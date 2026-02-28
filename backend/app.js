@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import resourceRoutes from './routes/resourceRoutes.js';
 import resourceManagementRoutes from './routes/resourceManagementRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config({ path: './.env' });
 
@@ -43,6 +44,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/management', resourceManagementRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

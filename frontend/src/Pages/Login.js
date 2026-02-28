@@ -33,8 +33,25 @@ const Login = () => {
         localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
         
+        // Role-based redirect
         setTimeout(() => {
-          navigate('/dashboard');
+          const userRole = response.data.data.user.role;
+          
+          switch(userRole) {
+            case 'admin':
+              navigate('/admin-dashboard');
+              break;
+            case 'resourceManager':
+              navigate('/manage-resources');
+              break;
+            case 'coordinator':
+              navigate('/coordinator-dashboard');
+              break;
+            case 'student':
+            default:
+              navigate('/dashboard');
+              break;
+          }
         }, 1500);
       }
     } catch (error) {
@@ -56,6 +73,11 @@ const Login = () => {
           Or{' '}
           <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
             create a new account
+          </Link>
+        </p>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          <Link to="/admin-login" className="font-medium text-red-600 hover:text-red-500">
+            Admin Login
           </Link>
         </p>
       </div>
