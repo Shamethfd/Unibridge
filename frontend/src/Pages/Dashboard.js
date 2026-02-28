@@ -140,12 +140,35 @@ const Dashboard = () => {
               >
                 Resources
               </Link>
-              <Link
-                to="/upload-resource"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
-              >
-                Upload Resource
-              </Link>
+              
+              {/* Student navigation */}
+              {(user?.role === 'student') && (
+                <Link
+                  to="/submit-resource"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+                >
+                  Submit Resource
+                </Link>
+              )}
+              
+              {/* Resource Manager navigation */}
+              {(user?.role === 'admin' || user?.role === 'resourceManager') && (
+                <>
+                  <Link
+                    to="/manage-resources"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700"
+                  >
+                    Manage Resources
+                  </Link>
+                  <Link
+                    to="/upload-resource"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+                  >
+                    Upload Resource
+                  </Link>
+                </>
+              )}
+              
               <button
                 onClick={handleLogout}
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
@@ -281,27 +304,65 @@ const Dashboard = () => {
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Welcome to LearnBridge!</h3>
                   
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Link
-                        to="/resources"
-                        className="block p-6 border border-gray-200 rounded-lg hover:bg-gray-50"
-                      >
-                        <h4 className="text-lg font-medium text-gray-900 mb-2">Browse Resources</h4>
-                        <p className="text-gray-600 text-sm">
-                          Access and download learning materials shared by the community.
-                        </p>
-                      </Link>
-                      
-                      <Link
-                        to="/upload-resource"
-                        className="block p-6 border border-gray-200 rounded-lg hover:bg-gray-50"
-                      >
-                        <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Resource</h4>
-                        <p className="text-gray-600 text-sm">
-                          Share your learning materials with other students.
-                        </p>
-                      </Link>
-                    </div>
+                    {/* Student Actions */}
+                    {user?.role === 'student' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Link
+                          to="/resources"
+                          className="block p-6 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
+                          <h4 className="text-lg font-medium text-gray-900 mb-2">Browse Resources</h4>
+                          <p className="text-gray-600 text-sm">
+                            Access and download approved learning materials.
+                          </p>
+                        </Link>
+                        
+                        <Link
+                          to="/submit-resource"
+                          className="block p-6 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
+                          <h4 className="text-lg font-medium text-gray-900 mb-2">Submit Resource</h4>
+                          <p className="text-gray-600 text-sm">
+                            Submit your learning materials for review.
+                          </p>
+                        </Link>
+                      </div>
+                    )}
+                    
+                    {/* Resource Manager Actions */}
+                    {(user?.role === 'admin' || user?.role === 'resourceManager') && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Link
+                          to="/resources"
+                          className="block p-6 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
+                          <h4 className="text-lg font-medium text-gray-900 mb-2">Browse Resources</h4>
+                          <p className="text-gray-600 text-sm">
+                            View all approved learning materials.
+                          </p>
+                        </Link>
+                        
+                        <Link
+                          to="/manage-resources"
+                          className="block p-6 border border-purple-200 rounded-lg hover:bg-purple-50"
+                        >
+                          <h4 className="text-lg font-medium text-purple-900 mb-2">Manage Resources</h4>
+                          <p className="text-gray-600 text-sm">
+                            Review and approve submitted resources.
+                          </p>
+                        </Link>
+                        
+                        <Link
+                          to="/upload-resource"
+                          className="block p-6 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
+                          <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Resource</h4>
+                          <p className="text-gray-600 text-sm">
+                            Add new learning materials directly.
+                          </p>
+                        </Link>
+                      </div>
+                    )}
 
                     <div className="border-t pt-6">
                       <h4 className="text-lg font-medium text-gray-900 mb-4">Quick Stats</h4>

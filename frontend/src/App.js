@@ -7,6 +7,8 @@ import Login from './Pages/Login';
 import Dashboard from './Pages/Dashboard';
 import ResourceList from './Pages/ResourceList';
 import UploadResource from './Pages/UploadResource';
+import SubmitResource from './Pages/SubmitResource';
+import ManageResources from './Pages/ManageResources';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,6 +34,14 @@ function App() {
       <Route 
         path="/upload-resource" 
         element={isAuthenticated ? <UploadResource /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/submit-resource" 
+        element={isAuthenticated ? <SubmitResource /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/manage-resources" 
+        element={isAuthenticated ? <ManageResources /> : <Navigate to="/login" />} 
       />
     </Routes>
   );

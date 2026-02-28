@@ -37,8 +37,9 @@ const ResourceList = () => {
         params.append('search', searchTerm);
       }
 
+      // Use the approved resources endpoint
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resources?${params}`
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/approved?${params}`
       );
 
       if (response.data.success) {
@@ -46,7 +47,7 @@ const ResourceList = () => {
         setTotalPages(response.data.data.pagination.pages);
       }
     } catch (error) {
-      toast.error('Failed to fetch resources');
+      toast.error('Failed to fetch approved resources');
       console.error('Error fetching resources:', error);
     } finally {
       setLoading(false);

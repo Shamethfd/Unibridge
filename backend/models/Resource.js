@@ -39,6 +39,23 @@ const resourceSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  status: {
+    type: String,
+    required: true,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  reviewedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  reviewDate: {
+    type: Date
+  },
+  reviewNotes: {
+    type: String,
+    maxlength: 500
+  },
   downloadCount: {
     type: Number,
     default: 0
@@ -55,6 +72,8 @@ const resourceSchema = new mongoose.Schema({
 resourceSchema.index({ title: 'text', description: 'text', tags: 'text' });
 resourceSchema.index({ category: 1 });
 resourceSchema.index({ uploadedBy: 1 });
+resourceSchema.index({ status: 1 });
+resourceSchema.index({ reviewedBy: 1 });
 
 const Resource = mongoose.model('Resource', resourceSchema);
 

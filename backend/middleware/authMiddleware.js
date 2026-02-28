@@ -76,6 +76,26 @@ export const authorize = (...roles) => {
   };
 };
 
+// Resource Manager specific authorization
+export const authorizeResourceManager = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Access denied. User not authenticated.'
+    });
+  }
+
+  // Allow both admin and resourceManager roles for resource management
+  if (req.user.role !== 'admin' && req.user.role !== 'resourceManager') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Resource Manager access required.'
+    });
+  }
+
+  next();
+};
+
 // Optional: Check if user owns the resource or is admin
 export const checkOwnershipOrAdmin = (resourceField = 'uploadedBy') => {
   return async (req, res, next) => {
