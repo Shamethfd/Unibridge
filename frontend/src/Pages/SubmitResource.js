@@ -1,19 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const SubmitResource = () => {
+  const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: 'other',
-    tags: ''
+    tags: '',
+    year: '',
+    semester: '',
+    module: ''
   });
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [availableModules, setAvailableModules] = useState([]);
+  const [loadingModules, setLoadingModules] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,6 +27,37 @@ const SubmitResource = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    fetchModules();
+  }, [formData.year, formData.semester]);
+
+  const fetchModules = async () => {
+    if (!formData.year || !formData.semester) {
+      setAvailableModules([]);
+      return;
+    }
+
+    try {
+      setLoadingModules(true);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/modules?year=${formData.year}&semester=${formData.semester}`
+      );
+
+      if (response.data.success) {
+        setAvailableModules(response.data.data.modules || []);
+      }
+    } catch (error) {
+      console.error('Error fetching modules:', error);
+      toast.error('Failed to fetch modules');
+    } finally {
+      setLoadingModules(false);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -65,8 +102,8 @@ const SubmitResource = () => {
       return;
     }
 
-    if (!formData.title.trim() || !formData.description.trim()) {
-      toast.error('Title and description are required');
+    if (!formData.title.trim() || !formData.description.trim() || !formData.year || !formData.semester || !formData.module) {
+      toast.error('Please provide all required fields: title, description, year, semester, and module');
       return;
     }
 
@@ -82,6 +119,9 @@ const SubmitResource = () => {
       formDataToSend.append('description', formData.description);
       formDataToSend.append('category', formData.category);
       formDataToSend.append('tags', formData.tags);
+      formDataToSend.append('year', formData.year);
+      formDataToSend.append('semester', formData.semester);
+      formDataToSend.append('module', formData.module);
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/submit`,
@@ -190,6 +230,73 @@ const SubmitResource = () => {
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     placeholder="Enter resource title"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="year" className="block text-sm font-medium text-gray-700">
+                      Year *
+                    </label>
+                    <select
+                      id="year"
+                      name="year"
+                      required
+                      value={formData.year}
+                      onChange={handleChange}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Select Year</option>
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="semester" className="block text-sm font-medium text-gray-700">
+                      Semester *
+                    </label>
+                    <select
+                      id="semester"
+                      name="semester"
+                      required
+                      value={formData.semester}
+                      onChange={handleChange}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Select Semester</option>
+                      <option value="1">1st Semester</option>
+                      <option value="2">2nd Semester</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="module" className="block text-sm font-medium text-gray-700">
+                      Module (Subject) *
+                    </label>
+                    <select
+                      id="module"
+                      name="module"
+                      required
+                      value={formData.module}
+                      onChange={handleChange}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Select Module</option>
+                      {loadingModules ? (
+                        <option value="">Loading modules...</option>
+                      ) : availableModules.length === 0 ? (
+                        <option value="">No modules available</option>
+                      ) : (
+                        availableModules.map((module) => (
+                          <option key={module._id} value={module.name}>
+                            {module.name}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
                 </div>
 
                 <div>

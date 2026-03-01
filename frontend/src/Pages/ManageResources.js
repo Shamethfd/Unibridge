@@ -272,6 +272,12 @@ const ResourceItem = ({ resource, onApprove, onReject, getCategoryColor, formatF
           <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
             <span>By: {resource.uploadedBy?.profile?.firstName} {resource.uploadedBy?.profile?.lastName}</span>
             <span>•</span>
+            <span>{resource.year} Year</span>
+            <span>•</span>
+            <span>{resource.semester} Semester</span>
+            <span>•</span>
+            <span>{resource.module}</span>
+            <span>•</span>
             <span>{formatFileSize(resource.fileSize)}</span>
             <span>•</span>
             <span>{new Date(resource.createdAt).toLocaleDateString()}</span>

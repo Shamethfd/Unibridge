@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import Resource from '../models/Resource.js';
+import Module from '../models/Module.js';
 import User from '../models/User.js';
 
 // Get __dirname equivalent in ES modules
@@ -61,7 +62,7 @@ export const submitResource = [
   upload.single('file'),
   async (req, res) => {
     try {
-      const { title, description, category, tags } = req.body;
+      const { title, description, category, tags, year, semester, module, moduleId } = req.body;
 
       if (!req.file) {
         return res.status(400).json({
@@ -70,11 +71,23 @@ export const submitResource = [
         });
       }
 
-      if (!title || !description) {
+      if (!title || !description || !year || !semester || !module) {
         return res.status(400).json({
           success: false,
-          message: 'Title and description are required'
+          message: 'Title, description, year, semester, and module are required'
         });
+      }
+
+      // Find the module if moduleId is provided
+      let selectedModule = null;
+      if (moduleId) {
+        selectedModule = await Module.findById(moduleId);
+        if (!selectedModule) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid module selected'
+          });
+        }
       }
 
       // Parse tags if provided
@@ -87,6 +100,10 @@ export const submitResource = [
         fileName: req.file.originalname,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
+        year: parseInt(year),
+        semester: parseInt(semester),
+        module,
+        moduleId: selectedModule?._id || null, // Link to module if provided
         category: category || 'other',
         uploadedBy: req.user._id,
         tags: parsedTags,
@@ -437,6 +454,149 @@ export const getResourceStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error fetching resource statistics',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get resources by Year & Semester (public access)
+// @route   GET /api/resources?year=1&semester=1
+// @access  Public
+export const getResourcesByYearSemester = async (req, res) => {
+  try {
+    const { year, semester, page = 1, limit = 10 } = req.query;
+
+    // Build query
+    let query = { status: 'approved' };
+    
+    if (year) {
+      query.year = parseInt(year);
+    }
+    
+    if (semester) {
+      query.semester = parseInt(semester);
+    }
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const resources = await Resource.find(query)
+      .populate('uploadedBy', 'username profile.firstName profile.lastName')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    const total = await Resource.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        resources,
+        pagination: {
+          current: pageNum,
+          pages: Math.ceil(total / limitNum),
+          total
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get resources by year/semester error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching resources',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get resources by Module (public access)
+// @route   GET /api/resources/module/:moduleName?year=1&semester=1
+// @access  Public
+export const getResourcesByModule = async (req, res) => {
+  try {
+    const { moduleName } = req.params;
+    const { year, semester, page = 1, limit = 10 } = req.query;
+
+    // Build query
+    let query = { 
+      status: 'approved',
+      module: moduleName
+    };
+    
+    if (year) {
+      query.year = parseInt(year);
+    }
+    
+    if (semester) {
+      query.semester = parseInt(semester);
+    }
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const resources = await Resource.find(query)
+      .populate('uploadedBy', 'username profile.firstName profile.lastName')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    const total = await Resource.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        resources,
+        pagination: {
+          current: pageNum,
+          pages: Math.ceil(total / limitNum),
+          total
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get resources by module error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching resources',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get all modules (public access)
+// @route   GET /api/resources/modules
+// @access  Public
+export const getAllModules = async (req, res) => {
+  try {
+    const { year, semester } = req.query;
+
+    // Build query
+    let query = { status: 'approved' };
+    
+    if (year) {
+      query.year = parseInt(year);
+    }
+    
+    if (semester) {
+      query.semester = parseInt(semester);
+    }
+
+    // Get unique modules for the given year/semester
+    const modules = await Resource.distinct('module', query);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        modules: modules.sort() // Sort alphabetically
+      }
+    });
+  } catch (error) {
+    console.error('Get modules error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching modules',
       error: error.message
     });
   }

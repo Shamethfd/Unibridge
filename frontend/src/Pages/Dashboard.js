@@ -161,6 +161,12 @@ const Dashboard = () => {
                     Manage Resources
                   </Link>
                   <Link
+                    to="/manage-modules"
+                    className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700"
+                  >
+                    Manage Modules
+                  </Link>
+                  <Link
                     to="/upload-resource"
                     className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
                   >
@@ -349,6 +355,16 @@ const Dashboard = () => {
                           <h4 className="text-lg font-medium text-purple-900 mb-2">Manage Resources</h4>
                           <p className="text-gray-600 text-sm">
                             Review and approve submitted resources.
+                          </p>
+                        </Link>
+                        
+                        <Link
+                          to="/manage-modules"
+                          className="block p-6 border border-green-200 rounded-lg hover:bg-green-50"
+                        >
+                          <h4 className="text-lg font-medium text-green-900 mb-2">Manage Modules</h4>
+                          <p className="text-gray-600 text-sm">
+                            Create and manage academic modules.
                           </p>
                         </Link>
                         

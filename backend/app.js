@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import resourceRoutes from './routes/resourceRoutes.js';
 import resourceManagementRoutes from './routes/resourceManagementRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import moduleRoutes from './routes/moduleRoutes.js';
 
 dotenv.config({ path: './.env' });
 
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/management', resourceManagementRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/modules', moduleRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

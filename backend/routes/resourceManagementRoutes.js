@@ -7,7 +7,10 @@ import {
   getApprovedResources,
   updateResource,
   deleteResource,
-  getResourceStats
+  getResourceStats,
+  getResourcesByYearSemester,
+  getResourcesByModule,
+  getAllModules
 } from '../controllers/resourceManagementController.js';
 import { protect, authorize, authorizeResourceManager } from '../middleware/authMiddleware.js';
 
@@ -24,6 +27,11 @@ router.get('/stats', protect, authorizeResourceManager, getResourceStats);
 
 // Public routes (approved resources)
 router.get('/approved', getApprovedResources);
+
+// New academic hierarchy routes (public access)
+router.get('/', getResourcesByYearSemester);
+router.get('/modules', getAllModules);
+router.get('/module/:moduleName', getResourcesByModule);
 
 // Resource Manager only routes (update/delete)
 router.put('/:id', protect, authorizeResourceManager, updateResource);

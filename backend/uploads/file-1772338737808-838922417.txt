@@ -1,0 +1,177 @@
+IT23624344
+Lab - 4
+Kaluarachchi E.I
+
+
+(a) Method to Compute Yield
+
+yield = (dividend / current_price) * 100
+
+
+
+Step 1.1 – Modify STOCKS_OBJ Type Specification
+
+CREATE OR REPLACE TYPE stocks_obj AS OBJECT (
+    company        VARCHAR2(30),
+    current_price  NUMBER,
+    dividend       NUMBER,
+    exchanges      exchange_list,   -- nested table of exchanges
+    
+    MEMBER FUNCTION get_yield RETURN NUMBER,
+    MEMBER FUNCTION price_usd(rate NUMBER) RETURN NUMBER,
+    MEMBER FUNCTION exchange_count RETURN NUMBER
+);
+/
+
+
+
+
+CREATE OR REPLACE TYPE BODY stocks_obj AS
+
+    -- (a) Yield
+    MEMBER FUNCTION get_yield RETURN NUMBER IS
+    BEGIN
+        RETURN (SELF.dividend / SELF.current_price) * 100;
+    END;
+
+    -- (b) Price in USD
+    MEMBER FUNCTION price_usd(rate NUMBER) RETURN NUMBER IS
+    BEGIN
+        RETURN SELF.current_price * rate;
+    END;
+
+    -- (c) Count Exchanges
+    MEMBER FUNCTION exchange_count RETURN NUMBER IS
+    BEGIN
+        RETURN SELF.exchanges.COUNT;
+    END;
+
+END;
+/
+
+
+
+
+(d) Purchase Value Method
+
+purchase value = purchase_price * qty
+
+
+(e) Profit Method
+
+profit = (current_price - purchase_price) * qty
+
+
+
+Modify CLIENTS_OBJ Type Specification
+
+CREATE OR REPLACE TYPE clients_obj AS OBJECT (
+    fname        VARCHAR2(30),
+    lname        VARCHAR2(30),
+    investments  investment_list,  -- nested table
+    
+    MEMBER FUNCTION total_purchase RETURN NUMBER,
+    MEMBER FUNCTION total_profit RETURN NUMBER
+);
+/
+
+
+Create Type Body
+
+CREATE OR REPLACE TYPE BODY clients_obj AS
+
+    -- (d) Total Purchase Value
+    MEMBER FUNCTION total_purchase RETURN NUMBER IS
+        total NUMBER := 0;
+    BEGIN
+        FOR i IN 1..SELF.investments.COUNT LOOP
+            total := total +
+                     (SELF.investments(i).purchase_price *
+                      SELF.investments(i).qty);
+        END LOOP;
+        RETURN total;
+    END;
+
+    -- (e) Total Profit
+    MEMBER FUNCTION total_profit RETURN NUMBER IS
+        total NUMBER := 0;
+        curr_price NUMBER;
+    BEGIN
+        FOR i IN 1..SELF.investments.COUNT LOOP
+
+            -- get current price from STOCKS table
+            SELECT s.current_price
+            INTO curr_price
+            FROM stocks_obj s
+            WHERE s.company = SELF.investments(i).company;
+
+            total := total +
+                     ((curr_price -
+                      SELF.investments(i).purchase_price)
+                      * SELF.investments(i).qty);
+        END LOOP;
+
+        RETURN total;
+    END;
+
+END;
+/
+
+
+
+
+2
+
+(a) Yield + USD Price (Rate = 0.74)
+
+
+SELECT s.company,
+       e.COLUMN_VALUE AS exchange,
+       s.get_yield() AS yield,
+       s.price_usd(0.74) AS price_usd
+FROM stocks_obj s,
+     TABLE(s.exchanges) e;
+
+
+
+
+(b) Shares traded on more than one exchange
+
+SELECT s.company,
+       s.current_price,
+       s.exchange_count() AS no_of_exchanges
+FROM stocks_obj s
+WHERE s.exchange_count() > 1;
+
+
+2(c) Client investments with Yield
+
+SELECT c.fname,
+       c.lname,
+       i.company,
+       s.get_yield() AS yield,
+       s.current_price,
+       s.dividend AS earnings_per_share
+FROM clients_obj c,
+     TABLE(c.investments) i,
+     stocks_obj s
+WHERE s.company = i.company;
+
+
+
+2(d) Total Purchase Value for All Clients
+
+
+SELECT c.fname,
+       c.lname,
+       c.total_purchase() AS total_value
+FROM clients_obj c;
+
+
+
+2(e) Total Profit (Book Profit / Loss)
+
+SELECT c.fname,
+       c.lname,
+       c.total_profit() AS book_profit
+FROM clients_obj c;
