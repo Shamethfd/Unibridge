@@ -1,53 +1,45 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-@font-face {
-  font-family: 'Gilroy Heavy';
-  src: url('./Fonts/Gilroy-Heavy.ttf') format('truetype');
-  font-weight: bolder;
-  font-style: normal;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@font-face {
-  font-family: 'Gilroy Bold';
-  src: url('./Fonts/Gilroy-Bold.ttf') format('truetype');
-  font-weight: bolder;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Gilroy Regular';
-  src: url('./Fonts/Gilroy-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Gilroy Light';
-  src: url('./Fonts/Gilroy-Light.ttf') format('truetype');
-  font-weight: lighter;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Gilroy Medium';
-  src: url('./Fonts/Gilroy-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  font-family: 'Gilroy Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: white;
+  background: #0d0d1a;
+  color: #ffffff;
+  min-height: 100vh;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0d0d1a; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6c63ff; }
+
+/* React toastify overrides */
+.Toastify__toast {
+  border-radius: 12px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.9rem !important;
 }
