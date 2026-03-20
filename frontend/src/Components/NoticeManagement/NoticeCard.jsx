@@ -80,11 +80,14 @@ const NoticeCard = ({ notice, onUpdate }) => {
 
   return (
     <div className="notice-card">
+      
       <div className="notice-card-header">
         <h4>{notice.title}</h4>
         <span className="audience-badge" style={{ backgroundColor: badgeColor[notice.targetAudience] }}>
           {notice.targetAudience === 'all' ? '🌐 All' :
-           notice.targetAudience === 'students' ? '🎓 Students' : '👨‍🏫 Tutors'}
+           notice.targetAudience === 'students' ? '🎓 Students' : 
+           notice.targetAudience === 'tutors' ? '👨‍🏫 Tutors' :
+           '📋 Coordinators'}
         </span>
       </div>
 

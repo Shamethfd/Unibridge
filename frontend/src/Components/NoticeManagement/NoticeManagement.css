@@ -536,3 +536,90 @@
   .notice-list-container,
   .analytics-container { padding: 16px; }
 }
+
+/* ===== USER NOTICE VIEW ===== */
+.user-notice-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.user-notice-header {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 16px;
+  color: white;
+  margin-bottom: 28px;
+}
+
+.user-notice-header h2 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.user-notice-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 16px;
+}
+
+.user-notices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.user-notice-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--primary);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user-notice-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(9, 72, 134, 0.15);
+}
+
+.user-notice-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.user-notice-card-header h4 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.user-notice-content {
+  color: var(--text-dark);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.user-notice-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.read-more {
+  color: var(--secondary);
+  font-weight: 600;
+  font-size: 13px;
+}
