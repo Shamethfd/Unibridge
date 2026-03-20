@@ -480,6 +480,7 @@
 .table-badge.all { background: #e8f0fe; color: var(--primary); }
 .table-badge.students { background: #dbeafe; color: var(--secondary); }
 .table-badge.tutors { background: #d1fae5; color: var(--success); }
+.table-badge.coordinators { background: #ede9fe; color: #7c3aed; }
 
 .views-count { color: var(--primary); font-weight: 600; }
 .status-active { color: var(--success); font-weight: 600; font-size: 13px; }

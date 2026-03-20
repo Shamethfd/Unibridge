@@ -108,6 +108,7 @@ const CreateNotice = ({ onCreated }) => {
               <option value="all">🌐 All Users</option>
               <option value="students">🎓 Students</option>
               <option value="tutors">👨‍🏫 Tutors</option>
+              <option value="coordinators">📋 Coordinators</option>
             </select>
           </div>
         </div>

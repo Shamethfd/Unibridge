@@ -49,6 +49,7 @@ const NoticeAnalytics = () => {
           <option value="all">All Reports</option>
           <option value="students">Students</option>
           <option value="tutors">Tutors</option>
+          <option value="coordinators">📋 Coordinators</option>
         </select>
       </div>
 
@@ -105,7 +106,10 @@ const NoticeAnalytics = () => {
                   <td>
                     <span className={`table-badge ${n.target}`}>
                       {n.target === 'all' ? '🌐 All' :
-                       n.target === 'students' ? '🎓 Students' : '👨‍🏫 Tutors'}
+                       n.target === 'students' ? '🎓 Students' : 
+                       n.target === 'tutors' ? '👨‍🏫 Tutors' :
+                       '📋 Coordinators'}
+
                     </span>
                   </td>
                   <td>
