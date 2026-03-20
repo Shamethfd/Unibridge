@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import CreateNotice from '../Components/NoticeManagement/CreateNotice';
 import NoticeList from '../Components/NoticeManagement/NoticeList';
-import NoticeAnalutics from '../Components/NoticeManagement/NoticeAnalutics';
+import NoticeAnalytics from '../Components/NoticeManagement/NoticeAnalytics';
 import SearchFilter from '../Components/Search/SearchFilter';
 import './NoticePage.css';
 
@@ -47,7 +47,7 @@ const NoticePage = () => {
           </>
         )}
         {activeSection === 'search' && <SearchFilter />}
-        {activeSection === 'analytics' && <NoticeAnalutics />}
+        {activeSection === 'analytics' && <NoticeAnalytics />}
       </div>
     </div>
   );

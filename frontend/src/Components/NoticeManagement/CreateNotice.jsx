@@ -13,10 +13,25 @@ const CreateNotice = ({ onCreated }) => {
 
   const validate = () => {
     const newErrors = {};
+
+    // Title validation
     if (!form.title.trim()) newErrors.title = 'Title is required';
     else if (form.title.trim().length < 3) newErrors.title = 'Title must be at least 3 characters';
+    else if (form.title.trim().length > 100) newErrors.title = 'Title must be under 100 characters';
+
+    // Content validation
     if (!form.content.trim()) newErrors.content = 'Content is required';
     else if (form.content.trim().length < 10) newErrors.content = 'Content must be at least 10 characters';
+    else if (form.content.trim().length > 1000) newErrors.content = 'Content must be under 1000 characters';
+
+    // Scheduled date validation
+    if (form.scheduledAt) {
+      const selectedDate = new Date(form.scheduledAt);
+      if (selectedDate <= new Date()) {
+        newErrors.scheduledAt = 'Scheduled date must be in the future';
+      }
+    }
+
     return newErrors;
   };
 
@@ -129,7 +144,9 @@ const CreateNotice = ({ onCreated }) => {
               name="scheduledAt"
               value={form.scheduledAt}
               onChange={handleChange}
+              className={errors.scheduledAt ? 'input-error' : ''}
             />
+            {errors.scheduledAt && <span className="error-text">{errors.scheduledAt}</span>}
           </div>
         </div>
 

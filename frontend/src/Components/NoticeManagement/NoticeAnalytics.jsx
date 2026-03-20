@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './NoticeManagement.css';
 
-const NoticeAnalutics = () => {
+const NoticeAnalytics = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reportType, setReportType] = useState('all');
