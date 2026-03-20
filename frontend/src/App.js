@@ -4,7 +4,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import HomePage from './Pages/HomePage';
-import FacultyPage from './Pages/FacultyPage';
 import YearPage from './Pages/YearPage';
 import SemesterPage from './Pages/SemesterPage';
 import ModulePage from './Pages/ModulePage';
@@ -16,7 +15,6 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/faculties" element={<FacultyPage />} />
         <Route path="/years/:facultyId/:facultyName" element={<YearPage />} />
         <Route path="/semesters/:yearId/:yearName" element={<SemesterPage />} />
         <Route path="/modules/:semesterId/:semesterName" element={<ModulePage />} />

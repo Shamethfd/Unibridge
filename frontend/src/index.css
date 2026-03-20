@@ -13,8 +13,8 @@ body {
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0d0d1a;
-  color: #ffffff;
+  background: #f4f7f6;
+  color: #121619;
   min-height: 100vh;
 }
 
@@ -33,9 +33,9 @@ input, select, textarea {
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0d0d1a; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #6c63ff; }
+::-webkit-scrollbar-track { background: #f4f7f6; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #0f62fe; }
 
 /* React toastify overrides */
 .Toastify__toast {

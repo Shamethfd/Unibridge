@@ -1,21 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { getFaculties } from '../services/api';
 import './HomePage.css';
+
+const FACULTY_ICONS = {
+  Computing: '💻',
+  Engineering: '⚙️',
+  Business: '📈',
+  Architecture: '🏗️',
+};
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [faculties, setFaculties] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { fetchFaculties(); }, []);
+
+  const fetchFaculties = async () => {
+    setLoading(true);
+    try {
+      const res = await getFaculties();
+      setFaculties(res.data);
+    } catch {
+      toast.error('Failed to load faculties');
+    } finally { setLoading(false); }
+  };
+
+  const getIcon = (name) => FACULTY_ICONS[name] || '🏛️';
+
+  const scrollToCourses = () => {
+    const section = document.getElementById('courses');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="home-page">
       {/* Navbar */}
       <nav className="navbar">
-        <div className="nav-brand">
+        <div className="nav-brand" style={{ cursor: 'pointer' }} onClick={() => window.scrollTo(0, 0)}>
           <span className="brand-icon">🎓</span>
           <span className="brand-name">UniConnect</span>
         </div>
         <div className="nav-links">
-          <a href="/" className="nav-link active">Home</a>
-          <button className="nav-btn" onClick={() => navigate('/faculties')}>
+          <button className="nav-btn" onClick={scrollToCourses}>
             Courses
           </button>
           <button className="nav-btn admin-btn" onClick={() => navigate('/admin')}>
@@ -37,7 +68,7 @@ const HomePage = () => {
             Our smart system prioritizes sessions based on urgency and demand.
           </p>
           <div className="hero-actions">
-            <button className="btn-primary" onClick={() => navigate('/faculties')}>
+            <button className="btn-primary" onClick={scrollToCourses}>
               📚 Browse Courses
             </button>
             <button className="btn-secondary" onClick={() => navigate('/admin')}>
@@ -66,34 +97,37 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="features-section">
-        <h2 className="section-title">Why Use Our System?</h2>
-        <div className="features-grid">
-          {[
-            { icon: '🔍', title: 'Duplicate Detection', desc: 'Automatically detects and groups similar requests' },
-            { icon: '👥', title: 'Group Requests', desc: 'Join existing requests and boost priority' },
-            { icon: '🎯', title: 'Urgency Levels', desc: 'Normal, Urgent, or Exam Priority support' },
-            { icon: '📊', title: 'Heat Score', desc: 'Smart demand scoring based on students & urgency' },
-            { icon: '💡', title: 'Smart Suggestions', desc: 'Related module suggestions as you browse' },
-            { icon: '🔔', title: 'Notifications', desc: 'Get alerted when your request is accepted' },
-          ].map((f, i) => (
-            <div className="feature-card" key={i}>
-              <div className="feature-icon">{f.icon}</div>
-              <h3 className="feature-title">{f.title}</h3>
-              <p className="feature-desc">{f.desc}</p>
-            </div>
-          ))}
+      {/* Embedded Courses Section */}
+      <div id="courses" className="page-content" style={{ marginTop: '2rem', paddingTop: '2rem' }}>
+        <div className="page-header" style={{ textAlign: 'center' }}>
+          <h2 className="page-title">Browse Faculties & Courses</h2>
+          <p className="page-subtitle">Choose your faculty to explore and request modules.</p>
         </div>
-      </div>
 
-      {/* CTA */}
-      <div className="cta-section">
-        <h2>Ready to get started?</h2>
-        <p>Click on Courses to explore faculties and submit your study request.</p>
-        <button className="btn-primary large" onClick={() => navigate('/faculties')}>
-          Get Started →
-        </button>
+        {loading ? (
+          <div className="loading-wrap"><div className="spinner" /><span>Loading faculties...</span></div>
+        ) : (
+          <div className="cards-grid">
+            {faculties.map(fac => (
+              <div
+                key={fac._id}
+                className="nav-card"
+                onClick={() => navigate(`/years/${fac._id}/${encodeURIComponent(fac.name)}`)}
+              >
+                <span className="card-icon">{fac.icon || getIcon(fac.name)}</span>
+                <div className="card-title">{fac.name}</div>
+                <div className="card-desc">Click to explore years →</div>
+              </div>
+            ))}
+
+            {faculties.length === 0 && (
+              <div className="empty-state" style={{ gridColumn: '1/-1' }}>
+                <div className="empty-icon">🏛️</div>
+                <p>No faculties yet. Please ask an admin to add faculties.</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <footer className="footer">

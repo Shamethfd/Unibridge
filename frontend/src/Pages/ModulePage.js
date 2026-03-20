@@ -47,8 +47,8 @@ const ModulePage = () => {
       <nav className="navbar">
         <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
         <div className="nav-links">
-          <a href="/" className="nav-link">Home</a>
-          <button className="nav-btn" onClick={() => navigate('/faculties')}>Courses</button>
+          <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
+          <button className="nav-btn admin-btn" onClick={() => navigate('/admin')}>Admin Panel</button>
         </div>
       </nav>
 

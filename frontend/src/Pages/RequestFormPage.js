@@ -54,7 +54,7 @@ const RequestFormPage = () => {
     try {
       const res = await getRequestsByModule(moduleId);
       setExistingReqs(res.data);
-    } catch {}
+    } catch { }
   };
 
   const toggleSlot = (slot) => {
@@ -120,7 +120,6 @@ const RequestFormPage = () => {
       <nav className="navbar">
         <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
         <div className="nav-links">
-          <a href="/" className="nav-link">Home</a>
           <button className="nav-btn" onClick={() => navigate('/faculties')}>Courses</button>
         </div>
       </nav>
@@ -138,7 +137,7 @@ const RequestFormPage = () => {
         <div className="request-form-card">
           {/* Module Banner */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(108,99,255,0.2), rgba(255,101,132,0.2))',
+            background: 'linear-gradient(135deg, rgba(199, 198, 214, 0.2), rgba(255,101,132,0.2))',
             border: '1px solid rgba(108,99,255,0.3)',
             borderRadius: '12px',
             padding: '1rem 1.5rem',
