@@ -7,7 +7,12 @@ import 'react-toastify/dist/ReactToastify.css';
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false);
+  const [notices, setNotices] = useState([]);
+  const [stats, setStats] = useState({
+    totalResources: 0,
+    totalModules: 0,
+    recentActivity: 0
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileData, setProfileData] = useState({ firstName: '', lastName: '', phone: '', bio: '' });
   const navigate = useNavigate();
