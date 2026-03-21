@@ -4,13 +4,38 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+// Configure environment variables BEFORE importing routes that use them
+dotenv.config({ path: './.env' });
+
 import authRoutes from './routes/authRoutes.js';
 import resourceRoutes from './routes/resourceRoutes.js';
 import resourceManagementRoutes from './routes/resourceManagementRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import moduleRoutes from './routes/moduleRoutes.js';
+import googleAuthRoutes from './routes/googleAuthSimple.js';
 
-dotenv.config({ path: './.env' });
+// Debug: Check if .env file is being loaded
+console.log('🔍 Environment Variables Debug:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Current working directory:', process.cwd());
+console.log('Looking for .env file at:', './.env');
+
+// Try to read .env file directly to debug
+import fs from 'fs';
+const envPath = './.env';
+try {
+  if (fs.existsSync(envPath)) {
+    console.log('✅ .env file exists');
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    console.log('📄 .env file content preview:');
+    console.log(envContent.substring(0, 200) + '...');
+  } else {
+    console.log('❌ .env file does not exist at:', envPath);
+  }
+} catch (error) {
+  console.log('❌ Error reading .env file:', error.message);
+}
 
 // Temporary fix: Hardcode JWT_SECRET if not loaded from .env
 if (!process.env.JWT_SECRET) {
@@ -24,6 +49,9 @@ console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✅ Set' : '❌ Missing');
 console.log('MONGODBURL:', process.env.MONGODBURL ? '✅ Set' : '❌ Missing');
 console.log('PORT:', process.env.PORT || '❌ Missing');
 console.log('CORS_ORIGIN:', process.env.CORS_ORIGIN || '❌ Missing');
+console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '✅ Set' : '❌ Missing');
+console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? '✅ Set' : '❌ Missing');
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL || '❌ Missing');
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -47,6 +75,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/management', resourceManagementRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/modules', moduleRoutes);
+app.use('/api/auth', googleAuthRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
