@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import noticeRoutes from './routes/noticeRoutes.js';
+import noticeRequestRoutes from './routes/noticeRequestRoutes.js';
 
 const app = express();
 
@@ -12,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/notices', noticeRoutes);
-
+app.use('/api/notice-requests', noticeRequestRoutes);
 mongoose.connect(process.env.MONGODBURL)
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.log('❌ MongoDB error:', err));
