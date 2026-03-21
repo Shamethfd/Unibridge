@@ -58,7 +58,6 @@ const HomePage = () => {
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">🚀 Smart Learning Requests</div>
           <h1 className="hero-title">
             Module & Study Request
             <span className="gradient-text"> Management System</span>
@@ -100,7 +99,7 @@ const HomePage = () => {
       {/* Embedded Courses Section */}
       <div id="courses" className="page-content" style={{ marginTop: '2rem', paddingTop: '2rem' }}>
         <div className="page-header" style={{ textAlign: 'center' }}>
-          <h2 className="page-title">Browse Faculties & Courses</h2>
+          <h2 className="page-title">Faculties & Courses</h2>
           <p className="page-subtitle">Choose your faculty to explore and request modules.</p>
         </div>
 
@@ -128,6 +127,43 @@ const HomePage = () => {
             )}
           </div>
         )}
+      </div>
+
+      {/* Features Section */}
+      <div className="features-section">
+        <h2 className="section-title">Why Use Our System?</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon">🔍</div>
+            <h3 className="feature-title">Duplicate Detection</h3>
+            <p className="feature-desc">Automatically detects and groups similar requests</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">👥</div>
+            <h3 className="feature-title">Group Requests</h3>
+            <p className="feature-desc">Join existing requests and boost priority</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🎯</div>
+            <h3 className="feature-title">Urgency Levels</h3>
+            <p className="feature-desc">Normal, Urgent, or Exam Priority support</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">📊</div>
+            <h3 className="feature-title">Heat Score</h3>
+            <p className="feature-desc">Smart demand scoring based on students & urgency</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">💡</div>
+            <h3 className="feature-title">Smart Suggestions</h3>
+            <p className="feature-desc">Related module suggestions as you browse</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🔔</div>
+            <h3 className="feature-title">Notifications</h3>
+            <p className="feature-desc">Get alerted when your request is accepted</p>
+          </div>
+        </div>
       </div>
 
       <footer className="footer">

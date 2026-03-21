@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
-  getFaculties, createFaculty, deleteFaculty,
+  getFaculties, createFaculty, updateFaculty, deleteFaculty,
   getYears, createYear, deleteYear,
   getSemesters, createSemester, deleteSemester,
-  getModules, createModule, deleteModule,
+  getModules, createModule, updateModule, deleteModule,
   getAllRequests, updateRequestStatus, deleteRequest,
   getDashboardStats
 } from '../services/api';
@@ -33,6 +33,11 @@ const AdminDashboard = () => {
   const [newYear, setNewYear] = useState({ name: 'Year 1' });
   const [newSemester, setNewSemester] = useState({ name: 'Semester 1' });
   const [newModule, setNewModule] = useState({ name: '', description: '' });
+
+  // Edit Faculty State
+  const [editingFacultyId, setEditingFacultyId] = useState(null);
+  const [editFacultyName, setEditFacultyName] = useState('');
+  const [editFacultyIcon, setEditFacultyIcon] = useState('');
 
   useEffect(() => { fetchAll(); }, []);
   useEffect(() => { if (selFaculty) loadYears(selFaculty); }, [selFaculty]);
@@ -66,6 +71,28 @@ const AdminDashboard = () => {
   const handleDeleteFaculty = async (id) => {
     if (!window.confirm('Delete this faculty?')) return;
     await deleteFaculty(id); toast.success('Deleted'); fetchAll();
+  };
+
+  const handleEditFacultyClick = (faculty) => {
+    setEditingFacultyId(faculty._id);
+    setEditFacultyName(faculty.name);
+    setEditFacultyIcon(faculty.icon);
+  };
+
+  const handleSaveEditFaculty = async (id) => {
+    try {
+      if (!editFacultyName.trim()) { toast.warning('Name is required'); return; }
+      await updateFaculty(id, { name: editFacultyName, icon: editFacultyIcon });
+      toast.success('Faculty updated!');
+      setEditingFacultyId(null);
+      fetchAll();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error updating faculty');
+    }
+  };
+
+  const handleCancelEditFaculty = () => {
+    setEditingFacultyId(null);
   };
 
   // Year CRUD
@@ -239,10 +266,45 @@ const AdminDashboard = () => {
                 <tbody>
                   {faculties.map(f => (
                     <tr key={f._id}>
-                      <td style={{ fontSize: '1.5rem' }}>{f.icon}</td>
-                      <td><strong>{f.name}</strong></td>
-                      <td>{new Date(f.createdAt).toLocaleDateString()}</td>
-                      <td><button className="btn-danger" onClick={() => handleDeleteFaculty(f._id)}>🗑 Delete</button></td>
+                      {editingFacultyId === f._id ? (
+                        <>
+                          <td>
+                            <input 
+                              value={editFacultyIcon} 
+                              onChange={e => setEditFacultyIcon(e.target.value)} 
+                              style={{ width: '50px', textAlign: 'center', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-dark)', color: 'var(--text-primary)' }} 
+                            />
+                          </td>
+                          <td>
+                            <input 
+                              value={editFacultyName} 
+                              onChange={e => setEditFacultyName(e.target.value)} 
+                              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-dark)', color: 'var(--text-primary)' }} 
+                            />
+                          </td>
+                          <td>{new Date(f.createdAt).toLocaleDateString()}</td>
+                          <td style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button className="btn-success" onClick={() => handleSaveEditFaculty(f._id)}>💾 Save</button>
+                            <button className="btn-danger" style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border)' }} onClick={handleCancelEditFaculty}>✕ Cancel</button>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td style={{ fontSize: '1.5rem' }}>{f.icon}</td>
+                          <td><strong>{f.name}</strong></td>
+                          <td>{new Date(f.createdAt).toLocaleDateString()}</td>
+                          <td style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button 
+                              className="btn-success" 
+                              style={{ background: 'rgba(255, 165, 2, 0.15)', color: 'var(--yellow)', border: '1px solid rgba(255, 165, 2, 0.3)' }} 
+                              onClick={() => handleEditFacultyClick(f)}
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button className="btn-danger" onClick={() => handleDeleteFaculty(f._id)}>🗑 Delete</button>
+                          </td>
+                        </>
+                      )}
                     </tr>
                   ))}
                 </tbody>
