@@ -85,8 +85,8 @@ export const authorizeResourceManager = (req, res, next) => {
     });
   }
 
-  // Allow both admin and resourceManager roles for resource management
-  if (req.user.role !== 'admin' && req.user.role !== 'resourceManager') {
+  // Allow admin, resourceManager, and coordinator roles for resource management
+  if (req.user.role !== 'admin' && req.user.role !== 'resourceManager' && req.user.role !== 'coordinator') {
     return res.status(403).json({
       success: false,
       message: 'Access denied. Resource Manager access required.'

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import HomePage from './Pages/HomePage';
 import Register from './Pages/Register';
 import Login from './Pages/Login';
+import AuthCallback from './Pages/AuthCallback';
 import AdminLogin from './Pages/AdminLogin';
 import AdminDashboard from './Pages/AdminDashboard';
 import Dashboard from './Pages/Dashboard';
@@ -32,6 +33,7 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/admin-login" element={<AdminLogin />} />
       
       {/* Admin Dashboard - Protected Route */}

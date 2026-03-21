@@ -4,332 +4,437 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const ManageResources = () => {
-  const [resources, setResources] = useState([]);
-  const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, total: 0 });
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+/* ─────────────────────────────────────
+   SHARED CONFIG
+───────────────────────────────────── */
+const categoryConfig = {
+  lecture:    { label: 'Lecture',    color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
+  assignment: { label: 'Assignment', color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
+  tutorial:   { label: 'Tutorial',   color: '#059669', bg: '#f0fdf4', border: '#a7f3d0' },
+  reference:  { label: 'Reference',  color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+  other:      { label: 'Other',      color: '#64748b', bg: '#f8fafc', border: '#e2e8f0' },
+};
 
-  useEffect(() => {
-    fetchPendingResources();
-    fetchStats();
-  }, [currentPage]);
+const formatFileSize = (bytes) => {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024, sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
 
-  const fetchPendingResources = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/pending?page=${currentPage}&limit=10`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+const getInitials = (u) => {
+  const f = u?.profile?.firstName?.[0] || '';
+  const l = u?.profile?.lastName?.[0] || '';
+  return (f + l).toUpperCase() || (u?.username?.[0] || '?').toUpperCase();
+};
 
-      if (response.data.success) {
-        setResources(response.data.data.resources);
-        setTotalPages(response.data.data.pagination.pages);
-      }
-    } catch (error) {
-      toast.error('Failed to fetch pending resources');
-    } finally {
-      setLoading(false);
-    }
+/* ─────────────────────────────────────
+   RESOURCE ITEM
+───────────────────────────────────── */
+const ResourceItem = ({ resource, onApprove, onReject }) => {
+  const [category, setCategory]     = useState(resource.category || 'other');
+  const [reviewNotes, setReviewNotes] = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [expanded, setExpanded]     = useState(false);
+
+  const uploaderName = [resource.uploadedBy?.profile?.firstName, resource.uploadedBy?.profile?.lastName]
+    .filter(Boolean).join(' ') || resource.uploadedBy?.username || 'Unknown';
+
+  const handleApprove = async () => {
+    setLoading(true);
+    await onApprove(resource._id, category, reviewNotes);
+    setLoading(false);
   };
 
-  const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/stats`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
-      if (response.data.success) {
-        setStats(response.data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
-    }
+  const handleReject = async () => {
+    setLoading(true);
+    await onReject(resource._id, reviewNotes);
+    setLoading(false);
   };
 
-  const handleApprove = async (resourceId, category, reviewNotes) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/${resourceId}/approve`,
-        { category, reviewNotes },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
-      if (response.data.success) {
-        toast.success('Resource approved successfully');
-        fetchPendingResources();
-        fetchStats();
-      }
-    } catch (error) {
-      toast.error('Failed to approve resource');
-    }
-  };
-
-  const handleReject = async (resourceId, reviewNotes) => {
-    if (!reviewNotes.trim()) {
-      toast.error('Please provide rejection reason');
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/${resourceId}/reject`,
-        { reviewNotes },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
-      if (response.data.success) {
-        toast.success('Resource rejected successfully');
-        fetchPendingResources();
-        fetchStats();
-      }
-    } catch (error) {
-      toast.error('Failed to reject resource');
-    }
-  };
-
-  const getCategoryColor = (category) => {
-    const colors = {
-      lecture: 'bg-blue-100 text-blue-800',
-      assignment: 'bg-red-100 text-red-800',
-      tutorial: 'bg-green-100 text-green-800',
-      reference: 'bg-yellow-100 text-yellow-800',
-      other: 'bg-gray-100 text-gray-800'
-    };
-    return colors[category] || colors.other;
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+  const catCfg = categoryConfig[resource.category] || categoryConfig.other;
+  const selCfg = categoryConfig[category]           || categoryConfig.other;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <ToastContainer position="top-right" />
-      
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/dashboard" className="text-xl font-semibold text-gray-900">
-                LearnBridge
-              </Link>
+    <div className="ri-row">
+      {/* Uploader avatar */}
+      <div className="ri-avatar">{getInitials(resource.uploadedBy)}</div>
+
+      <div className="ri-body">
+        {/* Title row */}
+        <div className="ri-title-row">
+          <span className="ri-title">{resource.title}</span>
+          <span className="ri-cat-tag" style={{ background: catCfg.bg, color: catCfg.color, borderColor: catCfg.border }}>
+            {catCfg.label}
+          </span>
+        </div>
+
+        {/* Description */}
+        {resource.description && <p className="ri-desc">{resource.description}</p>}
+
+        {/* Meta chips */}
+        <div className="ri-meta">
+          <div className="ri-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            {uploaderName}
+          </div>
+          {resource.year && <div className="ri-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Year {resource.year}</div>}
+          {resource.semester && <div className="ri-chip">Sem {resource.semester}</div>}
+          {resource.module && (
+            <div className="ri-chip">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              {resource.module}
             </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/dashboard"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/resources"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Resources
-              </Link>
-            </div>
+          )}
+          <div className="ri-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            {formatFileSize(resource.fileSize)}
+          </div>
+          <div className="ri-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {new Date(resource.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
-      </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-sm font-medium text-gray-500">Pending Review</h3>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-sm font-medium text-gray-500">Approved</h3>
-              <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-sm font-medium text-gray-500">Rejected</h3>
-              <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-sm font-medium text-gray-500">Total Resources</h3>
-              <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-            </div>
-          </div>
+        {/* Review toggle */}
+        <button className="ri-toggle" onClick={() => setExpanded(!expanded)}>
+          {expanded ? (
+            <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close Review Panel</>
+          ) : (
+            <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Open Review Panel</>
+          )}
+        </button>
 
-          {/* Pending Resources */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
-                Pending Resources ({resources.length})
-              </h3>
-            </div>
-
-            {loading ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading pending resources...</p>
-              </div>
-            ) : resources.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <p>No pending resources to review.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {resources.map((resource) => (
-                  <ResourceItem
-                    key={resource._id}
-                    resource={resource}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
-                    getCategoryColor={getCategoryColor}
-                    formatFileSize={formatFileSize}
-                  />
+        {/* Review panel */}
+        {expanded && (
+          <div className="ri-panel">
+            {/* Category */}
+            <div className="ri-panel-field">
+              <label className="ri-panel-label">Set Category</label>
+              <select className="ri-select" value={category} onChange={e => setCategory(e.target.value)}
+                style={{ borderColor: selCfg.border, color: selCfg.color }}>
+                {Object.entries(categoryConfig).map(([v, c]) => (
+                  <option key={v} value={v}>{c.label}</option>
                 ))}
-              </div>
-            )}
+              </select>
+            </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-700">
-                    Page {currentPage} of {totalPages}
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Notes */}
+            <div className="ri-panel-notes">
+              <label className="ri-panel-label">Review Notes <span style={{ color: '#dc2626' }}>*</span> for rejection</label>
+              <input className="ri-notes-input" type="text" value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} placeholder="Add feedback or rejection reason…" />
+            </div>
+
+            {/* Actions */}
+            <div className="ri-panel-actions">
+              <button className="ri-btn-approve" onClick={handleApprove} disabled={loading}>
+                {loading ? <span className="ri-spin-g" /> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12"/></svg>}
+                Approve
+              </button>
+              <button className="ri-btn-reject" onClick={handleReject} disabled={loading}>
+                {loading ? <span className="ri-spin-r" /> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>}
+                Reject
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-const ResourceItem = ({ resource, onApprove, onReject, getCategoryColor, formatFileSize }) => {
-  const [category, setCategory] = useState(resource.category);
-  const [reviewNotes, setReviewNotes] = useState('');
-  const [loading, setLoading] = useState(false);
+/* ─────────────────────────────────────
+   MAIN COMPONENT
+───────────────────────────────────── */
+const ManageResources = () => {
+  const [resources, setResources] = useState([]);
+  const [stats, setStats]         = useState({ pending: 0, approved: 0, rejected: 0, total: 0 });
+  const [loading, setLoading]     = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages]   = useState(1);
 
-  const handleApproveClick = () => {
-    setLoading(true);
-    onApprove(resource._id, category, reviewNotes);
-    setTimeout(() => setLoading(false), 1000);
+  useEffect(() => { fetchPendingResources(); fetchStats(); }, [currentPage]);
+
+  const fetchPendingResources = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/pending?page=${currentPage}&limit=10`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) { setResources(res.data.data.resources); setTotalPages(res.data.data.pagination.pages); }
+    } catch { toast.error('Failed to fetch pending resources'); }
+    finally { setLoading(false); }
   };
 
-  const handleRejectClick = () => {
-    setLoading(true);
-    onReject(resource._id, reviewNotes);
-    setTimeout(() => setLoading(false), 1000);
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/stats`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) setStats(res.data.data);
+    } catch { console.error('Failed to fetch stats'); }
   };
+
+  const handleApprove = async (id, category, reviewNotes) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.put(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/${id}/approve`,
+        { category, reviewNotes }, { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) { toast.success('Resource approved!'); fetchPendingResources(); fetchStats(); }
+    } catch { toast.error('Failed to approve resource'); }
+  };
+
+  const handleReject = async (id, reviewNotes) => {
+    if (!reviewNotes.trim()) { toast.error('Please provide a rejection reason'); return; }
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.put(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/${id}/reject`,
+        { reviewNotes }, { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) { toast.success('Resource rejected'); fetchPendingResources(); fetchStats(); }
+    } catch { toast.error('Failed to reject resource'); }
+  };
+
+  const statCards = [
+    { label: 'Pending Review',  value: stats.pending,  color: '#d97706', bg: '#fffbeb', border: '#fde68a',
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg> },
+    { label: 'Approved',        value: stats.approved, color: '#059669', bg: '#f0fdf4', border: '#a7f3d0',
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg> },
+    { label: 'Rejected',        value: stats.rejected, color: '#dc2626', bg: '#fef2f2', border: '#fecaca',
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> },
+    { label: 'Total Resources', value: stats.total,    color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe',
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> },
+  ];
 
   return (
-    <div className="p-6">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center space-x-3 mb-2">
-            <h4 className="text-lg font-medium text-gray-900">{resource.title}</h4>
-            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCategoryColor(resource.category)}`}>
-              {resource.category}
-            </span>
-          </div>
-          
-          <p className="text-gray-600 mb-3">{resource.description}</p>
-          
-          <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-            <span>By: {resource.uploadedBy?.profile?.firstName} {resource.uploadedBy?.profile?.lastName}</span>
-            <span>•</span>
-            <span>{resource.year} Year</span>
-            <span>•</span>
-            <span>{resource.semester} Semester</span>
-            <span>•</span>
-            <span>{resource.module}</span>
-            <span>•</span>
-            <span>{formatFileSize(resource.fileSize)}</span>
-            <span>•</span>
-            <span>{new Date(resource.createdAt).toLocaleDateString()}</span>
-          </div>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-          <div className="flex items-center space-x-4 mb-4">
+        .mr-root { min-height: 100vh; background: #f0f4f8; font-family: 'DM Sans', sans-serif; }
+
+        /* ── NAVBAR ── */
+        .mr-nav { position: sticky; top: 0; z-index: 50; background: white; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 12px rgba(9,72,134,0.07); }
+        .mr-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .mr-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .mr-brand-logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #094886, #2563eb); display: flex; align-items: center; justify-content: center; }
+        .mr-brand-name { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; color: #0f1e35; }
+        .mr-nav-links { display: flex; gap: 4px; }
+        .mr-nav-link { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 10px; font-size: 0.84rem; font-weight: 500; color: #475569; text-decoration: none; transition: background 0.15s, color 0.15s; }
+        .mr-nav-link:hover { background: #f1f5f9; color: #094886; }
+
+        /* ── BODY ── */
+        .mr-body { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* Page header */
+        .mr-page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.5rem; animation: mr-up 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+        .mr-page-title { font-family: 'Sora', sans-serif; font-size: 1.7rem; font-weight: 800; color: #0f1e35; }
+        .mr-page-title span { color: #2563eb; }
+        .mr-page-sub { font-size: 0.87rem; color: #94a3b8; margin-top: 4px; }
+        .mr-pending-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 20px; background: #fffbeb; border: 1.5px solid #fde68a; font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 600; color: #d97706; }
+        .mr-pending-dot { width: 6px; height: 6px; border-radius: 50%; background: #d97706; box-shadow: 0 0 5px #d97706; animation: mr-blink 1.8s ease-in-out infinite; }
+        @keyframes mr-blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* Stats */
+        .mr-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; animation: mr-up 0.4s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+        .mr-stat-card { background: white; border-radius: 16px; padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(9,72,134,0.06), 0 0 0 1px rgba(9,72,134,0.04); transition: transform 0.15s, box-shadow 0.15s; }
+        .mr-stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(9,72,134,0.10); }
+        .mr-stat-ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1.5px solid; }
+        .mr-stat-num { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 800; line-height: 1; }
+        .mr-stat-label { font-size: 0.78rem; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+
+        /* List */
+        .mr-list { background: white; border-radius: 18px; box-shadow: 0 2px 8px rgba(9,72,134,0.06), 0 0 0 1px rgba(9,72,134,0.04); overflow: hidden; animation: mr-up 0.4s 0.10s cubic-bezier(0.16,1,0.3,1) both; }
+        .mr-list-header { padding: 1.1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px; }
+        .mr-list-title { font-family: 'Sora', sans-serif; font-size: 0.95rem; font-weight: 700; color: #0f1e35; }
+
+        /* Loading */
+        .mr-loading { padding: 4rem; text-align: center; }
+        .mr-spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: mr-spin 0.7s linear infinite; margin: 0 auto 12px; }
+        .mr-loading p { font-size: 0.87rem; color: #94a3b8; }
+
+        /* Empty */
+        .mr-empty { padding: 4rem 2rem; text-align: center; }
+        .mr-empty-ico { width: 56px; height: 56px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+        .mr-empty h4 { font-family: 'Sora', sans-serif; font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
+        .mr-empty p { font-size: 0.84rem; color: #94a3b8; }
+
+        /* Pagination */
+        .mr-pagination { padding: 1rem 1.5rem; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+        .mr-page-info { font-size: 0.82rem; color: #94a3b8; }
+        .mr-page-info span { font-weight: 600; color: #475569; }
+        .mr-page-btns { display: flex; gap: 6px; }
+        .mr-page-btn { display: flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white; font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 600; color: #475569; cursor: pointer; transition: all 0.15s; }
+        .mr-page-btn:hover:not(:disabled) { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+        .mr-page-btn:disabled { opacity: 0.40; cursor: not-allowed; }
+
+        /* ── RESOURCE ITEM ── */
+        .ri-row { display: flex; gap: 1rem; align-items: flex-start; padding: 1.3rem 1.5rem; border-bottom: 1px solid #f8fafc; transition: background 0.15s; }
+        .ri-row:last-child { border-bottom: none; }
+        .ri-row:hover { background: #fafbfe; }
+
+        .ri-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #094886, #2563eb); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 0.80rem; font-weight: 700; color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.20); flex-shrink: 0; margin-top: 2px; }
+        .ri-body { flex: 1; min-width: 0; }
+        .ri-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+        .ri-title { font-family: 'Sora', sans-serif; font-size: 0.97rem; font-weight: 700; color: #0f1e35; }
+        .ri-cat-tag { padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; font-family: 'Sora', sans-serif; border: 1px solid; flex-shrink: 0; }
+        .ri-desc { font-size: 0.84rem; color: #64748b; line-height: 1.55; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .ri-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+        .ri-chip { display: flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #f1f5f9; padding: 3px 8px; border-radius: 8px; font-size: 0.76rem; color: #64748b; }
+
+        .ri-toggle { display: inline-flex; align-items: center; gap: 5px; font-size: 0.80rem; font-weight: 600; color: #2563eb; background: none; border: none; cursor: pointer; padding: 0; font-family: 'Sora', sans-serif; transition: color 0.15s; }
+        .ri-toggle:hover { color: #094886; }
+
+        .ri-panel { margin-top: 12px; padding: 14px 16px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+        .ri-panel-field { display: flex; flex-direction: column; gap: 5px; }
+        .ri-panel-label { font-size: 0.78rem; font-weight: 600; color: #475569; font-family: 'Sora', sans-serif; }
+        .ri-select { padding: 8px 32px 8px 12px; border-radius: 10px; border: 1.5px solid; background: white; font-size: 0.84rem; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; transition: box-shadow 0.2s; }
+        .ri-select:focus { box-shadow: 0 0 0 3px rgba(37,99,235,0.10); }
+        .ri-panel-notes { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 5px; }
+        .ri-notes-input { width: 100%; padding: 8px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.84rem; font-family: 'DM Sans', sans-serif; color: #1e293b; background: white; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        .ri-notes-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.10); }
+        .ri-notes-input::placeholder { color: #cbd5e1; }
+        .ri-panel-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-end; }
+
+        .ri-btn-approve { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 11px; border: none; background: linear-gradient(135deg, #047857, #059669); color: white; font-family: 'Sora', sans-serif; font-size: 0.84rem; font-weight: 600; cursor: pointer; box-shadow: 0 3px 10px rgba(5,150,105,0.28); transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s; }
+        .ri-btn-approve:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(5,150,105,0.35); }
+        .ri-btn-approve:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+        .ri-btn-reject { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 11px; border: 1.5px solid #fecaca; background: #fef2f2; color: #dc2626; font-family: 'Sora', sans-serif; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: background 0.15s, transform 0.15s, opacity 0.2s; }
+        .ri-btn-reject:hover:not(:disabled) { background: #fee2e2; transform: translateY(-1px); }
+        .ri-btn-reject:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        .ri-spin-g { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.30); border-top-color: white; border-radius: 50%; animation: mr-spin 0.65s linear infinite; display: inline-block; }
+        .ri-spin-r { width: 13px; height: 13px; border: 2px solid rgba(220,38,38,0.20); border-top-color: #dc2626; border-radius: 50%; animation: mr-spin 0.65s linear infinite; display: inline-block; }
+
+        @keyframes mr-spin { to { transform: rotate(360deg); } }
+        @keyframes mr-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 1024px) { .mr-stats { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 640px) { .mr-stats { grid-template-columns: 1fr 1fr; } .mr-body { padding: 1rem; } .ri-panel { flex-direction: column; } }
+      `}</style>
+
+      <ToastContainer position="top-right" toastStyle={{ fontFamily: "'DM Sans', sans-serif" }} />
+
+      <div className="mr-root">
+
+        {/* NAVBAR */}
+        <nav className="mr-nav">
+          <div className="mr-nav-inner">
+            <Link to="/dashboard" className="mr-brand">
+              <div className="mr-brand-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+              <span className="mr-brand-name">LearnBridge</span>
+            </Link>
+            <div className="mr-nav-links">
+              <Link to="/dashboard" className="mr-nav-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+              </Link>
+              <Link to="/resources" className="mr-nav-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Resources
+              </Link>
+            </div>
+          </div>
+        </nav>
+
+        <div className="mr-body">
+
+          {/* Page header */}
+          <div className="mr-page-header">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="lecture">Lecture</option>
-                <option value="assignment">Assignment</option>
-                <option value="tutorial">Tutorial</option>
-                <option value="reference">Reference</option>
-                <option value="other">Other</option>
-              </select>
+              <h1 className="mr-page-title">Manage <span>Resources</span></h1>
+              <p className="mr-page-sub">Review, approve, or reject submitted learning materials</p>
             </div>
-            
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Review Notes</label>
-              <input
-                type="text"
-                value={reviewNotes}
-                onChange={(e) => setReviewNotes(e.target.value)}
-                placeholder="Add review notes (required for rejection)"
-                className="w-full px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
+            {stats.pending > 0 && (
+              <div className="mr-pending-badge">
+                <span className="mr-pending-dot" />
+                {stats.pending} awaiting review
+              </div>
+            )}
           </div>
-        </div>
 
-        <div className="flex space-x-2 ml-4">
-          <button
-            onClick={handleApproveClick}
-            disabled={loading}
-            className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50"
-          >
-            Approve
-          </button>
-          <button
-            onClick={handleRejectClick}
-            disabled={loading}
-            className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:opacity-50"
-          >
-            Reject
-          </button>
+          {/* Stat cards */}
+          <div className="mr-stats">
+            {statCards.map((s, i) => (
+              <div key={i} className="mr-stat-card">
+                <div className="mr-stat-ico" style={{ background: s.bg, borderColor: s.border, color: s.color }}>{s.icon}</div>
+                <div>
+                  <p className="mr-stat-num" style={{ color: s.color }}>{s.value}</p>
+                  <p className="mr-stat-label">{s.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pending list */}
+          <div className="mr-list">
+            <div className="mr-list-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+              </svg>
+              <span className="mr-list-title">Pending Resources ({resources.length})</span>
+            </div>
+
+            {loading ? (
+              <div className="mr-loading">
+                <div className="mr-spinner" />
+                <p>Loading pending resources…</p>
+              </div>
+            ) : resources.length === 0 ? (
+              <div className="mr-empty">
+                <div className="mr-empty-ico">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
+                  </svg>
+                </div>
+                <h4>All caught up!</h4>
+                <p>No pending resources to review right now.</p>
+              </div>
+            ) : (
+              <>
+                {resources.map(resource => (
+                  <ResourceItem
+                    key={resource._id}
+                    resource={resource}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                  />
+                ))}
+
+                {totalPages > 1 && (
+                  <div className="mr-pagination">
+                    <p className="mr-page-info">Page <span>{currentPage}</span> of <span>{totalPages}</span></p>
+                    <div className="mr-page-btns">
+                      <button className="mr-page-btn" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+                        Previous
+                      </button>
+                      <button className="mr-page-btn" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === totalPages}>
+                        Next
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
