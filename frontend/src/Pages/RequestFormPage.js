@@ -42,6 +42,7 @@ const RequestFormPage = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [existingReqs, setExistingReqs] = useState([]);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const heatScore = calcHeatScore(1, urgency, selectedSlots);
   const demand = getDemand(heatScore);
@@ -63,9 +64,17 @@ const RequestFormPage = () => {
     );
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!category) newErrors.category = 'Please select a category.';
+    if (selectedSlots.length === 0) newErrors.slots = 'Please select at least one preferred time slot.';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!category) { toast.warning('Please select a category'); return; }
+    if (!validateForm()) return;
     setSubmitting(true);
     setDuplicateData(null);
     try {
@@ -187,10 +196,11 @@ const RequestFormPage = () => {
             {/* Category */}
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
               <label>Category *</label>
-              <select value={category} onChange={e => setCategory(e.target.value)} required>
+              <select value={category} onChange={e => { setCategory(e.target.value); setErrors(p => ({...p, category: ''})); }} required>
                 <option value="">— Select category —</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+              {errors.category && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{errors.category}</p>}
             </div>
 
             {/* Description */}
@@ -230,12 +240,13 @@ const RequestFormPage = () => {
                     type="button"
                     key={slot}
                     className={`time-slot ${selectedSlots.includes(slot) ? 'selected' : ''}`}
-                    onClick={() => toggleSlot(slot)}
+                    onClick={() => { toggleSlot(slot); setErrors(p => ({...p, slots: ''})); }}
                   >
                     {slot}
                   </button>
                 ))}
               </div>
+              {errors.slots && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '6px' }}>{errors.slots}</p>}
             </div>
 
             {/* Heat Score Preview */}

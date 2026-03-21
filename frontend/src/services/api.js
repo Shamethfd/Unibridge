@@ -35,3 +35,8 @@ export const updateRequestStatus = (id, status) =>
   API.put(`/requests/${id}/status`, { status });
 export const deleteRequest = (id) => API.delete(`/requests/${id}`);
 export const getDashboardStats = () => API.get("/requests/stats/dashboard");
+
+// User Preferences
+export const getUserPreference = (userId) => API.get(`/preferences/${userId}`);
+export const saveUserPreference = (userId, data) => API.put(`/preferences/${userId}`, data);
+export const clearUserPreference = (userId) => API.delete(`/preferences/${userId}`);

@@ -34,6 +34,9 @@ const AdminDashboard = () => {
   const [newSemester, setNewSemester] = useState({ name: 'Semester 1' });
   const [newModule, setNewModule] = useState({ name: '', description: '' });
 
+  // Inline validation errors
+  const [adminErrors, setAdminErrors] = useState({});
+
   // Edit Faculty State
   const [editingFacultyId, setEditingFacultyId] = useState(null);
   const [editFacultyName, setEditFacultyName] = useState('');
@@ -60,7 +63,10 @@ const AdminDashboard = () => {
   // Faculty CRUD
   const handleAddFaculty = async (e) => {
     e.preventDefault();
-    if (!newFaculty.name.trim()) return;
+    const errs = {};
+    if (!newFaculty.name.trim()) errs.facultyName = 'Faculty name is required.';
+    if (Object.keys(errs).length) { setAdminErrors(errs); return; }
+    setAdminErrors({});
     try {
       await createFaculty(newFaculty);
       toast.success('Faculty added!');
@@ -98,7 +104,10 @@ const AdminDashboard = () => {
   // Year CRUD
   const handleAddYear = async (e) => {
     e.preventDefault();
-    if (!selFaculty) { toast.warning('Select a faculty first'); return; }
+    const errs = {};
+    if (!selFaculty) errs.yearFaculty = 'Please select a faculty first.';
+    if (Object.keys(errs).length) { setAdminErrors(errs); return; }
+    setAdminErrors({});
     try {
       await createYear({ ...newYear, facultyId: selFaculty });
       toast.success('Year added!');
@@ -113,7 +122,10 @@ const AdminDashboard = () => {
   // Semester CRUD
   const handleAddSemester = async (e) => {
     e.preventDefault();
-    if (!selYear) { toast.warning('Select a year first'); return; }
+    const errs = {};
+    if (!selYear) errs.semYear = 'Please select a year first.';
+    if (Object.keys(errs).length) { setAdminErrors(errs); return; }
+    setAdminErrors({});
     try {
       await createSemester({ ...newSemester, yearId: selYear });
       toast.success('Semester added!');
@@ -128,8 +140,11 @@ const AdminDashboard = () => {
   // Module CRUD
   const handleAddModule = async (e) => {
     e.preventDefault();
-    if (!selSemester) { toast.warning('Select a semester first'); return; }
-    if (!newModule.name.trim()) return;
+    const errs = {};
+    if (!selSemester) errs.modSemester = 'Please select a semester first.';
+    if (!newModule.name.trim()) errs.modName = 'Module name is required.';
+    if (Object.keys(errs).length) { setAdminErrors(errs); return; }
+    setAdminErrors({});
     try {
       await createModule({ ...newModule, semesterId: selSemester });
       toast.success('Module added!');
@@ -251,7 +266,8 @@ const AdminDashboard = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Faculty Name</label>
-                  <input value={newFaculty.name} onChange={e => setNewFaculty({ ...newFaculty, name: e.target.value })} placeholder="e.g. Computing" required />
+                  <input value={newFaculty.name} onChange={e => { setNewFaculty({ ...newFaculty, name: e.target.value }); setAdminErrors(p => ({...p, facultyName: ''})); }} placeholder="e.g. Computing" required />
+                  {adminErrors.facultyName && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{adminErrors.facultyName}</p>}
                 </div>
                 <div className="form-group" style={{ maxWidth: 100 }}>
                   <label>Icon</label>
@@ -322,10 +338,11 @@ const AdminDashboard = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Faculty</label>
-                  <select value={selFaculty} onChange={e => setSelFaculty(e.target.value)} required>
+                  <select value={selFaculty} onChange={e => { setSelFaculty(e.target.value); setAdminErrors(p => ({...p, yearFaculty: ''})); }} required>
                     <option value="">Select faculty</option>
                     {faculties.map(f => <option key={f._id} value={f._id}>{f.icon} {f.name}</option>)}
                   </select>
+                  {adminErrors.yearFaculty && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{adminErrors.yearFaculty}</p>}
                 </div>
                 <div className="form-group">
                   <label>Year Name</label>
@@ -369,10 +386,11 @@ const AdminDashboard = () => {
                 </div>
                 <div className="form-group">
                   <label>Year</label>
-                  <select value={selYear} onChange={e => setSelYear(e.target.value)} required>
+                  <select value={selYear} onChange={e => { setSelYear(e.target.value); setAdminErrors(p => ({...p, semYear: ''})); }} required>
                     <option value="">Select year</option>
                     {years.map(y => <option key={y._id} value={y._id}>{y.name}</option>)}
                   </select>
+                  {adminErrors.semYear && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{adminErrors.semYear}</p>}
                 </div>
                 <div className="form-group">
                   <label>Semester</label>
@@ -422,16 +440,18 @@ const AdminDashboard = () => {
                 </div>
                 <div className="form-group">
                   <label>Semester</label>
-                  <select value={selSemester} onChange={e => setSelSemester(e.target.value)} required>
+                  <select value={selSemester} onChange={e => { setSelSemester(e.target.value); setAdminErrors(p => ({...p, modSemester: ''})); }} required>
                     <option value="">Select semester</option>
                     {semesters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                   </select>
+                  {adminErrors.modSemester && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{adminErrors.modSemester}</p>}
                 </div>
               </div>
               <div className="form-row" style={{ marginTop: '1rem' }}>
                 <div className="form-group">
                   <label>Module Name *</label>
-                  <input value={newModule.name} onChange={e => setNewModule({ ...newModule, name: e.target.value })} placeholder="e.g. Network Management" required />
+                  <input value={newModule.name} onChange={e => { setNewModule({ ...newModule, name: e.target.value }); setAdminErrors(p => ({...p, modName: ''})); }} placeholder="e.g. Network Management" required />
+                  {adminErrors.modName && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{adminErrors.modName}</p>}
                 </div>
                 <div className="form-group">
                   <label>Description</label>

@@ -10,12 +10,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   z-index: 1000;
   transition: transform 0.2s, background-color 0.2s;
   font-weight: 600;
-  border: 2px solid rgba(255,255,255,0.2);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .mycourse-floating-btn:hover {
@@ -34,7 +34,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   z-index: 1050;
   opacity: 0;
   visibility: hidden;
@@ -56,7 +56,7 @@
   height: 100vh;
   background-color: var(--bg-card, #ffffff);
   z-index: 1100;
-  box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
   transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -111,7 +111,7 @@
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
   margin-bottom: 20px;
 }
 
@@ -193,6 +193,18 @@
   flex: 1;
 }
 
-.btn-my-course:hover, .btn-clear-saved:hover {
+.btn-my-course:hover,
+.btn-clear-saved:hover {
   opacity: 0.9;
+}
+
+.qa-no-data {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 4px;
+}
+
+.qa-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

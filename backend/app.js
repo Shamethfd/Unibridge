@@ -8,6 +8,7 @@ import yearRoutes from "./routes/yearRoutes.js";
 import semesterRoutes from "./routes/semesterRoutes.js";
 import moduleRoutes from "./routes/moduleRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
+import preferenceRoutes from "./routes/preferenceRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -23,6 +24,7 @@ app.use("/api/years", yearRoutes);
 app.use("/api/semesters", semesterRoutes);
 app.use("/api/modules", moduleRoutes);
 app.use("/api/requests", requestRoutes);
+app.use("/api/preferences", preferenceRoutes);
 
 // Health check
 app.get("/", (req, res) => res.json({ message: "Module & Study Request API running" }));
