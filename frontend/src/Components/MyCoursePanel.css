@@ -1,0 +1,198 @@
+/* Floating Button CSS */
+.mycourse-floating-btn {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background-color: var(--primary, #0f62fe);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.2s, background-color 0.2s;
+  font-weight: 600;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.mycourse-floating-btn:hover {
+  transform: translateY(-2px);
+  background-color: var(--primary-dark, #0043ce);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+/* Sidebar Overlay */
+.mycourse-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 1050;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(2px);
+}
+
+.mycourse-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Sidebar Panel */
+.mycourse-sidebar {
+  position: fixed;
+  top: 0;
+  right: -450px;
+  width: 400px;
+  height: 100vh;
+  background-color: var(--bg-card, #ffffff);
+  z-index: 1100;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.mycourse-sidebar.open {
+  right: 0;
+}
+
+/* Header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--border, #e0e0e0);
+}
+
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary, #0f62fe);
+}
+
+.close-btn {
+  background: #1e1e1e;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.sidebar-content {
+  padding: 25px;
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--bg-dark, #f4f7f6);
+}
+
+/* Quick Access Box */
+.quick-access-box {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  margin-bottom: 20px;
+}
+
+.qa-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+}
+
+.qa-subtitle {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.qa-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.qa-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.qa-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.qa-select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+}
+
+.qa-select:focus {
+  border-color: var(--primary, #0f62fe);
+}
+
+.qa-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-my-course {
+  background-color: var(--primary, #0f62fe);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-clear-saved {
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-my-course:hover, .btn-clear-saved:hover {
+  opacity: 0.9;
+}

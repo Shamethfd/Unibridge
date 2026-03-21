@@ -67,12 +67,6 @@ const HomePage = () => {
             Our smart system prioritizes sessions based on urgency and demand.
           </p>
           <div className="hero-actions">
-            <button className="btn-primary" onClick={scrollToCourses}>
-              📚 Browse Courses
-            </button>
-            <button className="btn-secondary" onClick={() => navigate('/admin')}>
-              ⚙️ Admin Dashboard
-            </button>
           </div>
         </div>
 

@@ -137,7 +137,7 @@ const RequestFormPage = () => {
         <div className="request-form-card">
           {/* Module Banner */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(199, 198, 214, 0.2), rgba(255,101,132,0.2))',
+            background: 'linear-gradient(135deg, rgba(19, 198, 214, 0.2), rgba(255,101,132,0.2))',
             border: '1px solid rgba(108,99,255,0.3)',
             borderRadius: '12px',
             padding: '1rem 1.5rem',

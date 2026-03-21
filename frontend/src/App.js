@@ -9,6 +9,7 @@ import SemesterPage from './Pages/SemesterPage';
 import ModulePage from './Pages/ModulePage';
 import RequestFormPage from './Pages/RequestFormPage';
 import AdminDashboard from './Pages/AdminDashboard';
+import MyCoursePanel from './Components/MyCoursePanel';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={4000} theme="dark" />
+      <MyCoursePanel />
     </>
   );
 }
