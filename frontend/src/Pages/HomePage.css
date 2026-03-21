@@ -44,7 +44,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 3rem;
-  background: #094886;
+  background: #adc0d2;
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
