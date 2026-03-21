@@ -40,11 +40,17 @@ const ManageModules = () => {
     try {
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+      // Convert year & semester to numbers — API expects integers, not strings
+      const payload = {
+        name: formData.name.trim(),
+        year: Number(formData.year),
+        semester: Number(formData.semester),
+      };
       if (editingModule) {
-        await axios.put(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/modules/${editingModule._id}`, formData, { headers });
+        await axios.put(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/modules/${editingModule._id}`, payload, { headers });
         toast.success('Module updated successfully');
       } else {
-        await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/modules`, formData, { headers });
+        await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/modules`, payload, { headers });
         toast.success('Module created successfully');
       }
       setFormData({ name: '', year: '', semester: '' });
@@ -463,7 +469,7 @@ const ManageModules = () => {
                 </button>
                 <button type="submit" className="mm-save-btn" disabled={formLoading}>
                   {formLoading ? (
-                    <><span className="mm-form-spinner" /> Saving…</>
+                    <><span className="mm-form-spinner" /> Saving...</>
                   ) : editingModule ? (
                     <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Update Module</>
                   ) : (

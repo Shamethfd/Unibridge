@@ -7,7 +7,7 @@ import Login from './Pages/Login';
 import AuthCallback from './Pages/AuthCallback';
 import AdminLogin from './Pages/AdminLogin';
 import AdminDashboard from './Pages/AdminDashboard';
-import Dashboard from './Pages/Dashboard_clean';
+import Dashboard from './Pages/Dashboard_fixed';
 import Profile from './Pages/Profile';
 import ResourceList from './Pages/ResourceList';
 import UploadResource from './Pages/UploadResource';

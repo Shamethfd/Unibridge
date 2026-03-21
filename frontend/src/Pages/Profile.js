@@ -71,10 +71,10 @@ const Profile = () => {
   };
 
   const getInitials = () => {
-    const f = user?.profile?.firstName || '';
-    const l = user?.profile?.lastName || '';
+    const f = user?.profile?.firstName || user?.firstName || '';
+    const l = user?.profile?.lastName || user?.lastName || '';
     if (f || l) return `${f[0] || ''}${l[0] || ''}`.toUpperCase();
-    return (user?.username?.[0] || 'U').toUpperCase();
+    return 'U';
   };
 
   if (loading) {
@@ -100,9 +100,9 @@ const Profile = () => {
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-white mb-2">
-                  {user?.profile?.firstName} {user?.profile?.lastName}
+                  {user?.profile?.firstName || user?.firstName || ''} {user?.profile?.lastName || user?.lastName || ''}
                 </h1>
-                <p className="text-white/80">@{user?.username}</p>
+                <p className="text-white/80">@{user?.username || ''}</p>
               </div>
               <button
                 onClick={() => setEditMode(!editMode)}

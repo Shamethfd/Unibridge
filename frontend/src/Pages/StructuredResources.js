@@ -5,384 +5,467 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const StructuredResources = () => {
-  const [academicStructure, setAcademicStructure] = useState({});
-  const [expandedYears, setExpandedYears] = useState(new Set());
-  const [expandedSemesters, setExpandedSemesters] = useState(new Set());
-  const [expandedModules, setExpandedModules] = useState(new Set());
-  const [selectedModule, setSelectedModule] = useState(null);
-  const [moduleResources, setModuleResources] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentFilters, setCurrentFilters] = useState({ year: '', semester: '' });
+  const [academicStructure, setAcademicStructure]   = useState({});
+  const [expandedYears, setExpandedYears]           = useState(new Set());
+  const [expandedSemesters, setExpandedSemesters]   = useState(new Set());
+  const [expandedModules, setExpandedModules]       = useState(new Set());
+  const [selectedModule, setSelectedModule]         = useState(null);
+  const [moduleResources, setModuleResources]       = useState([]);
+  const [loading, setLoading]                       = useState(true);
+  const [currentFilters, setCurrentFilters]         = useState({ year: '', semester: '' });
 
-  useEffect(() => {
-    fetchAcademicStructure();
-  }, []);
+  useEffect(() => { fetchAcademicStructure(); }, []);
 
   const fetchAcademicStructure = async () => {
     try {
-      // Fetch all modules to build the structure
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/modules`
-      );
-
-      console.log('Modules API Response:', response.data); // Debug log
-
-      if (response.data.success) {
-        const modules = response.data.data.modules || [];
-        console.log('Modules:', modules); // Debug log
-        
-        // Build academic structure from modules
+      const res = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/modules`);
+      if (res.data.success) {
+        const modules = res.data.data.modules || [];
         const structure = {};
-        modules.forEach(module => {
-          const year = module.year.toString();
-          const semester = module.semester.toString();
-          const moduleName = module.name;
-          
-          if (!structure[year]) {
-            structure[year] = {};
-          }
-          if (!structure[year][semester]) {
-            structure[year][semester] = new Set();
-          }
-          structure[year][semester].add(moduleName);
+        modules.forEach((m) => {
+          const name = m?.name?.trim();
+          if (!name || m?.year == null || m?.semester == null) return;
+          const y = String(m.year), s = String(m.semester);
+          if (!structure[y]) structure[y] = {};
+          if (!structure[y][s]) structure[y][s] = new Set();
+          structure[y][s].add(name);
         });
-        
-        // Convert Sets to Arrays
-        Object.keys(structure).forEach(year => {
-          Object.keys(structure[year]).forEach(semester => {
-            structure[year][semester] = Array.from(structure[year][semester]).sort();
-          });
-        });
-        
-        console.log('Built structure:', structure); // Debug log
+        Object.keys(structure).forEach(y =>
+          Object.keys(structure[y]).forEach(s => {
+            structure[y][s] = Array.from(structure[y][s]).sort();
+          })
+        );
         setAcademicStructure(structure);
       } else {
-        console.error('API returned success=false:', response.data);
-        toast.error('Failed to fetch modules: ' + (response.data.message || 'Unknown error'));
-        // Set empty structure on failure
-        setAcademicStructure({});
+        toast.error('Failed to fetch modules'); setAcademicStructure({});
       }
-    } catch (error) {
-      console.error('Error fetching structure:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      toast.error('Failed to fetch academic structure: ' + (error.response?.data?.message || error.message));
-      // Set empty structure on error
-      setAcademicStructure({});
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) {
+      toast.error('Failed to fetch academic structure'); setAcademicStructure({});
+    } finally { setLoading(false); }
   };
 
   const fetchModuleResources = async (module, year, semester) => {
     try {
       setLoading(true);
-      const response = await axios.get(
+      const res = await axios.get(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/management/module/${encodeURIComponent(module)}?year=${year}&semester=${semester}`
       );
-
-      if (response.data.success) {
-        setModuleResources(response.data.data.resources);
+      if (res.data.success) {
+        setModuleResources(res.data.data.resources);
         setCurrentFilters({ year, semester });
       }
-    } catch (error) {
-      toast.error('Failed to fetch module resources');
-      console.error('Error fetching module resources:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error('Failed to fetch module resources'); }
+    finally { setLoading(false); }
   };
 
   const toggleYear = (year) => {
-    const newExpanded = new Set(expandedYears);
-    if (newExpanded.has(year)) {
-      newExpanded.delete(year);
-    } else {
-      newExpanded.add(year);
-    }
-    setExpandedYears(newExpanded);
+    const n = new Set(expandedYears);
+    n.has(year) ? n.delete(year) : n.add(year);
+    setExpandedYears(n);
   };
 
   const toggleSemester = (year, semester) => {
     const key = `${year}-${semester}`;
-    const newExpanded = new Set(expandedSemesters);
-    if (newExpanded.has(key)) {
-      newExpanded.delete(key);
-    } else {
-      newExpanded.add(key);
-    }
-    setExpandedSemesters(newExpanded);
+    const n = new Set(expandedSemesters);
+    n.has(key) ? n.delete(key) : n.add(key);
+    setExpandedSemesters(n);
   };
 
-  const toggleModule = (module) => {
-    const newExpanded = new Set(expandedModules);
-    if (newExpanded.has(module)) {
-      newExpanded.delete(module);
-      setSelectedModule(null);
-      setModuleResources([]);
+  const toggleModule = (module, year, semester) => {
+    const n = new Set(expandedModules);
+    if (n.has(module)) {
+      n.delete(module); setSelectedModule(null); setModuleResources([]);
     } else {
-      newExpanded.add(module);
-      setSelectedModule(module);
+      n.add(module); setSelectedModule(module);
+      fetchModuleResources(module, year, semester);
     }
-    setExpandedModules(newExpanded);
+    setExpandedModules(n);
   };
 
   const handleDownload = async (resource) => {
     try {
-      const response = await axios.get(
+      const res = await axios.get(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/resources/${resource._id}/download`,
-        {
-          responseType: 'blob'
-        }
+        { responseType: 'blob' }
       );
-
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', resource.fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      link.href = url; link.setAttribute('download', resource.fileName);
+      document.body.appendChild(link); link.click(); link.remove();
       window.URL.revokeObjectURL(url);
-
       toast.success('Download started!');
-    } catch (error) {
-      toast.error('Failed to download resource');
-      console.error('Error downloading resource:', error);
-    }
+    } catch { toast.error('Failed to download resource'); }
   };
 
-  const getYearLabel = (year) => {
-    const labels = {
-      '1': '1st Year',
-      '2': '2nd Year',
-      '3': '3rd Year',
-      '4': '4th Year'
-    };
-    return labels[year] || `${year} Year`;
-  };
-
-  const getSemesterLabel = (semester) => {
-    const labels = {
-      '1': '1st Semester',
-      '2': '2nd Semester'
-    };
-    return labels[semester] || `${semester} Semester`;
+  const yearLabels = { '1':'1st Year','2':'2nd Year','3':'3rd Year','4':'4th Year' };
+  const semLabels  = { '1':'1st Semester','2':'2nd Semester' };
+  const yearColors = {
+    '1':{ color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', light:'#dbeafe' },
+    '2':{ color:'#059669', bg:'#f0fdf4', border:'#a7f3d0', light:'#bbf7d0' },
+    '3':{ color:'#d97706', bg:'#fffbeb', border:'#fde68a', light:'#fef3c7' },
+    '4':{ color:'#7c3aed', bg:'#faf5ff', border:'#ddd6fe', light:'#ede9fe' },
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    if (!bytes || bytes === 0) return '0 B';
+    const k = 1024, sizes = ['B','KB','MB','GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  if (loading) {
+  const getFileIcon = (fileName) => {
+    const ext = (fileName || '').split('.').pop().toLowerCase();
+    if (ext === 'pdf') return { label:'PDF', color:'#dc2626', bg:'#fef2f2' };
+    if (['doc','docx'].includes(ext)) return { label:'DOC', color:'#2563eb', bg:'#eff6ff' };
+    if (['ppt','pptx'].includes(ext)) return { label:'PPT', color:'#ea580c', bg:'#fff7ed' };
+    if (['jpg','jpeg','png','gif'].includes(ext)) return { label:'IMG', color:'#7c3aed', bg:'#faf5ff' };
+    return { label:'FILE', color:'#059669', bg:'#f0fdf4' };
+  };
+
+  if (loading && Object.keys(academicStructure).length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div style={{ minHeight:'100vh', background:'#f0f4f8', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap'); @keyframes sr-spin{to{transform:rotate(360deg)}}`}</style>
         <ToastContainer position="top-right" />
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading academic resources...</p>
+        <div style={{ textAlign:'center' }}>
+          <div style={{ width:44, height:44, border:'3px solid #e2e8f0', borderTopColor:'#2563eb', borderRadius:'50%', animation:'sr-spin 0.7s linear infinite', margin:'0 auto 14px' }} />
+          <p style={{ color:'#64748b', fontFamily:"'DM Sans',sans-serif" }}>Loading academic resources…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <ToastContainer position="top-right" />
-      
-      {/* Navigation Header */}
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">LearnBridge</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/dashboard"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .sr-root { min-height: 100vh; background: #f0f4f8; font-family: 'DM Sans', sans-serif; }
+
+        /* NAVBAR */
+        .sr-nav { position: sticky; top: 0; z-index: 50; background: white; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 12px rgba(9,72,134,0.07); }
+        .sr-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .sr-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .sr-brand-logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #094886, #2563eb); display: flex; align-items: center; justify-content: center; }
+        .sr-brand-name { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; color: #0f1e35; }
+        .sr-nav-links { display: flex; gap: 6px; }
+        .sr-nav-link { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 10px; font-size: 0.84rem; font-weight: 500; color: #475569; text-decoration: none; transition: background 0.15s, color 0.15s; }
+        .sr-nav-link:hover { background: #f1f5f9; color: #094886; }
+        .sr-nav-cta { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; font-size: 0.84rem; font-weight: 600; background: linear-gradient(135deg, #094886, #2563eb); color: white; text-decoration: none; box-shadow: 0 3px 10px rgba(37,99,235,0.28); font-family: 'Sora', sans-serif; transition: transform 0.15s, box-shadow 0.15s; }
+        .sr-nav-cta:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(37,99,235,0.35); }
+
+        /* BODY */
+        .sr-body { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* PAGE HEADER */
+        .sr-page-header { margin-bottom: 1.5rem; animation: sr-up 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+        .sr-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 0.80rem; color: #94a3b8; margin-bottom: 10px; flex-wrap: wrap; }
+        .sr-breadcrumb a { color: #94a3b8; text-decoration: none; transition: color 0.15s; }
+        .sr-breadcrumb a:hover { color: #2563eb; }
+        .sr-breadcrumb .active { color: #2563eb; font-weight: 600; }
+        .sr-breadcrumb-sep { color: #cbd5e1; }
+        .sr-page-title { font-family: 'Sora', sans-serif; font-size: 1.7rem; font-weight: 800; color: #0f1e35; }
+        .sr-page-title span { color: #2563eb; }
+        .sr-page-sub { font-size: 0.87rem; color: #94a3b8; margin-top: 4px; }
+
+        /* STRUCTURE VIEW */
+        .sr-year-card { background: white; border-radius: 18px; box-shadow: 0 2px 8px rgba(9,72,134,0.06), 0 0 0 1px rgba(9,72,134,0.04); overflow: hidden; margin-bottom: 1rem; animation: sr-up 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+
+        .sr-year-header { padding: 1.1rem 1.4rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.15s; user-select: none; }
+        .sr-year-header:hover { background: #fafbfe; }
+        .sr-year-left { display: flex; align-items: center; gap: 12px; }
+        .sr-year-ico { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1.5px solid; flex-shrink: 0; }
+        .sr-year-label { font-family: 'Sora', sans-serif; font-size: 1rem; font-weight: 700; color: #0f1e35; }
+        .sr-year-count { font-size: 0.78rem; color: #94a3b8; margin-top: 1px; }
+        .sr-chevron { transition: transform 0.25s; color: #94a3b8; flex-shrink: 0; }
+        .sr-chevron.open { transform: rotate(90deg); }
+
+        .sr-year-body { border-top: 1px solid #f1f5f9; padding: 1rem 1.4rem; display: flex; flex-direction: column; gap: 8px; }
+
+        /* Semester row */
+        .sr-sem-block { border: 1.5px solid #f1f5f9; border-radius: 14px; overflow: hidden; }
+        .sr-sem-header { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: #fafbfc; transition: background 0.15s; user-select: none; }
+        .sr-sem-header:hover { background: #f1f5f9; }
+        .sr-sem-left { display: flex; align-items: center; gap: 8px; }
+        .sr-sem-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .sr-sem-label { font-family: 'Sora', sans-serif; font-size: 0.88rem; font-weight: 700; color: #334155; }
+        .sr-sem-count { font-size: 0.76rem; color: #94a3b8; padding: 2px 8px; background: white; border-radius: 20px; border: 1px solid #e2e8f0; }
+
+        .sr-sem-body { border-top: 1px solid #f1f5f9; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+
+        /* Module pill */
+        .sr-module-item { border-radius: 11px; overflow: hidden; }
+        .sr-module-header { padding: 9px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.15s; background: white; border: 1.5px solid #f1f5f9; border-radius: 11px; user-select: none; }
+        .sr-module-header:hover { border-color: #bfdbfe; background: #eff6ff; }
+        .sr-module-header.expanded { border-color: #2563eb; background: #eff6ff; border-radius: 11px 11px 0 0; border-bottom-color: transparent; }
+        .sr-module-left { display: flex; align-items: center; gap: 8px; }
+        .sr-module-ico-sm { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, #094886, #2563eb); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .sr-module-name { font-family: 'Sora', sans-serif; font-size: 0.86rem; font-weight: 600; color: #0f1e35; }
+        .sr-module-arrow { color: #94a3b8; transition: transform 0.2s; flex-shrink: 0; }
+        .sr-module-arrow.open { transform: rotate(90deg); color: #2563eb; }
+
+        /* Module resources panel */
+        .sr-module-panel { background: #f8fafc; border: 1.5px solid #2563eb; border-top: none; border-radius: 0 0 11px 11px; overflow: hidden; }
+        .sr-module-panel-inner { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+
+        /* Resource card inside module */
+        .sr-res-card { background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; transition: box-shadow 0.15s, border-color 0.15s; }
+        .sr-res-card:hover { border-color: #bfdbfe; box-shadow: 0 2px 10px rgba(9,72,134,0.07); }
+        .sr-res-badge { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 0.58rem; font-weight: 800; flex-shrink: 0; }
+        .sr-res-body { flex: 1; min-width: 0; }
+        .sr-res-title { font-family: 'Sora', sans-serif; font-size: 0.86rem; font-weight: 700; color: #0f1e35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sr-res-desc { font-size: 0.76rem; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sr-res-meta { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+        .sr-res-chip { display: flex; align-items: center; gap: 3px; font-size: 0.72rem; color: #94a3b8; background: #f8fafc; padding: 2px 7px; border-radius: 6px; border: 1px solid #f1f5f9; }
+        .sr-res-dl-btn { display: flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 10px; border: none; background: linear-gradient(135deg, #094886, #2563eb); color: white; font-family: 'Sora', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(37,99,235,0.25); flex-shrink: 0; transition: transform 0.15s, box-shadow 0.15s; }
+        .sr-res-dl-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.35); }
+
+        /* FULL MODULE RESOURCES VIEW */
+        .sr-module-view { background: white; border-radius: 18px; box-shadow: 0 2px 8px rgba(9,72,134,0.06), 0 0 0 1px rgba(9,72,134,0.04); overflow: hidden; animation: sr-up 0.4s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+        .sr-module-view-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+        .sr-module-view-title { font-family: 'Sora', sans-serif; font-size: 1rem; font-weight: 700; color: #0f1e35; display: flex; align-items: center; gap: 10px; }
+        .sr-count-badge { padding: 3px 10px; border-radius: 20px; background: #eff6ff; color: #2563eb; font-size: 0.76rem; font-weight: 600; font-family: 'Sora', sans-serif; border: 1px solid #bfdbfe; }
+        .sr-back-btn { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; font-weight: 600; color: #2563eb; background: none; border: none; cursor: pointer; font-family: 'Sora', sans-serif; transition: color 0.15s; }
+        .sr-back-btn:hover { color: #094886; }
+
+        /* Empty */
+        .sr-empty { padding: 4rem 2rem; text-align: center; }
+        .sr-empty-ico { width: 60px; height: 60px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+        .sr-empty h4 { font-family: 'Sora', sans-serif; font-size: 1rem; font-weight: 700; color: #334155; margin-bottom: 6px; }
+        .sr-empty p { font-size: 0.84rem; color: #94a3b8; margin-bottom: 18px; }
+        .sr-empty-cta { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 12px; background: linear-gradient(135deg, #094886, #2563eb); color: white; text-decoration: none; font-family: 'Sora', sans-serif; font-size: 0.85rem; font-weight: 600; box-shadow: 0 3px 10px rgba(37,99,235,0.28); transition: transform 0.15s; }
+        .sr-empty-cta:hover { transform: translateY(-1px); }
+
+        /* Loading inline */
+        .sr-loading-inline { padding: 2rem; text-align: center; }
+        .sr-spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: sr-spin 0.7s linear infinite; margin: 0 auto 10px; }
+        .sr-loading-inline p { font-size: 0.84rem; color: #94a3b8; }
+
+        @keyframes sr-spin { to { transform: rotate(360deg); } }
+        @keyframes sr-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 640px) { .sr-body { padding: 1rem; } .sr-page-title { font-size: 1.4rem; } }
+      `}</style>
+
+      <ToastContainer position="top-right" toastStyle={{ fontFamily: "'DM Sans', sans-serif" }} />
+
+      <div className="sr-root">
+        {/* NAVBAR */}
+        <nav className="sr-nav">
+          <div className="sr-nav-inner">
+            <Link to="/dashboard" className="sr-brand">
+              <div className="sr-brand-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+              <span className="sr-brand-name">LearnBridge</span>
+            </Link>
+            <div className="sr-nav-links">
+              <Link to="/dashboard" className="sr-nav-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 Dashboard
               </Link>
-              <Link
-                to="/submit-resource"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
-              >
+              <Link to="/submit-resource" className="sr-nav-cta">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Submit Resource
               </Link>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          
-          {/* Breadcrumb */}
-          {selectedModule && (
-            <div className="mb-6 flex items-center text-sm text-gray-600">
-              <Link to="/resources" className="hover:text-indigo-600">
-                Resources
-              </Link>
-              <span className="mx-2">→</span>
-              <span>{getYearLabel(currentFilters.year)}</span>
-              <span className="mx-2">→</span>
-              <span>{getSemesterLabel(currentFilters.semester)}</span>
-              <span className="mx-2">→</span>
-              <span className="text-indigo-600 font-medium">{selectedModule}</span>
-            </div>
-          )}
+        <div className="sr-body">
 
+          {/* Page header */}
+          <div className="sr-page-header">
+            {selectedModule && (
+              <div className="sr-breadcrumb">
+                <Link to="/resources">Resources</Link>
+                <span className="sr-breadcrumb-sep">›</span>
+                <span>{yearLabels[currentFilters.year] || `Year ${currentFilters.year}`}</span>
+                <span className="sr-breadcrumb-sep">›</span>
+                <span>{semLabels[currentFilters.semester] || `Semester ${currentFilters.semester}`}</span>
+                <span className="sr-breadcrumb-sep">›</span>
+                <span className="active">{selectedModule}</span>
+              </div>
+            )}
+            <h1 className="sr-page-title">
+              {selectedModule ? <><span>{selectedModule}</span> Resources</> : <>Academic <span>Resources</span></>}
+            </h1>
+            <p className="sr-page-sub">
+              {selectedModule
+                ? `Browse and download resources for this module`
+                : 'Explore resources organized by year, semester, and module'}
+            </p>
+          </div>
+
+          {/* MODULE RESOURCES VIEW */}
           {selectedModule ? (
-            /* Module Resources View */
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
-                  {selectedModule} Resources
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  {moduleResources.length} resource{moduleResources.length !== 1 ? 's' : ''}
-                </p>
+            <div className="sr-module-view">
+              <div className="sr-module-view-header">
+                <div className="sr-module-view-title">
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg,#094886,#2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  </div>
+                  {selectedModule}
+                  <span className="sr-count-badge">{moduleResources.length} resource{moduleResources.length !== 1 ? 's' : ''}</span>
+                </div>
+                <button className="sr-back-btn" onClick={() => { setSelectedModule(null); setModuleResources([]); }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+                  Back to Structure
+                </button>
               </div>
 
-              {moduleResources.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <p>No resources found for this module.</p>
+              {loading ? (
+                <div className="sr-loading-inline"><div className="sr-spinner" /><p>Loading resources…</p></div>
+              ) : moduleResources.length === 0 ? (
+                <div className="sr-empty">
+                  <div className="sr-empty-ico">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  </div>
+                  <h4>No resources found</h4>
+                  <p>No approved resources for this module yet.</p>
+                  <Link to="/submit-resource" className="sr-empty-cta">Submit the first resource</Link>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200">
-                  {moduleResources.map((resource) => (
-                    <div key={resource._id} className="p-6 hover:bg-gray-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-medium text-gray-900 mb-2">
-                            {resource.title}
-                          </h4>
-                          <p className="text-gray-600 text-sm mb-3">
-                            {resource.description}
-                          </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            <span>By: {resource.uploadedBy?.profile?.firstName} {resource.uploadedBy?.profile?.lastName}</span>
-                            <span>•</span>
-                            <span>{formatFileSize(resource.fileSize)}</span>
-                            <span>•</span>
-                            <span>{new Date(resource.createdAt).toLocaleDateString()}</span>
+                <div style={{ padding: '1rem' }}>
+                  {moduleResources.map(resource => {
+                    const fi = getFileIcon(resource.fileName);
+                    const uploaderName = [resource.uploadedBy?.profile?.firstName, resource.uploadedBy?.profile?.lastName].filter(Boolean).join(' ') || '—';
+                    return (
+                      <div key={resource._id} className="sr-res-card" style={{ marginBottom: 8 }}>
+                        <div className="sr-res-badge" style={{ background: fi.bg, color: fi.color }}>{fi.label}</div>
+                        <div className="sr-res-body">
+                          <p className="sr-res-title">{resource.title}</p>
+                          {resource.description && <p className="sr-res-desc">{resource.description}</p>}
+                          <div className="sr-res-meta">
+                            <span className="sr-res-chip">
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                              {uploaderName}
+                            </span>
+                            <span className="sr-res-chip">{formatFileSize(resource.fileSize)}</span>
+                            <span className="sr-res-chip">{new Date(resource.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</span>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleDownload(resource)}
-                            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          >
-                            Download
-                          </button>
-                        </div>
+                        <button className="sr-res-dl-btn" onClick={() => handleDownload(resource)}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          Download
+                        </button>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
           ) : (
-            /* Academic Structure View */
+            /* ACADEMIC STRUCTURE VIEW */
             Object.keys(academicStructure).length === 0 ? (
-              <div className="bg-white shadow rounded-lg p-8 text-center">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Resources Available</h3>
-                <p className="text-gray-600 mb-4">
-                  There are no approved resources yet. Submit your first resource to get started!
-                </p>
-                <Link
-                  to="/submit-resource"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Submit Resource
-                </Link>
+              <div style={{ background:'white', borderRadius:18, padding:'4rem 2rem', textAlign:'center', boxShadow:'0 2px 8px rgba(9,72,134,0.06)', animation:'sr-up 0.4s cubic-bezier(0.16,1,0.3,1) both' }}>
+                <div className="sr-empty-ico">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </div>
+                <h4 style={{ fontFamily:"'Sora',sans-serif", fontSize:'1rem', fontWeight:700, color:'#334155', marginBottom:6 }}>No Resources Available</h4>
+                <p style={{ fontSize:'0.84rem', color:'#94a3b8', marginBottom:18 }}>There are no approved resources yet. Submit your first resource to get started!</p>
+                <Link to="/submit-resource" className="sr-empty-cta">Submit Resource</Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Academic Resources</h2>
-                
-                {Object.keys(academicStructure)
-                  .sort((a, b) => parseInt(a) - parseInt(b))
-                  .map((year) => (
-                    <div key={year} className="bg-white shadow rounded-lg">
-                      <div
-                        className="px-6 py-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50"
-                        onClick={() => toggleYear(year)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-medium text-gray-900">
-                            {getYearLabel(year)}
-                          </h3>
-                          <svg
-                            className={`w-5 h-5 text-gray-400 transform transition-transform ${
-                              expandedYears.has(year) ? 'rotate-90' : ''
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
+              Object.keys(academicStructure)
+                .sort((a, b) => parseInt(a) - parseInt(b))
+                .map((year, yi) => {
+                  const yc = yearColors[year] || yearColors['1'];
+                  const totalModules = Object.values(academicStructure[year] || {}).flat().length;
+                  return (
+                    <div key={year} className="sr-year-card" style={{ animationDelay: `${yi * 0.05}s` }}>
+
+                      {/* Year header */}
+                      <div className="sr-year-header" onClick={() => toggleYear(year)}>
+                        <div className="sr-year-left">
+                          <div className="sr-year-ico" style={{ background: yc.bg, borderColor: yc.border, color: yc.color }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                          </div>
+                          <div>
+                            <p className="sr-year-label">{yearLabels[year] || `Year ${year}`}</p>
+                            <p className="sr-year-count">{totalModules} module{totalModules !== 1 ? 's' : ''}</p>
+                          </div>
                         </div>
+                        <svg className={`sr-chevron${expandedYears.has(year) ? ' open' : ''}`} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9,18 15,12 9,6"/>
+                        </svg>
                       </div>
 
+                      {/* Semesters */}
                       {expandedYears.has(year) && (
-                        <div className="px-6 py-4 space-y-3">
-                          {[1, 2].map((semester) => {
-                            const semesterKey = `${year}-${semester}`;
-                            const semesterModules = academicStructure[year]?.[semester] || [];
-                            
+                        <div className="sr-year-body">
+                          {[1, 2].map(sem => {
+                            const semKey = `${year}-${sem}`;
+                            const semModules = academicStructure[year]?.[String(sem)] || [];
+                            if (semModules.length === 0) return null;
                             return (
-                              <div key={semesterKey} className="border-l-4 border-gray-200">
-                                <div
-                                  className="pl-4 py-3 cursor-pointer hover:bg-gray-50"
-                                  onClick={() => toggleSemester(year, semester)}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <h4 className="text-md font-medium text-gray-800">
-                                      {getSemesterLabel(semester)}
-                                    </h4>
-                                    <svg
-                                      className={`w-4 h-4 text-gray-400 transform transition-transform ${
-                                        expandedSemesters.has(semesterKey) ? 'rotate-90' : ''
-                                      }`}
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
+                              <div key={semKey} className="sr-sem-block">
+                                <div className="sr-sem-header" onClick={() => toggleSemester(year, sem)}>
+                                  <div className="sr-sem-left">
+                                    <div className="sr-sem-dot" style={{ background: yc.color, boxShadow: `0 0 5px ${yc.color}` }} />
+                                    <span className="sr-sem-label">{semLabels[String(sem)] || `Semester ${sem}`}</span>
+                                    <span className="sr-sem-count">{semModules.length} module{semModules.length !== 1 ? 's' : ''}</span>
                                   </div>
+                                  <svg className={`sr-chevron${expandedSemesters.has(semKey) ? ' open' : ''}`} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                  </svg>
                                 </div>
 
-                                {expandedSemesters.has(semesterKey) && (
-                                  <div className="pl-4 py-3 space-y-2">
-                                    {semesterModules.map((module) => (
-                                      <div
-                                        key={module}
-                                        className="p-3 border-l-2 border-gray-300 cursor-pointer hover:bg-indigo-50"
-                                        onClick={() => toggleModule(module)}
-                                      >
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-sm font-medium text-indigo-600">
-                                            {module}
-                                          </span>
-                                          <svg
-                                            className={`w-4 h-4 text-gray-400 transform transition-transform ${
-                                              expandedModules.has(module) ? 'rotate-90' : ''
-                                            }`}
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                {/* Modules */}
+                                {expandedSemesters.has(semKey) && (
+                                  <div className="sr-sem-body">
+                                    {semModules.map(mod => (
+                                      <div key={mod} className="sr-module-item">
+                                        <div
+                                          className={`sr-module-header${expandedModules.has(mod) ? ' expanded' : ''}`}
+                                          onClick={() => toggleModule(mod, year, String(sem))}
+                                        >
+                                          <div className="sr-module-left">
+                                            <div className="sr-module-ico-sm">
+                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                            </div>
+                                            <span className="sr-module-name">{mod}</span>
+                                          </div>
+                                          <svg className={`sr-module-arrow${expandedModules.has(mod) ? ' open' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="9,18 15,12 9,6"/>
                                           </svg>
                                         </div>
+
+                                        {/* Inline resources */}
+                                        {expandedModules.has(mod) && (
+                                          <div className="sr-module-panel">
+                                            {loading && selectedModule === mod ? (
+                                              <div className="sr-loading-inline"><div className="sr-spinner" /><p>Loading…</p></div>
+                                            ) : moduleResources.length === 0 ? (
+                                              <div style={{ padding:'1rem', textAlign:'center', fontSize:'0.82rem', color:'#94a3b8' }}>No resources found for this module.</div>
+                                            ) : (
+                                              <div className="sr-module-panel-inner">
+                                                {moduleResources.map(resource => {
+                                                  const fi = getFileIcon(resource.fileName);
+                                                  return (
+                                                    <div key={resource._id} className="sr-res-card">
+                                                      <div className="sr-res-badge" style={{ background: fi.bg, color: fi.color }}>{fi.label}</div>
+                                                      <div className="sr-res-body">
+                                                        <p className="sr-res-title">{resource.title}</p>
+                                                        <div className="sr-res-meta">
+                                                          <span className="sr-res-chip">{formatFileSize(resource.fileSize)}</span>
+                                                          <span className="sr-res-chip">{new Date(resource.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+                                                        </div>
+                                                      </div>
+                                                      <button className="sr-res-dl-btn" onClick={() => handleDownload(resource)}>
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                                        Download
+                                                      </button>
+                                                    </div>
+                                                  );
+                                                })}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
                                       </div>
                                     ))}
                                   </div>
@@ -393,13 +476,13 @@ const StructuredResources = () => {
                         </div>
                       )}
                     </div>
-                  ))}
-              </div>
+                  );
+                })
             )
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
