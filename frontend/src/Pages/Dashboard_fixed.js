@@ -4,32 +4,19 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState([]);
-  const [stats, setStats] = useState({
-    totalResources: 0,
-    totalModules: 0,
-    recentActivity: 0
-  });
+  const [stats, setStats]     = useState({ totalResources: 0, totalModules: 0, recentActivity: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (!token) { 
-      navigate('/login'); 
-      return; 
-    }
+    if (!token) { navigate('/login'); return; }
     if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        navigate('/login');
-        return;
-      }
+      try { setUser(JSON.parse(storedUser)); }
+      catch { navigate('/login'); return; }
     }
     fetchDashboardData();
   }, [navigate]);
@@ -37,302 +24,198 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Mock notices data
-      const mockNotices = [
-        {
-          id: 1,
-          title: "Welcome to UniBridge!",
-          content: "Your academic resource management platform is now ready. Explore modules, submit resources, and collaborate with peers.",
-          type: "info",
-          date: new Date().toISOString(),
-          priority: "high"
-        },
-        {
-          id: 2,
-          title: "New Module Available",
-          content: "Advanced Web Development has been added to curriculum. Check out the latest resources and materials.",
-          type: "success",
-          date: new Date(Date.now() - 86400000).toISOString(),
-          priority: "medium"
-        },
-        {
-          id: 3,
-          title: "System Maintenance",
-          content: "Scheduled maintenance will occur this weekend from 2 AM to 4 AM. The platform may be temporarily unavailable.",
-          type: "warning",
-          date: new Date(Date.now() - 172800000).toISOString(),
-          priority: "low"
-        }
-      ];
-
-      // Mock stats
-      const mockStats = {
-        totalResources: 156,
-        totalModules: 24,
-        recentActivity: 12
-      };
-
-      setNotices(mockNotices);
-      setStats(mockStats);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      setNotices([
+        { id: 1, title: 'Welcome to LearnBridge!', content: 'Your academic resource management platform is ready. Explore modules, submit resources, and collaborate with peers.', type: 'info', date: new Date().toISOString(), priority: 'high' },
+        { id: 2, title: 'New Module Available', content: 'Advanced Web Development has been added to curriculum. Check out the latest resources and materials.', type: 'success', date: new Date(Date.now() - 86400000).toISOString(), priority: 'medium' },
+        { id: 3, title: 'System Maintenance', content: 'Scheduled maintenance this weekend from 2 AM to 4 AM. The platform may be temporarily unavailable.', type: 'warning', date: new Date(Date.now() - 172800000).toISOString(), priority: 'low' },
+      ]);
+      setStats({ totalResources: 156, totalModules: 24, recentActivity: 12 });
+    } catch (err) {
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
+  const formatDate = (ds) => {
+    const diff = Math.ceil(Math.abs(new Date() - new Date(ds)) / 864e5);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Yesterday';
+    if (diff < 7)  return diff + ' days ago';
+    return new Date(ds).toLocaleDateString();
   };
 
-  const getNoticeIcon = (type) => {
-    switch (type) {
-      case 'success': return '✅';
-      case 'warning': return '⚠️';
-      case 'error': return '❌';
-      default: return 'ℹ️';
-    }
+  const getInitials = () => {
+    const f = user?.profile?.firstName?.[0] || '';
+    const l = user?.profile?.lastName?.[0]  || '';
+    return (f + l).toUpperCase() || (user?.username?.[0] || 'U').toUpperCase();
   };
 
-  const getPriorityClass = (priority) => {
-    switch (priority) {
-      case 'high': return 'border-l-red-500 bg-red-50';
-      case 'medium': return 'border-l-amber-500 bg-amber-50';
-      default: return 'border-l-green-500 bg-green-50';
-    }
-  };
+  const roleLabel = { admin: 'Administrator', resourceManager: 'Resource Manager', coordinator: 'Coordinator', student: 'Student' };
 
   const getQuickActions = () => {
-    const actions = [
-      {
-        title: "Browse Resources",
-        description: "Explore available study materials",
-        icon: "📚",
-        link: "/resources",
-        color: "bg-primary-500"
-      },
-      {
-        title: "Submit Resource",
-        description: "Share your study materials",
-        icon: "📤",
-        link: "/submit-resource",
-        color: "bg-green-500"
-      }
+    const base = [
+      { title: 'Browse Resources', desc: 'Explore study materials',  link: '/resources',       color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
+      { title: 'Submit Resource',  desc: 'Share your materials',     link: '/submit-resource',  color: '#059669', bg: '#f0fdf4', border: '#a7f3d0' },
     ];
-
-    if (user?.role === 'admin' || user?.role === 'resourceManager' || user?.role === 'coordinator') {
-      actions.unshift(
-        {
-          title: "Manage Modules",
-          description: "Create and edit course modules",
-          icon: "⚙️",
-          link: "/manage-modules",
-          color: "bg-amber-500"
-        },
-        {
-          title: "Manage Resources",
-          description: "Review and moderate submissions",
-          icon: "📁",
-          link: "/manage-resources",
-          color: "bg-secondary-500"
-        }
+    if (['admin','resourceManager','coordinator'].includes(user?.role)) {
+      base.unshift(
+        { title: 'Manage Modules',   desc: 'Create & edit modules', link: '/manage-modules',   color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+        { title: 'Manage Resources', desc: 'Review submissions',    link: '/manage-resources', color: '#7c3aed', bg: '#faf5ff', border: '#ddd6fe' },
       );
     }
-
-    return actions;
+    return base;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sage-50 to-sage-100">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-sage-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
+      <div style={{ minHeight:'100vh', background:'#f0f4f8', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <style>{'@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap"); @keyframes sp{to{transform:rotate(360deg)}}'}</style>
+        <div style={{ textAlign:'center' }}>
+          <div style={{ width:44, height:44, border:'3px solid #e2e8f0', borderTopColor:'#2563eb', borderRadius:'50%', animation:'sp 0.7s linear infinite', margin:'0 auto 14px' }} />
+          <p style={{ color:'#64748b', fontFamily:"'DM Sans',sans-serif" }}>Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
+  const noticeTypes = {
+    info:    { color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', leftBar:'#2563eb' },
+    success: { color:'#059669', bg:'#f0fdf4', border:'#a7f3d0', leftBar:'#059669' },
+    warning: { color:'#d97706', bg:'#fffbeb', border:'#fde68a', leftBar:'#d97706' },
+    error:   { color:'#dc2626', bg:'#fef2f2', border:'#fecaca', leftBar:'#dc2626' },
+  };
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <ToastContainer position="top-right" />
+    <div style={{ minHeight:'100vh', background:'#f0f4f8', fontFamily:"'DM Sans',sans-serif" }}>
+      <style>{'@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"); *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}'}</style>
+      <ToastContainer position="top-right" toastStyle={{ fontFamily:"'DM Sans',sans-serif" }} />
 
-      {/* Header Section */}
-      <div className="mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-              Welcome back, {user?.profile?.firstName || 'Student'}! 👋
-            </h1>
-            <p className="text-lg text-gray-600">
-              Here's what's happening in your academic journey today
-            </p>
-          </div>
-          
-          <div className="flex-shrink-0">
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-                  {user?.profile?.firstName?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">
-                    {user?.profile?.firstName} {user?.profile?.lastName}
-                  </h3>
-                  <span className="inline-block px-3 py-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-sm rounded-full font-medium">
-                    {user?.role}
-                  </span>
+      <div style={{ maxWidth:1280, margin:'0 auto', padding:'2rem 1.5rem' }}>
+
+        {/* HERO */}
+        <div style={{ background:'linear-gradient(135deg,#094886 0%,#1a6dbf 50%,#2563eb 100%)', borderRadius:22, padding:'2rem 2.4rem', color:'white', position:'relative', overflow:'hidden', boxShadow:'0 6px 24px rgba(9,72,134,0.22)', marginBottom:'1.5rem' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1.5rem', flexWrap:'wrap', position:'relative', zIndex:1 }}>
+            <div>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'4px 12px', borderRadius:20, background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.20)', fontSize:'0.78rem', fontWeight:600, fontFamily:"'Sora',sans-serif", marginBottom:10 }}>
+                <span style={{ width:6, height:6, borderRadius:'50%', background:'#93c5fd', boxShadow:'0 0 6px #93c5fd' }} />
+                Academic Dashboard
+              </div>
+              <h1 style={{ fontFamily:"'Sora',sans-serif", fontSize:'clamp(1.5rem,3vw,2rem)', fontWeight:800, lineHeight:1.2, marginBottom:6 }}>
+                Welcome back, <span style={{ color:'#93c5fd' }}>{user?.profile?.firstName || 'Student'}</span>! 👋
+              </h1>
+              <p style={{ fontSize:'0.9rem', color:'rgba(255,255,255,0.68)', lineHeight:1.6 }}>Here's what's happening in your academic journey today.</p>
+            </div>
+            <div style={{ background:'rgba(255,255,255,0.12)', border:'1.5px solid rgba(255,255,255,0.22)', borderRadius:16, padding:'16px 20px', display:'flex', alignItems:'center', gap:14, backdropFilter:'blur(10px)', flexShrink:0 }}>
+              <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(255,255,255,0.18)', border:'2px solid rgba(255,255,255,0.35)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Sora',sans-serif", fontSize:'1.1rem', fontWeight:800, color:'white' }}>{getInitials()}</div>
+              <div>
+                <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.95rem', fontWeight:700, color:'white' }}>{[user?.profile?.firstName, user?.profile?.lastName].filter(Boolean).join(' ') || user?.username}</p>
+                <div style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:4, padding:'3px 10px', borderRadius:20, background:'rgba(255,255,255,0.15)', fontSize:'0.74rem', fontWeight:600, fontFamily:"'Sora',sans-serif", color:'rgba(255,255,255,0.90)' }}>
+                  <span style={{ width:5, height:5, borderRadius:'50%', background:'#93c5fd', display:'inline-block' }} />
+                  {roleLabel[user?.role] || user?.role}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl">
-              📖
+        {/* STATS */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem', marginBottom:'1.5rem' }}>
+          {[
+            { num: stats.totalResources, label:'Total Resources',   color:'#2563eb', bg:'#eff6ff' },
+            { num: stats.totalModules,   label:'Available Modules', color:'#059669', bg:'#f0fdf4' },
+            { num: stats.recentActivity, label:'Recent Activities', color:'#7c3aed', bg:'#faf5ff' },
+          ].map((s, i) => (
+            <div key={i} style={{ background:'white', borderRadius:16, padding:'1.2rem 1.4rem', display:'flex', alignItems:'center', gap:14, boxShadow:'0 2px 8px rgba(9,72,134,0.06)', transition:'transform 0.15s', cursor:'default' }}
+              onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}>
+              <div style={{ width:46, height:46, borderRadius:13, background:s.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'1.4rem' }}>
+                {i===0?'📖':i===1?'📚':'🔥'}
+              </div>
+              <div>
+                <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'1.6rem', fontWeight:800, color:'#0f1e35', lineHeight:1 }}>{s.num}</p>
+                <p style={{ fontSize:'0.80rem', color:'#94a3b8', fontWeight:500, marginTop:3 }}>{s.label}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">{stats.totalResources}</h3>
-              <p className="text-gray-600 font-medium">Total Resources</p>
-            </div>
-          </div>
+          ))}
         </div>
-        
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl">
-              📚
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">{stats.totalModules}</h3>
-              <p className="text-gray-600 font-medium">Available Modules</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">
-              🔥
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">{stats.recentActivity}</h3>
-              <p className="text-gray-600 font-medium">Recent Activities</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        {/* Notices Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              📢 Notices & Announcements
-            </h2>
-            <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-              View All
-            </button>
-          </div>
-          <div className="space-y-4">
-            {notices.map((notice) => (
-              <div key={notice.id} className={`p-4 rounded-xl border-l-4 transition-all hover:translate-x-1 hover:shadow-md ${getPriorityClass(notice.priority)}`}>
-                <div className="flex items-start gap-3">
-                  <span className="text-xl">{getNoticeIcon(notice.type)}</span>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">{notice.title}</h3>
-                    <p className="text-gray-600 text-sm mb-2">{notice.content}</p>
-                    <span className="text-xs text-gray-500">{formatDate(notice.date)}</span>
+        {/* 2-COL */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.2rem', marginBottom:'1.5rem' }}>
+
+          {/* Notices */}
+          <div style={{ background:'white', borderRadius:18, boxShadow:'0 2px 8px rgba(9,72,134,0.06)', overflow:'hidden' }}>
+            <div style={{ padding:'1.1rem 1.4rem 0', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1rem' }}>
+              <span style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.95rem', fontWeight:700, color:'#0f1e35' }}>📢 Notices & Announcements</span>
+              <button style={{ fontSize:'0.80rem', fontWeight:600, color:'#2563eb', background:'none', border:'none', cursor:'pointer', fontFamily:"'Sora',sans-serif" }}>View All</button>
+            </div>
+            <div style={{ padding:'0 1.4rem 1.4rem' }}>
+              {notices.map(n => {
+                const nc = noticeTypes[n.type] || noticeTypes.info;
+                return (
+                  <div key={n.id} style={{ display:'flex', gap:10, padding:'11px 13px', borderRadius:12, border:'1.5px solid '+nc.border, borderLeft:'4px solid '+nc.leftBar, background:nc.bg, marginBottom:8, transition:'transform 0.15s', cursor:'default' }}
+                    onMouseEnter={e => e.currentTarget.style.transform='translateX(2px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform='translateX(0)'}>
+                    <div style={{ fontSize:'1.1rem', flexShrink:0 }}>
+                      {n.type==='success'?'✅':n.type==='warning'?'⚠️':n.type==='error'?'❌':'ℹ️'}
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.83rem', fontWeight:700, color:'#0f1e35', marginBottom:3 }}>{n.title}</p>
+                      <p style={{ fontSize:'0.80rem', color:'#64748b', lineHeight:1.5, marginBottom:5 }}>{n.content}</p>
+                      <span style={{ fontSize:'0.72rem', color:'#94a3b8' }}>{formatDate(n.date)}</span>
+                    </div>
                   </div>
-                </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div style={{ background:'white', borderRadius:18, boxShadow:'0 2px 8px rgba(9,72,134,0.06)', overflow:'hidden' }}>
+            <div style={{ padding:'1.1rem 1.4rem 0', marginBottom:'1rem' }}>
+              <span style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.95rem', fontWeight:700, color:'#0f1e35' }}>🚀 Quick Actions</span>
+            </div>
+            <div style={{ padding:'0 1.4rem 1.4rem' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                {getQuickActions().map((a, i) => (
+                  <a key={i} href={a.link} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, padding:'1.1rem 0.8rem', borderRadius:14, border:'1.5px solid #f1f5f9', borderTop:'3px solid transparent', background:'#fafbfc', textDecoration:'none', transition:'all 0.2s', cursor:'pointer' }}
+                    onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 6px 20px rgba(9,72,134,0.08)'; e.currentTarget.style.borderTopColor=a.color; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderTopColor='transparent'; }}>
+                    <div style={{ width:44, height:44, borderRadius:13, display:'flex', alignItems:'center', justifyContent:'center', background:a.bg, border:'1.5px solid '+a.border, fontSize:'1.2rem' }}>
+                      {a.title.includes('Browse')?'📚':a.title.includes('Submit')?'📤':a.title.includes('Module')?'⚙️':'📁'}
+                    </div>
+                    <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.84rem', fontWeight:700, color:'#0f1e35', textAlign:'center' }}>{a.title}</p>
+                    <p style={{ fontSize:'0.76rem', color:'#94a3b8', textAlign:'center', lineHeight:1.4 }}>{a.desc}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div style={{ background:'white', borderRadius:18, boxShadow:'0 2px 8px rgba(9,72,134,0.06)', overflow:'hidden' }}>
+          <div style={{ padding:'1.1rem 1.5rem 0', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.4rem' }}>
+            <span style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.95rem', fontWeight:700, color:'#0f1e35' }}>📈 Recent Activity</span>
+            <button style={{ fontSize:'0.80rem', fontWeight:600, color:'#2563eb', background:'none', border:'none', cursor:'pointer', fontFamily:"'Sora',sans-serif" }}>View All</button>
+          </div>
+          <div style={{ paddingBottom:'0.4rem' }}>
+            {[
+              { bg:'#eff6ff', emoji:'📤', text:'New resource uploaded', detail:'JavaScript Fundamentals',  time:'2 hours ago' },
+              { bg:'#f0fdf4', emoji:'📚', text:'New module created',    detail:'Machine Learning Basics',   time:'5 hours ago' },
+              { bg:'#faf5ff', emoji:'👤', text:'New user joined',       detail:'John Doe',                  time:'1 day ago'   },
+            ].map((a, i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderBottom: i<2?'1px solid #f8fafc':'none', transition:'background 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.background='#fafbfe'}
+                onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                <div style={{ width:38, height:38, borderRadius:11, background:a.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'1.1rem' }}>{a.emoji}</div>
+                <p style={{ flex:1, fontSize:'0.86rem', color:'#475569' }}>{a.text}: <strong style={{ color:'#0f1e35', fontWeight:600 }}>{a.detail}</strong></p>
+                <span style={{ fontSize:'0.76rem', color:'#94a3b8', whiteSpace:'nowrap', flexShrink:0 }}>{a.time}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Quick Actions Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <div className="flex items-center gap-2 mb-6">
-            <h2 className="text-xl font-bold text-gray-900">🚀 Quick Actions</h2>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {getQuickActions().map((action, index) => (
-              <Link
-                key={index}
-                to={action.link}
-                className="group p-6 bg-gray-50 rounded-xl border-2 border-transparent hover:border-primary-200 hover:bg-white hover:shadow-lg transition-all"
-              >
-                <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center text-2xl mb-4 mx-auto group-hover:scale-110 transition-transform`}>
-                  {action.icon}
-                </div>
-                <h3 className="font-semibold text-gray-900 text-center mb-2">{action.title}</h3>
-                <p className="text-gray-600 text-sm text-center">{action.description}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">📈 Recent Activity</h2>
-          <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-            View All
-          </button>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-lg">
-              📤
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">
-                New resource uploaded: <strong>JavaScript Fundamentals</strong>
-              </p>
-              <span className="text-sm text-gray-500">2 hours ago</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-lg">
-              📚
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">
-                New module created: <strong>Machine Learning Basics</strong>
-              </p>
-              <span className="text-sm text-gray-500">5 hours ago</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-lg">
-              👤
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">
-                New user joined: <strong>John Doe</strong>
-              </p>
-              <span className="text-sm text-gray-500">1 day ago</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
