@@ -340,6 +340,44 @@ export const downloadResource = async (req, res) => {
   }
 };
 
+// @desc    Preview resource file
+// @route   GET /api/resources/:id/preview
+// @access  Private
+export const previewResource = async (req, res) => {
+  try {
+    const resource = await Resource.findById(req.params.id);
+
+    if (!resource) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resource not found'
+      });
+    }
+
+    const filePath = path.join(__dirname, '../uploads', path.basename(resource.fileUrl));
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found on server'
+      });
+    }
+
+    // Use inline disposition for browser preview
+    res.setHeader('Content-Disposition', `inline; filename="${resource.fileName}"`);
+    res.setHeader('Content-Type', resource.mimeType || 'application/octet-stream');
+
+    res.sendFile(filePath);
+  } catch (error) {
+    console.error('Preview resource error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error previewing resource',
+      error: error.message
+    });
+  }
+};
+
 // @desc    Get resources uploaded by current user
 // @route   GET /api/resources/my-resources
 // @access  Private

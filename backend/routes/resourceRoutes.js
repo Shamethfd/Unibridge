@@ -6,7 +6,8 @@ import {
   updateResource,
   deleteResource,
   downloadResource,
-  getMyResources
+  getMyResources,
+  previewResource
 } from '../controllers/resourceController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get('/', getResources);
 router.get('/:id', getResourceById);
 router.get('/:id/download', downloadResource);
+router.get('/:id/preview', protect, previewResource);
 
 // Protected routes
 router.post('/upload', protect, uploadResource);

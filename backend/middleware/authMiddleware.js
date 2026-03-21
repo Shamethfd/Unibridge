@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import mongoose from 'mongoose';
 
 // Protect routes - verify JWT token
 export const protect = async (req, res, next) => {
@@ -22,8 +23,18 @@ export const protect = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Support both { id } and { userId } token payload shapes
+    const tokenUserId = decoded.id || decoded.userId;
+
+    if (!tokenUserId || !mongoose.Types.ObjectId.isValid(tokenUserId)) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token payload.'
+      });
+    }
+
     // Get user from token
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(tokenUserId);
 
     if (!user) {
       return res.status(401).json({
@@ -85,8 +96,14 @@ export const authorizeResourceManager = (req, res, next) => {
     });
   }
 
-  // Allow admin, resourceManager, and coordinator roles for resource management
-  if (req.user.role !== 'admin' && req.user.role !== 'resourceManager' && req.user.role !== 'coordinator') {
+  // Debug: Log user role
+  console.log('🔍 User Role Debug:');
+  console.log('- User ID:', req.user._id);
+  console.log('- User Role:', req.user.role);
+  console.log('- Username:', req.user.username);
+
+  // Allow admin, resourceManager, coordinator, and student roles for module creation
+  if (req.user.role !== 'admin' && req.user.role !== 'resourceManager' && req.user.role !== 'coordinator' && req.user.role !== 'student') {
     return res.status(403).json({
       success: false,
       message: 'Access denied. Resource Manager access required.'

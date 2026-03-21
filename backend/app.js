@@ -14,6 +14,7 @@ import resourceManagementRoutes from './routes/resourceManagementRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import moduleRoutes from './routes/moduleRoutes.js';
 import googleAuthRoutes from './routes/googleAuthSimple.js';
+import Module from './models/Module.js';
 
 // Debug: Check if .env file is being loaded
 console.log('🔍 Environment Variables Debug:');
@@ -90,7 +91,15 @@ app.get('/api/health', (req, res) => {
 });
 
 mongoose.connect(`${process.env.MONGODBURL}`)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(async () => {
+    console.log('Connected to MongoDB');
+    try {
+      await Module.syncIndexes();
+      console.log('✅ Module indexes synced successfully');
+    } catch (indexError) {
+      console.error('❌ Failed to sync module indexes:', indexError.message);
+    }
+  })
   .catch(err => console.error('MongoDB connection error:', err));
 
 const PORT = process.env.PORT || 5000;

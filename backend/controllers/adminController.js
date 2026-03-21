@@ -38,16 +38,24 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    // Create admin user object for token generation
-    const adminUser = {
-      _id: 'admin-hardcoded',
-      email: ADMIN_CREDENTIALS.email,
-      role: 'admin',
-      profile: {
-        firstName: 'System',
-        lastName: 'Administrator'
-      }
-    };
+    // Ensure a real admin user exists in MongoDB so protected routes work correctly
+    let adminUser = await User.findOne({ email: ADMIN_CREDENTIALS.email });
+
+    if (!adminUser) {
+      adminUser = await User.create({
+        username: 'system_admin',
+        email: ADMIN_CREDENTIALS.email,
+        password: ADMIN_CREDENTIALS.password,
+        role: 'admin',
+        profile: {
+          firstName: 'System',
+          lastName: 'Administrator'
+        }
+      });
+    } else if (adminUser.role !== 'admin') {
+      adminUser.role = 'admin';
+      await adminUser.save();
+    }
 
     // Generate token
     const token = generateToken(adminUser._id);
@@ -56,7 +64,7 @@ export const adminLogin = async (req, res) => {
       success: true,
       message: 'Admin login successful',
       data: {
-        user: adminUser,
+        user: adminUser.toJSON(),
         token
       }
     });

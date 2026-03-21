@@ -14,9 +14,9 @@ const router = express.Router();
 router.get('/', getModulesByYearSemester);
 router.get('/:id', getModuleById);
 
-// Resource Manager only routes (protected)
-router.post('/', protect, authorizeResourceManager, createModule);
-router.put('/:id', protect, authorizeResourceManager, updateModule);
-router.delete('/:id', protect, authorizeResourceManager, deleteModule);
+// Protected routes (only authentication required)
+router.post('/', protect, createModule);
+router.put('/:id', protect, updateModule);
+router.delete('/:id', protect, deleteModule);
 
 export default router;

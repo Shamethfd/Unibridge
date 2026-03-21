@@ -50,6 +50,14 @@ export const createModule = async (req, res) => {
     });
   } catch (error) {
     console.error('Create module error:', error);
+
+    // Handle duplicate key errors (e.g., unique indexes in DB)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'A module with this name already exists for this year and semester'
+      });
+    }
     
     // Handle validation errors
     if (error.name === 'ValidationError') {
