@@ -67,9 +67,16 @@ const RequestFormPage = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!category) newErrors.category = 'Please select a category.';
+    if (!description.trim()) newErrors.description = 'Description is required.';
     if (selectedSlots.length === 0) newErrors.slots = 'Please select at least one preferred time slot.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleDescriptionBlur = () => {
+    if (!description.trim()) {
+      setErrors(prev => ({ ...prev, description: 'Description is required.' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -205,13 +212,27 @@ const RequestFormPage = () => {
 
             {/* Description */}
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label>Description</label>
+              <label>Description <span style={{ color: '#da1e28' }}>*</span></label>
               <textarea
                 value={description}
-                onChange={e => setDescription(e.target.value)}
+                onChange={e => {
+                  setDescription(e.target.value);
+                  if (e.target.value.trim()) setErrors(prev => ({ ...prev, description: '' }));
+                }}
+                onBlur={handleDescriptionBlur}
                 placeholder="Describe what topics you need help with..."
                 rows={4}
+                style={errors.description ? {
+                  border: '1.5px solid #da1e28',
+                  boxShadow: '0 0 0 3px rgba(218,30,40,0.12)',
+                  outline: 'none'
+                } : {}}
               />
+              {errors.description && (
+                <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px', marginBottom: 0 }}>
+                  {errors.description}
+                </p>
+              )}
             </div>
 
             {/* Urgency */}

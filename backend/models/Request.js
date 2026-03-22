@@ -14,7 +14,12 @@ const requestSchema = new mongoose.Schema(
         "Others",
       ],
     },
-    description: { type: String, default: "" },
+    description: {
+      type: String,
+      required: [true, 'Description is required.'],
+      trim: true,
+      minlength: [1, 'Description cannot be empty.'],
+    },
     urgency: {
       type: String,
       enum: ["Normal", "Urgent", "Exam Priority"],

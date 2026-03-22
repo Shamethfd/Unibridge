@@ -12,7 +12,9 @@ import {
 } from '../services/api';
 import './MyCoursePanel.css';
 
-const ALLOWED_FACULTIES = ['Engineering', 'Business', 'Architecture', 'Computing'];
+// Routes where the My Course button should appear.
+// Pattern-based: works for ALL faculties — including new ones added by admin.
+const COURSE_ROUTES = ['/years/', '/semesters/', '/modules/', '/request/'];
 
 // Generate or retrieve a persistent user ID from localStorage
 const getUserId = () => {
@@ -157,11 +159,9 @@ const MyCoursePanel = () => {
   };
 
   // ── Visibility check ──
-  const shouldShowButton = () => {
-    if (location.pathname === '/') return false;
-    const path = decodeURIComponent(location.pathname);
-    return ALLOWED_FACULTIES.some(f => path.includes(f));
-  };
+  // Show on any course-navigation route (faculty-agnostic, fully dynamic).
+  const shouldShowButton = () =>
+    COURSE_ROUTES.some(r => location.pathname.startsWith(r));
 
   if (!shouldShowButton()) return null;
 

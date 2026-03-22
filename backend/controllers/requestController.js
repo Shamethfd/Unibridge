@@ -25,7 +25,12 @@ export const getRequestsByModule = async (req, res) => {
 
 export const createRequest = async (req, res) => {
   try {
-    const { moduleId, category } = req.body;
+    const { moduleId, category, description } = req.body;
+
+    // Backend validation: description is required
+    if (!description || !description.trim()) {
+      return res.status(400).json({ message: 'Description is required.' });
+    }
 
     // Duplicate detection
     const existing = await Request.findOne({ moduleId, category });
