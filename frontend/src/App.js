@@ -77,7 +77,7 @@ const Header = ({ user, onLogout }) => {
               <span className={`text-xl font-bold transition-colors ${
                 scrolled ? 'text-gray-900' : 'text-white'
               }`}>
-                UniBridge
+                LearnBridge
               </span>
             </Link>
           </div>

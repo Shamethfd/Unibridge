@@ -178,7 +178,7 @@ const Dashboard = () => {
             <div style={{ padding:'0 1.4rem 1.4rem' }}>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                 {getQuickActions().map((a, i) => (
-                  <a key={i} href={a.link} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, padding:'1.1rem 0.8rem', borderRadius:14, border:'1.5px solid #f1f5f9', borderTop:'3px solid transparent', background:'#fafbfc', textDecoration:'none', transition:'all 0.2s', cursor:'pointer' }}
+                  <Link key={i} to={a.link} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, padding:'1.1rem 0.8rem', borderRadius:14, border:'1.5px solid #f1f5f9', borderTop:'3px solid transparent', background:'#fafbfc', textDecoration:'none', transition:'all 0.2s', cursor:'pointer' }}
                     onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 6px 20px rgba(9,72,134,0.08)'; e.currentTarget.style.borderTopColor=a.color; }}
                     onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderTopColor='transparent'; }}>
                     <div style={{ width:44, height:44, borderRadius:13, display:'flex', alignItems:'center', justifyContent:'center', background:a.bg, border:'1.5px solid '+a.border, fontSize:'1.2rem' }}>
@@ -186,7 +186,7 @@ const Dashboard = () => {
                     </div>
                     <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.84rem', fontWeight:700, color:'#0f1e35', textAlign:'center' }}>{a.title}</p>
                     <p style={{ fontSize:'0.76rem', color:'#94a3b8', textAlign:'center', lineHeight:1.4 }}>{a.desc}</p>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

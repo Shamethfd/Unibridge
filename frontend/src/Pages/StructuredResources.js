@@ -143,18 +143,6 @@ const StructuredResources = () => {
 
         .sr-root { min-height: 100vh; background: #f0f4f8; font-family: 'DM Sans', sans-serif; }
 
-        /* NAVBAR */
-        .sr-nav { position: sticky; top: 0; z-index: 50; background: white; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 12px rgba(9,72,134,0.07); }
-        .sr-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-        .sr-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .sr-brand-logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #094886, #2563eb); display: flex; align-items: center; justify-content: center; }
-        .sr-brand-name { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; color: #0f1e35; }
-        .sr-nav-links { display: flex; gap: 6px; }
-        .sr-nav-link { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 10px; font-size: 0.84rem; font-weight: 500; color: #475569; text-decoration: none; transition: background 0.15s, color 0.15s; }
-        .sr-nav-link:hover { background: #f1f5f9; color: #094886; }
-        .sr-nav-cta { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; font-size: 0.84rem; font-weight: 600; background: linear-gradient(135deg, #094886, #2563eb); color: white; text-decoration: none; box-shadow: 0 3px 10px rgba(37,99,235,0.28); font-family: 'Sora', sans-serif; transition: transform 0.15s, box-shadow 0.15s; }
-        .sr-nav-cta:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(37,99,235,0.35); }
-
         /* BODY */
         .sr-body { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
 
@@ -251,30 +239,6 @@ const StructuredResources = () => {
       <ToastContainer position="top-right" toastStyle={{ fontFamily: "'DM Sans', sans-serif" }} />
 
       <div className="sr-root">
-        {/* NAVBAR */}
-        <nav className="sr-nav">
-          <div className="sr-nav-inner">
-            <Link to="/dashboard" className="sr-brand">
-              <div className="sr-brand-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="sr-brand-name">LearnBridge</span>
-            </Link>
-            <div className="sr-nav-links">
-              <Link to="/dashboard" className="sr-nav-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                Dashboard
-              </Link>
-              <Link to="/submit-resource" className="sr-nav-cta">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Submit Resource
-              </Link>
-            </div>
-          </div>
-        </nav>
-
         <div className="sr-body">
 
           {/* Page header */}

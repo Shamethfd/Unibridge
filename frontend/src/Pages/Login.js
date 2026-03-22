@@ -32,8 +32,8 @@ const Login = () => {
           switch (userRole) {
             case 'admin': navigate('/admin-dashboard'); break;
             case 'resourceManager': navigate('/manage-resources'); break;
-            case 'coordinator': navigate('/CoordinatorDashboard'); break;
-            default: navigate('/Dashboard'); break;
+            case 'coordinator': navigate('/dashboard'); break;
+            default: navigate('/dashboard'); break;
           }
         }, 1500);
       }
@@ -59,7 +59,7 @@ const Login = () => {
           switch (userRole) {
             case 'admin': navigate('/admin-dashboard'); break;
             case 'resourceManager': navigate('/manage-resources'); break;
-            case 'coordinator': navigate('/coordinator-dashboard'); break;
+            case 'coordinator': navigate('/dashboard'); break;
             default: navigate('/dashboard'); break;
           }
         }, 1500);
