@@ -137,52 +137,6 @@ const ResourceList = () => {
           font-family: 'DM Sans', sans-serif;
         }
 
-        /* ── NAVBAR ── */
-        .rl-nav {
-          position: sticky; top: 0; z-index: 50;
-          background: white;
-          border-bottom: 1px solid #e2e8f0;
-          box-shadow: 0 1px 12px rgba(9,72,134,0.07);
-        }
-        .rl-nav-inner {
-          max-width: 1280px; margin: 0 auto;
-          padding: 0 1.5rem; height: 64px;
-          display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-        }
-        .rl-brand {
-          display: flex; align-items: center; gap: 10px; text-decoration: none;
-        }
-        .rl-brand-logo {
-          width: 36px; height: 36px;
-          background: linear-gradient(135deg, #094886 0%, #2563eb 100%);
-          border-radius: 10px;
-          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .rl-brand-name {
-          font-family: 'Sora', sans-serif;
-          font-size: 1.15rem; font-weight: 700; color: #0f1e35; letter-spacing: -0.2px;
-        }
-        .rl-nav-right { display: flex; align-items: center; gap: 8px; }
-        .rl-nav-link {
-          display: flex; align-items: center; gap: 6px;
-          padding: 7px 14px; border-radius: 10px;
-          font-size: 0.84rem; font-weight: 500; color: #475569;
-          text-decoration: none; transition: background 0.15s, color 0.15s;
-          white-space: nowrap;
-        }
-        .rl-nav-link:hover { background: #f1f5f9; color: #094886; }
-        .rl-nav-btn {
-          display: flex; align-items: center; gap: 6px;
-          padding: 8px 16px; border-radius: 10px;
-          font-size: 0.84rem; font-weight: 600;
-          background: linear-gradient(135deg, #094886, #2563eb);
-          color: white; text-decoration: none;
-          box-shadow: 0 3px 10px rgba(37,99,235,0.28);
-          transition: transform 0.15s, box-shadow 0.15s;
-          font-family: 'Sora', sans-serif; white-space: nowrap;
-        }
-        .rl-nav-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(37,99,235,0.35); }
-
         /* ── PAGE BODY ── */
         .rl-body {
           max-width: 1280px; margin: 0 auto;
@@ -458,38 +412,6 @@ const ResourceList = () => {
       <ToastContainer position="top-right" toastStyle={{ fontFamily: "'DM Sans', sans-serif" }} />
 
       <div className="rl-root">
-
-        {/* ── NAVBAR ── */}
-        <nav className="rl-nav">
-          <div className="rl-nav-inner">
-            <Link to="/dashboard" className="rl-brand">
-              <div className="rl-brand-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="rl-brand-name">LearnBridge</span>
-            </Link>
-
-            <div className="rl-nav-right">
-              <Link to="/dashboard" className="rl-nav-link">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                  <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                </svg>
-                Dashboard
-              </Link>
-              <Link to="/upload-resource" className="rl-nav-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                Upload Resource
-              </Link>
-            </div>
-          </div>
-        </nav>
-
         {/* ── BODY ── */}
         <div className="rl-body">
 

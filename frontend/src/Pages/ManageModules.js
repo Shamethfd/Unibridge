@@ -94,16 +94,6 @@ const ManageModules = () => {
 
         .mm-root { min-height: 100vh; background: #f0f4f8; font-family: 'DM Sans', sans-serif; }
 
-        /* ── NAVBAR ── */
-        .mm-nav { position: sticky; top: 0; z-index: 50; background: white; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 12px rgba(9,72,134,0.07); }
-        .mm-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-        .mm-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .mm-brand-logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #094886, #2563eb); display: flex; align-items: center; justify-content: center; }
-        .mm-brand-name { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; color: #0f1e35; }
-        .mm-nav-links { display: flex; gap: 4px; }
-        .mm-nav-link { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 10px; font-size: 0.84rem; font-weight: 500; color: #475569; text-decoration: none; transition: background 0.15s, color 0.15s; }
-        .mm-nav-link:hover { background: #f1f5f9; color: #094886; }
-
         /* ── BODY ── */
         .mm-body { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
 
@@ -212,31 +202,6 @@ const ManageModules = () => {
       <ToastContainer position="top-right" toastStyle={{ fontFamily: "'DM Sans', sans-serif" }} />
 
       <div className="mm-root">
-
-        {/* NAVBAR */}
-        <nav className="mm-nav">
-          <div className="mm-nav-inner">
-            <Link to="/dashboard" className="mm-brand">
-              <div className="mm-brand-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="mm-brand-name">LearnBridge</span>
-            </Link>
-            <div className="mm-nav-links">
-              <Link to="/manage-resources" className="mm-nav-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Manage Resources
-              </Link>
-              <Link to="/admin-dashboard" className="mm-nav-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Admin Dashboard
-              </Link>
-            </div>
-          </div>
-        </nav>
-
         <div className="mm-body">
 
           {/* Page header */}

@@ -118,36 +118,6 @@ const UploadResource = () => {
 
         .ur-root { min-height: 100vh; background: #f0f4f8; font-family: 'DM Sans', sans-serif; }
 
-        /* NAVBAR */
-        .ur-nav {
-          position: sticky; top: 0; z-index: 50;
-          background: white; border-bottom: 1px solid #e2e8f0;
-          box-shadow: 0 1px 12px rgba(9,72,134,0.07);
-        }
-        .ur-nav-inner {
-          max-width: 1280px; margin: 0 auto;
-          padding: 0 1.5rem; height: 64px;
-          display: flex; align-items: center; justify-content: space-between;
-        }
-        .ur-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .ur-brand-logo {
-          width: 36px; height: 36px;
-          background: linear-gradient(135deg, #094886 0%, #2563eb 100%);
-          border-radius: 10px; display: flex; align-items: center; justify-content: center;
-        }
-        .ur-brand-name {
-          font-family: 'Sora', sans-serif; font-size: 1.15rem;
-          font-weight: 700; color: #0f1e35; letter-spacing: -0.2px;
-        }
-        .ur-nav-links { display: flex; align-items: center; gap: 6px; }
-        .ur-nav-link {
-          display: flex; align-items: center; gap: 6px;
-          padding: 7px 14px; border-radius: 10px;
-          font-size: 0.84rem; font-weight: 500; color: #475569;
-          text-decoration: none; transition: background 0.15s, color 0.15s;
-        }
-        .ur-nav-link:hover { background: #f1f5f9; color: #094886; }
-
         /* BODY */
         .ur-body {
           max-width: 780px; margin: 0 auto;
@@ -383,36 +353,6 @@ const UploadResource = () => {
       <ToastContainer position="top-right" toastStyle={{ fontFamily: "'DM Sans', sans-serif" }} />
 
       <div className="ur-root">
-
-        {/* NAVBAR */}
-        <nav className="ur-nav">
-          <div className="ur-nav-inner">
-            <Link to="/dashboard" className="ur-brand">
-              <div className="ur-brand-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="ur-brand-name">LearnBridge</span>
-            </Link>
-            <div className="ur-nav-links">
-              <Link to="/dashboard" className="ur-nav-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                  <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                </svg>
-                Dashboard
-              </Link>
-              <Link to="/resources" className="ur-nav-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                </svg>
-                Resources
-              </Link>
-            </div>
-          </div>
-        </nav>
-
         {/* BODY */}
         <div className="ur-body">
 
