@@ -1,4 +1,6 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import User from '../models/User.js';
 
 // Admin middleware - check if user has admin role
 export const adminOnly = async (req, res, next) => {
@@ -21,9 +23,10 @@ export const adminOnly = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Check if this is the hardcoded admin user
-    if (decoded.id === 'admin-hardcoded') {
-      // Set admin user object
+    const tokenUserId = decoded.id || decoded.userId;
+
+    // Legacy support for old hardcoded admin tokens
+    if (tokenUserId === 'admin-hardcoded') {
       req.user = {
         _id: 'admin-hardcoded',
         email: 'admin@learnbridge.com',
@@ -36,14 +39,32 @@ export const adminOnly = async (req, res, next) => {
       return next();
     }
 
-    // For regular admin users from database, you would check their role here
-    // But since we're using hardcoded admin, we don't need database lookup
-    
-    return res.status(403).json({
-      success: false,
-      message: 'Access denied. Admin privileges required.'
-    });
+    if (!tokenUserId || !mongoose.Types.ObjectId.isValid(tokenUserId)) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token payload.'
+      });
+    }
 
+    const user = await User.findById(tokenUserId).select('-password');
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token is valid but user not found.'
+      });
+    }
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+    }
+
+    req.user = user;
+    return next();
+    
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({

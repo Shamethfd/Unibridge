@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 
 // Generate JWT Token
@@ -100,8 +101,17 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database is not connected. Please try again shortly.'
+      });
+    }
+
+    const normalizedEmail = email?.trim().toLowerCase();
+
     // Validate email & password
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
         message: 'Please provide email and password'
@@ -109,12 +119,19 @@ export const login = async (req, res) => {
     }
 
     // Check for user
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
     if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
+      });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message: 'This account does not have a password. Please use Google Sign-In.'
       });
     }
 
@@ -141,6 +158,15 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+
+    if (error.name === 'MongooseServerSelectionError') {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection failed. Please ensure MongoDB is running.',
+        error: error.message
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Server error during login',

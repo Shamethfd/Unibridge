@@ -5,8 +5,12 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.join(__dirname, '.env');
+
 // Configure environment variables BEFORE importing routes that use them
-dotenv.config({ path: './.env' });
+dotenv.config({ path: envPath });
 
 import authRoutes from './routes/authRoutes.js';
 import resourceRoutes from './routes/resourceRoutes.js';
@@ -20,11 +24,10 @@ import Module from './models/Module.js';
 console.log('🔍 Environment Variables Debug:');
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('Current working directory:', process.cwd());
-console.log('Looking for .env file at:', './.env');
+console.log('Looking for .env file at:', envPath);
 
 // Try to read .env file directly to debug
 import fs from 'fs';
-const envPath = './.env';
 try {
   if (fs.existsSync(envPath)) {
     console.log('✅ .env file exists');
@@ -54,14 +57,10 @@ console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '✅ Set' : '❌
 console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? '✅ Set' : '❌ Missing');
 console.log('FRONTEND_URL:', process.env.FRONTEND_URL || '❌ Missing');
 
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 
 app.use(cors({
-  origin: `${process.env.CORS_ORIGIN}`,
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
