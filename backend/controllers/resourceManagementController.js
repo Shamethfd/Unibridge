@@ -180,6 +180,60 @@ export const getPendingResources = async (req, res) => {
   }
 };
 
+// @desc    Get completed resources (resourceManager only)
+// @route   GET /api/resources/completed
+// @access  Private (resourceManager)
+export const getCompletedResources = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, status } = req.query;
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {
+      status: status && ['approved', 'rejected'].includes(status)
+        ? status
+        : { $in: ['approved', 'rejected'] }
+    };
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { module: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const resources = await Resource.find(query)
+      .populate('uploadedBy reviewedBy', 'username profile.firstName profile.lastName')
+      .sort({ reviewDate: -1, updatedAt: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    const total = await Resource.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        resources,
+        pagination: {
+          current: pageNum,
+          pages: Math.ceil(total / limitNum),
+          total
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get completed resources error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching completed resources',
+      error: error.message
+    });
+  }
+};
+
 // @desc    Approve resource (resourceManager only)
 // @route   PUT /api/resources/:id/approve
 // @access  Private (resourceManager)

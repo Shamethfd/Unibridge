@@ -2,6 +2,7 @@ import express from 'express';
 import {
   submitResource,
   getPendingResources,
+  getCompletedResources,
   approveResource,
   rejectResource,
   getApprovedResources,
@@ -21,6 +22,7 @@ router.post('/submit', protect, authorize('student'), submitResource);
 
 // Resource Manager routes
 router.get('/pending', protect, authorizeResourceManager, getPendingResources);
+router.get('/completed', protect, authorizeResourceManager, getCompletedResources);
 router.put('/:id/approve', protect, authorizeResourceManager, approveResource);
 router.put('/:id/reject', protect, authorizeResourceManager, rejectResource);
 router.get('/stats', protect, authorizeResourceManager, getResourceStats);
