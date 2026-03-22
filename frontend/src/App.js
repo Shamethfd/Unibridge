@@ -254,17 +254,18 @@ const Layout = () => {
 };
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(null);
+  const token = localStorage.getItem('token');
+  const storedUser = localStorage.getItem('user');
+  const isAuthenticated = !!token;
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    setIsAuthenticated(!!token);
-    if (user) {
-      setUserRole(JSON.parse(user).role);
+  let userRole = null;
+  if (storedUser) {
+    try {
+      userRole = JSON.parse(storedUser).role;
+    } catch {
+      userRole = null;
     }
-  }, []);
+  }
 
   return (
     <Routes>
@@ -289,6 +290,11 @@ function App() {
       <Route 
         path="/admin-dashboard" 
         element={isAuthenticated && userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/admin-login" />} 
+      />
+
+      <Route
+        path="/coordinator-dashboard"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
       />
     </Routes>
   );

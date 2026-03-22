@@ -30,7 +30,7 @@ const AuthCallback = () => {
               navigate('/manage-resources');
               break;
             case 'coordinator':
-              navigate('/coordinator-dashboard');
+              navigate('/dashboard');
               break;
             default:
               navigate('/dashboard');

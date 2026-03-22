@@ -14,13 +14,23 @@ const Register = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'phone') {
+      const numericOnly = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, phone: numericOnly });
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) { toast.error('Passwords do not match'); return; }
     if (formData.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+    if (!/^\d{10}$/.test(formData.phone)) { toast.error('Phone number must contain exactly 10 digits'); return; }
     setLoading(true);
     try {
       const { confirmPassword, ...registrationData } = formData;
@@ -227,10 +237,10 @@ const Register = () => {
               </div>
 
               <div className="rg-field">
-                <label>Phone <span className="rg-opt">optional</span></label>
+                <label>Phone <span className="rg-req">*</span></label>
                 <div className="rg-wrap">
                   <span className="rg-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.32 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.59a16 16 0 0 0 6.36 6.36l.96-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-                  <input className="rg-input" type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+94 77 000 0000" />
+                  <input className="rg-input" type="tel" name="phone" required inputMode="numeric" pattern="\d{10}" maxLength={10} value={formData.phone} onChange={handleChange} placeholder="0770000000" />
                 </div>
               </div>
 
