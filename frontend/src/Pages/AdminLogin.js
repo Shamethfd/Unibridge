@@ -18,15 +18,20 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const payload = {
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password
+      };
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/admin/login`,
-        formData
+        payload
       );
       if (response.data.success) {
         toast.success('Admin login successful!');
         localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        setTimeout(() => navigate('/admin-dashboard'), 1000);
+        window.location.href = '/admin-dashboard';
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Admin login failed');

@@ -27,15 +27,14 @@ const Login = () => {
         toast.success('Login successful!');
         localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        setTimeout(() => {
-          const userRole = response.data.data.user.role;
-          switch (userRole) {
-            case 'admin': navigate('/admin-dashboard'); break;
-            case 'resourceManager': navigate('/manage-resources'); break;
-            case 'coordinator': navigate('/dashboard'); break;
-            default: navigate('/dashboard'); break;
-          }
-        }, 1500);
+        const userRole = response.data.data.user.role;
+        if (userRole === 'admin') {
+          window.location.href = '/admin-dashboard';
+        } else if (userRole === 'resourceManager') {
+          window.location.href = '/manage-resources';
+        } else {
+          window.location.href = '/dashboard';
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
@@ -53,16 +52,14 @@ const Login = () => {
         toast.success('Google login successful!');
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        setTimeout(() => {
-          const userRole = response.data.user.role;
-          switch (userRole) {
-            case 'admin': navigate('/admin-dashboard'); break;
-            case 'resourceManager': navigate('/manage-resources'); break;
-            case 'coordinator': navigate('/dashboard'); break;
-            default: navigate('/dashboard'); break;
-          }
-        }, 1500);
+
+        const userRole = response.data.user.role;
+        switch (userRole) {
+          case 'admin': navigate('/admin-dashboard', { replace: true }); break;
+          case 'resourceManager': navigate('/manage-resources', { replace: true }); break;
+          case 'coordinator': navigate('/dashboard', { replace: true }); break;
+          default: navigate('/dashboard', { replace: true }); break;
+        }
       }
     } catch (error) {
       toast.error('Google login failed. Please try again.');

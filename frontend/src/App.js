@@ -233,7 +233,15 @@ const Layout = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        try {
+          setUser(JSON.parse(decodeURIComponent(storedUser)));
+        } catch {
+          setUser(null);
+        }
+      }
     }
   }, []);
 
@@ -263,7 +271,11 @@ function App() {
     try {
       userRole = JSON.parse(storedUser).role;
     } catch {
-      userRole = null;
+      try {
+        userRole = JSON.parse(decodeURIComponent(storedUser)).role;
+      } catch {
+        userRole = null;
+      }
     }
   }
 

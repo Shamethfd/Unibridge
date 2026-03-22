@@ -79,7 +79,21 @@ const AdminDashboard = () => {
     { id: 'manage-users',             label: 'Manage Users',             icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
   ];
 
-  const UserForm = ({ title, form, setForm, onSubmit, showPass, setShowPass, submitLabel }) => (
+  const handleUserFormChange = (setForm, field, value) => {
+    setForm((prev) => {
+      if (field === 'phone') {
+        return { ...prev, phone: value.replace(/\D/g, '').slice(0, 10) };
+      }
+
+      if (field === 'firstName' || field === 'lastName') {
+        return { ...prev, [field]: value.replace(/[^A-Za-z]/g, '') };
+      }
+
+      return { ...prev, [field]: value };
+    });
+  };
+
+  const renderUserForm = ({ title, form, setForm, onSubmit, showPass, setShowPass, submitLabel }) => (
     <div className="ad-card" style={{ animation: 'ad-up 0.35s cubic-bezier(0.16,1,0.3,1) both' }}>
       <div className="ad-card-header">
         <div className="ad-card-header-ico">
@@ -106,7 +120,7 @@ const AdminDashboard = () => {
                     : ico==='phone' ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.32 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.59a16 16 0 0 0 6.36 6.36l.96-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     : <span style={{ fontSize: '0.84rem', fontWeight: 700, fontFamily: "'Sora',sans-serif", color: '#94a3b8' }}>@</span>}
                   </span>
-                  <input className="ad-input" type={name==='phone'?'tel':'text'} required={['firstName','lastName','username'].includes(name)} value={form[name]} onChange={e=>setForm({...form,[name]:e.target.value})} placeholder={name==='firstName'?'John':name==='lastName'?'Doe':name==='phone'?'+94 77 000 0000':name==='username'?'johndoe':''} />
+                  <input className="ad-input" type={name==='phone'?'tel':'text'} required={['firstName','lastName','username'].includes(name)} value={form[name]} onChange={e => handleUserFormChange(setForm, name, e.target.value)} inputMode={name === 'phone' ? 'numeric' : undefined} maxLength={name === 'phone' ? 10 : undefined} placeholder={name==='firstName'?'John':name==='lastName'?'Doe':name==='phone'?'0770000000':name==='username'?'johndoe':''} />
                 </div>
               </div>
             ))}
@@ -114,14 +128,14 @@ const AdminDashboard = () => {
               <label>Email <span className="ad-req">*</span></label>
               <div className="ad-wrap">
                 <span className="ad-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
-                <input className="ad-input" type="email" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="user@learnbridge.com" />
+                <input className="ad-input" type="email" required value={form.email} onChange={e => handleUserFormChange(setForm, 'email', e.target.value)} placeholder="user@learnbridge.com" />
               </div>
             </div>
             <div className="ad-field">
               <label>Password <span className="ad-req">*</span></label>
               <div className="ad-wrap">
                 <span className="ad-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                <input className="ad-input" style={{ paddingRight: 38 }} type={showPass?'text':'password'} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})} placeholder="Min. 6 characters" />
+                <input className="ad-input" style={{ paddingRight: 38 }} type={showPass?'text':'password'} required value={form.password} onChange={e => handleUserFormChange(setForm, 'password', e.target.value)} placeholder="Min. 6 characters" />
                 <button type="button" className="ad-eye" onClick={()=>setShowPass(!showPass)}>
                   {showPass
                     ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -133,7 +147,7 @@ const AdminDashboard = () => {
           </div>
           <div className="ad-field" style={{ marginTop: '0.4rem' }}>
             <label>Bio <span className="ad-opt">optional</span></label>
-            <textarea className="ad-textarea" rows={2} value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})} placeholder="Brief description about this user…" />
+            <textarea className="ad-textarea" rows={2} value={form.bio} onChange={e => handleUserFormChange(setForm, 'bio', e.target.value)} placeholder="Brief description about this user…" />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.4rem' }}>
             <button type="submit" className="ad-btn-submit" disabled={formLoading}>
@@ -311,28 +325,28 @@ const AdminDashboard = () => {
 
           {/* ── CREATE RESOURCE MANAGER ── */}
           {activeTab === 'create-resource-manager' && (
-            <UserForm
-              title="Create Resource Manager"
-              form={resourceManagerForm}
-              setForm={setResourceManagerForm}
-              onSubmit={e => handleCreate(e, resourceManagerForm, 'Resource Manager', setResourceManagerForm)}
-              showPass={showPassRM}
-              setShowPass={setShowPassRM}
-              submitLabel="Create Resource Manager"
-            />
+            renderUserForm({
+              title: 'Create Resource Manager',
+              form: resourceManagerForm,
+              setForm: setResourceManagerForm,
+              onSubmit: e => handleCreate(e, resourceManagerForm, 'Resource Manager', setResourceManagerForm),
+              showPass: showPassRM,
+              setShowPass: setShowPassRM,
+              submitLabel: 'Create Resource Manager'
+            })
           )}
 
           {/* ── CREATE COORDINATOR ── */}
           {activeTab === 'create-coordinator' && (
-            <UserForm
-              title="Create Coordinator"
-              form={coordinatorForm}
-              setForm={setCoordinatorForm}
-              onSubmit={e => handleCreate(e, coordinatorForm, 'Coordinator', setCoordinatorForm)}
-              showPass={showPassCoord}
-              setShowPass={setShowPassCoord}
-              submitLabel="Create Coordinator"
-            />
+            renderUserForm({
+              title: 'Create Coordinator',
+              form: coordinatorForm,
+              setForm: setCoordinatorForm,
+              onSubmit: e => handleCreate(e, coordinatorForm, 'Coordinator', setCoordinatorForm),
+              showPass: showPassCoord,
+              setShowPass: setShowPassCoord,
+              submitLabel: 'Create Coordinator'
+            })
           )}
 
           {/* ── MANAGE USERS ── */}

@@ -17,6 +17,12 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    if (name === 'firstName' || name === 'lastName') {
+      const lettersOnly = value.replace(/[^A-Za-z]/g, '');
+      setFormData({ ...formData, [name]: lettersOnly });
+      return;
+    }
+
     if (name === 'phone') {
       const numericOnly = value.replace(/\D/g, '').slice(0, 10);
       setFormData({ ...formData, phone: numericOnly });

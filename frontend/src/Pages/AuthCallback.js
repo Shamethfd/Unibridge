@@ -12,11 +12,11 @@ const AuthCallback = () => {
 
     if (token && user) {
       try {
+        const userData = JSON.parse(decodeURIComponent(user));
+
         // Store token and user data
         localStorage.setItem('token', token);
-        localStorage.setItem('user', user);
-        
-        const userData = JSON.parse(decodeURIComponent(user));
+        localStorage.setItem('user', JSON.stringify(userData));
         
         toast.success('Google login successful!');
         
@@ -24,16 +24,16 @@ const AuthCallback = () => {
         setTimeout(() => {
           switch (userData.role) {
             case 'admin':
-              navigate('/admin-dashboard');
+              navigate('/admin-dashboard', { replace: true });
               break;
             case 'resourceManager':
-              navigate('/manage-resources');
+              navigate('/manage-resources', { replace: true });
               break;
             case 'coordinator':
-              navigate('/dashboard');
+              navigate('/dashboard', { replace: true });
               break;
             default:
-              navigate('/dashboard');
+              navigate('/dashboard', { replace: true });
               break;
           }
         }, 1500);
