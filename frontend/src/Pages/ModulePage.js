@@ -48,7 +48,7 @@ const ModulePage = () => {
         <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
         <div className="nav-links">
           <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
-          <button className="nav-btn admin-btn" onClick={() => navigate('/admin')}>Admin Panel</button>
+          <button className="nav-btn admin-btn" onClick={() => navigate('/codeigniter-dashboard')}>CodeIgniter Dashboard</button>
         </div>
       </nav>
 
@@ -81,7 +81,7 @@ const ModulePage = () => {
         ) : filtered.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📭</div>
-            <p>{search ? 'No modules match your search.' : 'No modules configured. Ask admin to add modules.'}</p>
+            <p>{search ? 'No modules match your search.' : 'No modules configured. Add modules via the CodeIgniter Dashboard.'}</p>
           </div>
         ) : (
           <div className="cards-grid">

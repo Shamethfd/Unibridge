@@ -43,14 +43,14 @@ const HomePage = () => {
       <nav className="navbar">
         <div className="nav-brand" style={{ cursor: 'pointer' }} onClick={() => window.scrollTo(0, 0)}>
           <span className="brand-icon">🎓</span>
-          <span className="brand-name">UniConnect</span>
+          <span className="brand-name">LearnBridge</span>
         </div>
         <div className="nav-links">
           <button className="nav-btn" onClick={scrollToCourses}>
             Courses
           </button>
-          <button className="nav-btn admin-btn" onClick={() => navigate('/admin')}>
-            Admin Panel
+          <button className="nav-btn admin-btn" onClick={() => navigate('/codeigniter-dashboard')}>
+            CodeIgniter Dashboard
           </button>
         </div>
       </nav>
@@ -116,7 +116,7 @@ const HomePage = () => {
             {faculties.length === 0 && (
               <div className="empty-state" style={{ gridColumn: '1/-1' }}>
                 <div className="empty-icon">🏛️</div>
-                <p>No faculties yet. Please ask an admin to add faculties.</p>
+                <p>No faculties yet. Please add faculties via the CodeIgniter Dashboard.</p>
               </div>
             )}
           </div>

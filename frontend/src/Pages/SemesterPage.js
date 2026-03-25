@@ -32,7 +32,7 @@ const SemesterPage = () => {
         <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
         <div className="nav-links">
           <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
-          <button className="nav-btn admin-btn" onClick={() => navigate('/admin')}>Admin Panel</button>
+          <button className="nav-btn admin-btn" onClick={() => navigate('/codeigniter-dashboard')}>CodeIgniter Dashboard</button>
         </div>
       </nav>
 
@@ -52,7 +52,7 @@ const SemesterPage = () => {
         ) : semesters.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📚</div>
-            <p>No semesters configured. Please ask an admin to add semesters.</p>
+            <p>No semesters configured. Please add semesters via the CodeIgniter Dashboard.</p>
           </div>
         ) : (
           <div className="cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>

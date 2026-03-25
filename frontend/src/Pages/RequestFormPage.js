@@ -101,7 +101,7 @@ const RequestFormPage = () => {
         toast.success(`✅ Request submitted! ${demand.label}`);
         // simulate accepted notification after 3s
         setTimeout(() => {
-          toast.info('🔔 Your request has been received by admin!', { autoClose: 5000 });
+          toast.info('🔔 Your request has been received in the CodeIgniter Dashboard!', { autoClose: 5000 });
         }, 3000);
         setTimeout(() => navigate('/faculties'), 2500);
       }

@@ -13,7 +13,7 @@ import {
 import './MyCoursePanel.css';
 
 // Routes where the My Course button should appear.
-// Pattern-based: works for ALL faculties — including new ones added by admin.
+// Pattern-based: works for ALL faculties — including new ones added via the CodeIgniter Dashboard.
 const COURSE_ROUTES = ['/years/', '/semesters/', '/modules/', '/request/'];
 
 // Generate or retrieve a persistent user ID from localStorage

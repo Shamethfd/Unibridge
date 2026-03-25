@@ -11,7 +11,7 @@ import {
 } from '../services/api';
 import './HomePage.css';
 
-const AdminDashboard = () => {
+const CodeIgniterDashboard = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('overview');
 
@@ -189,13 +189,13 @@ const AdminDashboard = () => {
         <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
         <div className="nav-links">
           <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
-          <button className="nav-btn" onClick={() => navigate('/')}>Exit Admin</button>
+          <button className="nav-btn" onClick={() => navigate('/')}>Exit Dashboard</button>
         </div>
       </nav>
 
       <div className="page-content">
         <div className="page-header">
-          <h1 className="page-title">⚙️ Admin Dashboard</h1>
+          <h1 className="page-title">⚙️ CodeIgniter Dashboard</h1>
           <p className="page-subtitle">Manage faculties, years, semesters, modules, and student requests</p>
         </div>
 
@@ -520,4 +520,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default CodeIgniterDashboard;
