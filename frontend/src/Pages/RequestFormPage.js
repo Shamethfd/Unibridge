@@ -134,7 +134,7 @@ const RequestFormPage = () => {
   return (
     <div className="page-shell">
       <nav className="navbar">
-        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
+        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">LearnBridge</span></div>
         <div className="nav-links">
           <button className="nav-btn" onClick={() => navigate('/faculties')}>Courses</button>
         </div>
@@ -178,7 +178,7 @@ const RequestFormPage = () => {
               <p>{duplicateData.message}</p>
               <p style={{ marginBottom: '1rem' }}>
                 Urgency: <strong>{duplicateData.request.urgency}</strong> &nbsp;|&nbsp;
-                Heat Score: <strong>{duplicateData.request.heatScore}</strong>
+                Time: <strong>{new Date(duplicateData.request.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>
               </p>
               <button className="btn-join" onClick={handleJoin}>👥 Join This Request</button>
             </div>
@@ -328,7 +328,8 @@ const RequestFormPage = () => {
                     <th>Category</th>
                     <th>Urgency</th>
                     <th>Students</th>
-                    <th>Heat Score</th>
+                    <th>Time</th>
+                    <th>Preferred Time</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -338,7 +339,8 @@ const RequestFormPage = () => {
                       <td>{r.category}</td>
                       <td>{r.urgency}</td>
                       <td>👥 {r.studentsCount}</td>
-                      <td>🔥 {r.heatScore}</td>
+                      <td>🕒 {new Date(r.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                      <td>{r.preferredTime && r.preferredTime.length > 0 ? r.preferredTime.join(', ') : '—'}</td>
                       <td><span className={`status-badge ${r.status}`}>{r.status}</span></td>
                     </tr>
                   ))}

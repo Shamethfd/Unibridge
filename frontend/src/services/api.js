@@ -40,3 +40,8 @@ export const getDashboardStats = () => API.get("/requests/stats/dashboard");
 export const getUserPreference = (userId) => API.get(`/preferences/${userId}`);
 export const saveUserPreference = (userId, data) => API.put(`/preferences/${userId}`, data);
 export const clearUserPreference = (userId) => API.delete(`/preferences/${userId}`);
+
+// Messages
+export const getAllMessages = () => API.get("/messages");
+export const createMessage = (data) => API.post("/messages", data);
+export const approveMessage = (id) => API.put(`/messages/${id}/approve`);

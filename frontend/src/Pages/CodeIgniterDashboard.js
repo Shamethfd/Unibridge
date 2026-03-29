@@ -7,7 +7,7 @@ import {
   getSemesters, createSemester, deleteSemester,
   getModules, createModule, updateModule, deleteModule,
   getAllRequests, updateRequestStatus, deleteRequest,
-  getDashboardStats
+  getDashboardStats, getAllMessages, approveMessage
 } from '../services/api';
 import './HomePage.css';
 
@@ -22,7 +22,11 @@ const CodeIgniterDashboard = () => {
   const [modules, setModules] = useState([]);
   const [requests, setRequests] = useState([]);
   const [stats, setStats] = useState(null);
+  const [tutorMessages, setTutorMessages] = useState([]);
 
+  // Send Note State
+  const [sendNoteRequest, setSendNoteRequest] = useState(null);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   // Selections
   const [selFaculty, setSelFaculty] = useState('');
   const [selYear, setSelYear] = useState('');
@@ -49,16 +53,17 @@ const CodeIgniterDashboard = () => {
 
   const fetchAll = async () => {
     try {
-      const [facRes, reqRes, statRes] = await Promise.all([getFaculties(), getAllRequests(), getDashboardStats()]);
+      const [facRes, reqRes, statRes, msgRes] = await Promise.all([getFaculties(), getAllRequests(), getDashboardStats(), getAllMessages()]);
       setFaculties(facRes.data);
       setRequests(reqRes.data);
       setStats(statRes.data);
+      setTutorMessages(msgRes.data.filter(m => m.source === 'Tutor'));
     } catch { toast.error('Failed to load data'); }
   };
 
-  const loadYears = async (fid) => { try { const r = await getYears(fid); setYears(r.data); } catch {} };
-  const loadSemesters = async (yid) => { try { const r = await getSemesters(yid); setSemesters(r.data); } catch {} };
-  const loadModules = async (sid) => { try { const r = await getModules(sid); setModules(r.data); } catch {} };
+  const loadYears = async (fid) => { try { const r = await getYears(fid); setYears(r.data); } catch { } };
+  const loadSemesters = async (yid) => { try { const r = await getSemesters(yid); setSemesters(r.data); } catch { } };
+  const loadModules = async (sid) => { try { const r = await getModules(sid); setModules(r.data); } catch { } };
 
   // Faculty CRUD
   const handleAddFaculty = async (e) => {
@@ -171,6 +176,34 @@ const CodeIgniterDashboard = () => {
     await deleteRequest(id); toast.success('Deleted'); fetchAll();
   };
 
+  const handleSendClick = (request) => {
+    setSendNoteRequest(request);
+    setIsNoteModalOpen(true);
+  };
+
+  const handleCopyNote = () => {
+    if (!sendNoteRequest) return;
+    const noteText = `Module: ${sendNoteRequest.moduleName}
+Category: ${sendNoteRequest.category}
+University: ${sendNoteRequest.university || 'N/A'}
+Students: ${sendNoteRequest.studentsCount}
+Preferred Time: ${sendNoteRequest.preferredTime && sendNoteRequest.preferredTime.length > 0 ? sendNoteRequest.preferredTime.join(', ') : 'N/A'}`;
+    
+    navigator.clipboard.writeText(noteText)
+      .then(() => toast.success('Note copied to clipboard!'))
+      .catch(() => toast.error('Failed to copy note.'));
+  };
+
+  const handleApproveMessage = async (msgId) => {
+    try {
+      await approveMessage(msgId);
+      toast.success('Message Approved! Notification sent to Tutor.');
+      fetchAll();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to approve message');
+    }
+  };
+
   const highDemandModules = stats?.byModule?.filter(m => m.total >= 5) || [];
   const totalStudents = requests.reduce((s, r) => s + r.studentsCount, 0);
 
@@ -181,12 +214,15 @@ const CodeIgniterDashboard = () => {
     { id: 'semesters', label: '📚 Semesters' },
     { id: 'modules', label: '📖 Modules' },
     { id: 'requests', label: '📋 Requests' },
+    { id: 'tutormessages', label: '👨‍🏫 Tutor Messages' },
   ];
+
+
 
   return (
     <div className="page-shell">
       <nav className="navbar">
-        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
+        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">LearnBridge</span></div>
         <div className="nav-links">
           <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
           <button className="nav-btn" onClick={() => navigate('/')}>Exit Dashboard</button>
@@ -266,7 +302,7 @@ const CodeIgniterDashboard = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Faculty Name</label>
-                  <input value={newFaculty.name} onChange={e => { setNewFaculty({ ...newFaculty, name: e.target.value }); setAdminErrors(p => ({...p, facultyName: ''})); }} placeholder="e.g. Computing" required />
+                  <input value={newFaculty.name} onChange={e => { setNewFaculty({ ...newFaculty, name: e.target.value }); setAdminErrors(p => ({ ...p, facultyName: '' })); }} placeholder="e.g. Computing" required />
                   {adminErrors.facultyName && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{adminErrors.facultyName}</p>}
                 </div>
                 <div className="form-group" style={{ maxWidth: 100 }}>
@@ -285,17 +321,17 @@ const CodeIgniterDashboard = () => {
                       {editingFacultyId === f._id ? (
                         <>
                           <td>
-                            <input 
-                              value={editFacultyIcon} 
-                              onChange={e => setEditFacultyIcon(e.target.value)} 
-                              style={{ width: '50px', textAlign: 'center', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-dark)', color: 'var(--text-primary)' }} 
+                            <input
+                              value={editFacultyIcon}
+                              onChange={e => setEditFacultyIcon(e.target.value)}
+                              style={{ width: '50px', textAlign: 'center', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-dark)', color: 'var(--text-primary)' }}
                             />
                           </td>
                           <td>
-                            <input 
-                              value={editFacultyName} 
-                              onChange={e => setEditFacultyName(e.target.value)} 
-                              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-dark)', color: 'var(--text-primary)' }} 
+                            <input
+                              value={editFacultyName}
+                              onChange={e => setEditFacultyName(e.target.value)}
+                              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-dark)', color: 'var(--text-primary)' }}
                             />
                           </td>
                           <td>{new Date(f.createdAt).toLocaleDateString()}</td>
@@ -310,9 +346,9 @@ const CodeIgniterDashboard = () => {
                           <td><strong>{f.name}</strong></td>
                           <td>{new Date(f.createdAt).toLocaleDateString()}</td>
                           <td style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button 
-                              className="btn-success" 
-                              style={{ background: 'rgba(255, 165, 2, 0.15)', color: 'var(--yellow)', border: '1px solid rgba(255, 165, 2, 0.3)' }} 
+                            <button
+                              className="btn-success"
+                              style={{ background: 'rgba(255, 165, 2, 0.15)', color: 'var(--yellow)', border: '1px solid rgba(255, 165, 2, 0.3)' }}
                               onClick={() => handleEditFacultyClick(f)}
                             >
                               ✏️ Edit
@@ -338,7 +374,7 @@ const CodeIgniterDashboard = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Faculty</label>
-                  <select value={selFaculty} onChange={e => { setSelFaculty(e.target.value); setAdminErrors(p => ({...p, yearFaculty: ''})); }} required>
+                  <select value={selFaculty} onChange={e => { setSelFaculty(e.target.value); setAdminErrors(p => ({ ...p, yearFaculty: '' })); }} required>
                     <option value="">Select faculty</option>
                     {faculties.map(f => <option key={f._id} value={f._id}>{f.icon} {f.name}</option>)}
                   </select>
@@ -347,7 +383,7 @@ const CodeIgniterDashboard = () => {
                 <div className="form-group">
                   <label>Year Name</label>
                   <select value={newYear.name} onChange={e => setNewYear({ name: e.target.value })}>
-                    {['Year 1','Year 2','Year 3','Year 4'].map(y => <option key={y}>{y}</option>)}
+                    {['Year 1', 'Year 2', 'Year 3', 'Year 4'].map(y => <option key={y}>{y}</option>)}
                   </select>
                 </div>
                 <button type="submit" className="btn-add">+ Add</button>
@@ -386,7 +422,7 @@ const CodeIgniterDashboard = () => {
                 </div>
                 <div className="form-group">
                   <label>Year</label>
-                  <select value={selYear} onChange={e => { setSelYear(e.target.value); setAdminErrors(p => ({...p, semYear: ''})); }} required>
+                  <select value={selYear} onChange={e => { setSelYear(e.target.value); setAdminErrors(p => ({ ...p, semYear: '' })); }} required>
                     <option value="">Select year</option>
                     {years.map(y => <option key={y._id} value={y._id}>{y.name}</option>)}
                   </select>
@@ -395,7 +431,7 @@ const CodeIgniterDashboard = () => {
                 <div className="form-group">
                   <label>Semester</label>
                   <select value={newSemester.name} onChange={e => setNewSemester({ name: e.target.value })}>
-                    {['Semester 1','Semester 2'].map(s => <option key={s}>{s}</option>)}
+                    {['Semester 1', 'Semester 2'].map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
                 <button type="submit" className="btn-add">+ Add</button>
@@ -440,7 +476,7 @@ const CodeIgniterDashboard = () => {
                 </div>
                 <div className="form-group">
                   <label>Semester</label>
-                  <select value={selSemester} onChange={e => { setSelSemester(e.target.value); setAdminErrors(p => ({...p, modSemester: ''})); }} required>
+                  <select value={selSemester} onChange={e => { setSelSemester(e.target.value); setAdminErrors(p => ({ ...p, modSemester: '' })); }} required>
                     <option value="">Select semester</option>
                     {semesters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                   </select>
@@ -450,7 +486,7 @@ const CodeIgniterDashboard = () => {
               <div className="form-row" style={{ marginTop: '1rem' }}>
                 <div className="form-group">
                   <label>Module Name *</label>
-                  <input value={newModule.name} onChange={e => { setNewModule({ ...newModule, name: e.target.value }); setAdminErrors(p => ({...p, modName: ''})); }} placeholder="e.g. Network Management" required />
+                  <input value={newModule.name} onChange={e => { setNewModule({ ...newModule, name: e.target.value }); setAdminErrors(p => ({ ...p, modName: '' })); }} placeholder="e.g. Network Management" required />
                   {adminErrors.modName && <p style={{ color: '#da1e28', fontSize: '0.82rem', marginTop: '4px' }}>{adminErrors.modName}</p>}
                 </div>
                 <div className="form-group">
@@ -490,7 +526,7 @@ const CodeIgniterDashboard = () => {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Module</th><th>Category</th><th>Urgency</th><th>Students</th><th>Heat</th><th>Status</th><th>Actions</th>
+                      <th>Module</th><th>Category</th><th>Urgency</th><th>Students</th><th>Time</th><th>Preferred Time</th><th>Status</th><th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -500,12 +536,14 @@ const CodeIgniterDashboard = () => {
                         <td style={{ maxWidth: 160 }}>{r.category}</td>
                         <td>{r.urgency}</td>
                         <td>👥 {r.studentsCount}</td>
-                        <td>🔥 {r.heatScore}</td>
+                        <td>🕒 {new Date(r.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                        <td>{r.preferredTime && r.preferredTime.length > 0 ? r.preferredTime.join(', ') : '—'}</td>
                         <td><span className={`status-badge ${r.status}`}>{r.status}</span></td>
                         <td style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                           {r.status !== 'Accepted' && <button className="btn-success" onClick={() => handleStatusChange(r._id, 'Accepted')}>✅ Accept</button>}
                           {r.status !== 'Rejected' && <button className="btn-danger" onClick={() => handleStatusChange(r._id, 'Rejected')}>✕</button>}
                           <button className="btn-danger" onClick={() => handleDeleteRequest(r._id)}>🗑</button>
+                          <button className="btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleSendClick(r)}>📤 Send</button>
                         </td>
                       </tr>
                     ))}
@@ -515,7 +553,78 @@ const CodeIgniterDashboard = () => {
             )}
           </>
         )}
+
+        {/* ── TUTOR MESSAGES ── */}
+        {tab === 'tutormessages' && (
+          <>
+            <h3 style={{ marginBottom: '1rem' }}>Tutor Messages ({tutorMessages.length})</h3>
+            {tutorMessages.length === 0 ? (
+              <div className="empty-state"><div className="empty-icon">📫</div><p>No messages received from tutors yet.</p></div>
+            ) : (
+              <div className="cards-grid">
+                {tutorMessages.map(m => (
+                  <div key={m._id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', position: 'relative' }}>
+                    
+                    {m.status === 'approved' && (
+                      <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: 'var(--green)', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                        ✅ Approved
+                      </div>
+                    )}
+                    
+                    <div style={{ paddingBottom: '0.8rem', borderBottom: '1px solid var(--bg-card2)' }}>
+                      <h4 style={{ color: 'var(--primary)', marginBottom: '0.4rem' }}>{m.moduleName}</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '0.85rem', color: 'var(--text-secondary)', gap: '0.4rem' }}>
+                        <span><strong>Cat:</strong> {m.category}</span>
+                        <span><strong>Uni:</strong> {m.university}</span>
+                        <span><strong>Time:</strong> {m.preferredTime?.length ? m.preferredTime.join(', ') : 'N/A'}</span>
+                        <span><strong>Students:</strong> {m.studentsCount}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '0.95rem', lineHeight: '1.6', fontStyle: 'italic', color: 'var(--text-primary)' }}>
+                        "{m.message}"
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--bg-card2)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        {new Date(m.createdAt).toLocaleString()}
+                      </span>
+                      
+                      {m.status === 'pending' ? (
+                        <button className="btn-success" style={{ fontWeight: 'bold' }} onClick={() => handleApproveMessage(m._id)}>
+                          Approve Selection
+                        </button>
+                      ) : (
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 'bold' }}>Done</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* Note Modal */}
+      {isNoteModalOpen && sendNoteRequest && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setIsNoteModalOpen(false)}>
+          <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: '16px', width: '90%', maxWidth: '500px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>📤 Generated Note</h3>
+            
+            <div style={{ background: 'var(--bg-dark)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', fontFamily: 'monospace', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '1rem', color: 'var(--text-primary)' }}>
+              {`Module: ${sendNoteRequest.moduleName}\nCategory: ${sendNoteRequest.category}\nUniversity: ${sendNoteRequest.university || 'N/A'}\nStudents: ${sendNoteRequest.studentsCount}\nPreferred Time: ${sendNoteRequest.preferredTime && sendNoteRequest.preferredTime.length > 0 ? sendNoteRequest.preferredTime.join(', ') : 'N/A'}`}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+              <button className="btn-secondary" onClick={() => setIsNoteModalOpen(false)}>Close</button>
+              <button className="btn-primary" onClick={handleCopyNote}>📋 Copy Note</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

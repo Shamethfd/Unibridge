@@ -9,6 +9,7 @@ import SemesterPage from './Pages/SemesterPage';
 import ModulePage from './Pages/ModulePage';
 import RequestFormPage from './Pages/RequestFormPage';
 import CodeIgniterDashboard from './Pages/CodeIgniterDashboard';
+import TutorManagement from './Pages/TutorManagement';
 import MyCoursePanel from './Components/MyCoursePanel';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/modules/:semesterId/:semesterName" element={<ModulePage />} />
         <Route path="/request/:moduleId/:moduleName" element={<RequestFormPage />} />
         <Route path="/codeigniter-dashboard" element={<CodeIgniterDashboard />} />
+        <Route path="/tutor-management" element={<TutorManagement />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={4000} theme="dark" />
       <MyCoursePanel />

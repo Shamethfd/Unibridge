@@ -9,9 +9,11 @@ import semesterRoutes from "./routes/semesterRoutes.js";
 import moduleRoutes from "./routes/moduleRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import preferenceRoutes from "./routes/preferenceRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 dotenv.config();
 connectDB();
+
 
 const app = express();
 
@@ -24,6 +26,7 @@ app.use("/api/semesters", semesterRoutes);
 app.use("/api/modules", moduleRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/preferences", preferenceRoutes);
+app.use("/api/messages", messageRoutes);
 
 
 app.get("/", (req, res) => res.json({ message: "Module & Study Request API running" }));

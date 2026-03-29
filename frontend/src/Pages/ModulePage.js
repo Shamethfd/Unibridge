@@ -45,7 +45,7 @@ const ModulePage = () => {
   return (
     <div className="page-shell">
       <nav className="navbar">
-        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
+        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">LearnBridge</span></div>
         <div className="nav-links">
           <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
           <button className="nav-btn admin-btn" onClick={() => navigate('/codeigniter-dashboard')}>CodeIgniter Dashboard</button>
