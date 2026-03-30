@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import HomePage from './Pages/HomePage';
+import HomePage from './Pages/Hpage';
 import YearPage from './Pages/YearPage';
 import SemesterPage from './Pages/SemesterPage';
 import ModulePage from './Pages/ModulePage';
