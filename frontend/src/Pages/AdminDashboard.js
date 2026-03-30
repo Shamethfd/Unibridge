@@ -13,10 +13,12 @@ const AdminDashboard = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [showPassRM, setShowPassRM] = useState(false);
   const [showPassCoord, setShowPassCoord] = useState(false);
+  const [showPassNoticeMgr, setShowPassNoticeMgr] = useState(false);
 
   const emptyForm = (role) => ({ username: '', email: '', password: '', firstName: '', lastName: '', phone: '', bio: '', role });
   const [resourceManagerForm, setResourceManagerForm] = useState(emptyForm('resourceManager'));
   const [coordinatorForm, setCoordinatorForm] = useState(emptyForm('coordinator'));
+  const [noticeManagerForm, setNoticeManagerForm] = useState(emptyForm('noticeManager'));
 
   useEffect(() => { fetchUsers(); }, [currentPage]);
 
@@ -42,7 +44,12 @@ const AdminDashboard = () => {
       );
       if (res.data.success) {
         toast.success(`${role} created successfully`);
-        resetFn(emptyForm(role === 'Resource Manager' ? 'resourceManager' : 'coordinator'));
+        const roleValue = role === 'Resource Manager'
+          ? 'resourceManager'
+          : role === 'Coordinator'
+            ? 'coordinator'
+            : 'noticeManager';
+        resetFn(emptyForm(roleValue));
         fetchUsers();
       }
     } catch (err) { toast.error(err.response?.data?.message || `Failed to create ${role}`); }
@@ -64,6 +71,7 @@ const AdminDashboard = () => {
     admin:           { label: 'Admin',            color: '#7c3aed', bg: '#faf5ff', border: '#ddd6fe' },
     resourceManager: { label: 'Resource Manager', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
     coordinator:     { label: 'Coordinator',      color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+    noticeManager:   { label: 'Notice Manager',   color: '#0f766e', bg: '#ecfeff', border: '#99f6e4' },
     student:         { label: 'Student',          color: '#059669', bg: '#f0fdf4', border: '#a7f3d0' },
   };
 
@@ -76,6 +84,7 @@ const AdminDashboard = () => {
   const tabs = [
     { id: 'create-resource-manager', label: 'Create Resource Manager', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> },
     { id: 'create-coordinator',       label: 'Create Coordinator',       icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+    { id: 'create-notice-manager',    label: 'Create Notice Manager',    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> },
     { id: 'manage-users',             label: 'Manage Users',             icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
   ];
 
@@ -298,6 +307,10 @@ const AdminDashboard = () => {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Manage Resources
               </Link>
+              <Link to="/notice-management" className="ad-nav-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Notice Manage
+              </Link>
               <button className="ad-logout-btn" onClick={handleLogout}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 Logout
@@ -346,6 +359,18 @@ const AdminDashboard = () => {
               showPass: showPassCoord,
               setShowPass: setShowPassCoord,
               submitLabel: 'Create Coordinator'
+            })
+          )}
+
+          {activeTab === 'create-notice-manager' && (
+            renderUserForm({
+              title: 'Create Notice Manager',
+              form: noticeManagerForm,
+              setForm: setNoticeManagerForm,
+              onSubmit: e => handleCreate(e, noticeManagerForm, 'Notice Manager', setNoticeManagerForm),
+              showPass: showPassNoticeMgr,
+              setShowPass: setShowPassNoticeMgr,
+              submitLabel: 'Create Notice Manager'
             })
           )}
 

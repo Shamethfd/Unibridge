@@ -1,0 +1,248 @@
+/* ===== SEARCH FILTER CSS ===== */
+:root {
+  --primary: #094886;
+  --secondary: #2563eb;
+  --primary-light: #e8f0fe;
+  --secondary-light: #dbeafe;
+  --success: #059669;
+  --border: #e2e8f0;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --bg-light: #f8fafc;
+}
+
+.search-filter-container {
+  background: white;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(9, 72, 134, 0.08);
+  border: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+
+.search-header {
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+.search-header h3 {
+  margin: 0 0 4px;
+  color: var(--primary);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.search-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Tabs */
+.search-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  padding: 9px 20px;
+  border: 2px solid var(--border);
+  background: white;
+  color: var(--text-muted);
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+  background: var(--secondary-light);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(9, 72, 134, 0.3);
+}
+
+/* Search Bar */
+.search-bar-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+  min-width: 200px;
+}
+
+.s-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+}
+
+.search-main-input {
+  width: 100%;
+  padding: 12px 40px 12px 40px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--text-dark);
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-main-input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.clear-btn:hover { background: #f1f5f9; }
+
+.audience-filter {
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--text-dark);
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 150px;
+}
+
+.audience-filter:focus {
+  outline: none;
+  border-color: var(--secondary);
+}
+
+/* Results */
+.search-results { min-height: 100px; }
+
+.results-header {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: var(--primary-light);
+  border-radius: 8px;
+  color: var(--primary);
+}
+
+.result-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--bg-light);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid var(--secondary);
+}
+
+.result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(9, 72, 134, 0.1);
+}
+
+.result-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+.result-card-top h4 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.result-card p {
+  margin: 0 0 8px;
+  color: var(--text-dark);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.result-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.result-badge.all      { background: var(--primary-light); color: var(--primary); }
+.result-badge.students { background: var(--secondary-light); color: var(--secondary); }
+.result-badge.tutors   { background: #d1fae5; color: var(--success); }
+
+.result-module {
+  display: inline-block;
+  background: var(--secondary-light);
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.result-footer {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* States */
+.search-loading,
+.no-results,
+.search-placeholder {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.no-results p, .search-placeholder p { font-size: 16px; margin: 0 0 6px; }
+.no-results small, .search-placeholder small { font-size: 13px; }
+.search-loading { font-size: 15px; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .search-filter-container { padding: 16px; }
+  .search-bar-row { flex-direction: column; }
+  .audience-filter { width: 100%; }
+}

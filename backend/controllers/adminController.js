@@ -78,7 +78,7 @@ export const adminLogin = async (req, res) => {
   }
 };
 
-// @desc    Create Resource Manager or Coordinator (Admin only)
+// @desc    Create privileged user (Admin only)
 // @route   POST /api/admin/create-user
 // @access  Private (Admin only)
 export const createUser = async (req, res) => {
@@ -103,10 +103,10 @@ export const createUser = async (req, res) => {
     }
 
     // Validate role
-    if (!['resourceManager', 'coordinator'].includes(role)) {
+    if (!['resourceManager', 'coordinator', 'noticeManager'].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid role. Must be either resourceManager or coordinator'
+        message: 'Invalid role. Must be one of resourceManager, coordinator, noticeManager'
       });
     }
 

@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +19,8 @@ import resourceManagementRoutes from './routes/resourceManagementRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import moduleRoutes from './routes/moduleRoutes.js';
 import googleAuthRoutes from './routes/googleAuthSimple.js';
+import noticeRoutes from './routes/noticeRoutes.js';
+import noticeRequestRoutes from './routes/noticeRequestRoutes.js';
 import Module from './models/Module.js';
 
 // Debug: Check if .env file is being loaded
@@ -27,7 +30,6 @@ console.log('Current working directory:', process.cwd());
 console.log('Looking for .env file at:', envPath);
 
 // Try to read .env file directly to debug
-import fs from 'fs';
 try {
   if (fs.existsSync(envPath)) {
     console.log('✅ .env file exists');
@@ -64,7 +66,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -76,6 +77,8 @@ app.use('/api/management', resourceManagementRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/modules', moduleRoutes);
 app.use('/api/auth', googleAuthRoutes);
+app.use('/api/notices', noticeRoutes);
+app.use('/api/notice-requests', noticeRequestRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -102,4 +105,4 @@ mongoose.connect(`${process.env.MONGODBURL}`)
   .catch(err => console.error('MongoDB connection error:', err));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server on ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

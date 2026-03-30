@@ -106,13 +106,42 @@ const Dashboard = () => {
               </h1>
               <p style={{ fontSize:'0.9rem', color:'rgba(255,255,255,0.68)', lineHeight:1.6 }}>Here's what's happening in your academic journey today.</p>
             </div>
-            <div style={{ background:'rgba(255,255,255,0.12)', border:'1.5px solid rgba(255,255,255,0.22)', borderRadius:16, padding:'16px 20px', display:'flex', alignItems:'center', gap:14, backdropFilter:'blur(10px)', flexShrink:0 }}>
-              <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(255,255,255,0.18)', border:'2px solid rgba(255,255,255,0.35)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Sora',sans-serif", fontSize:'1.1rem', fontWeight:800, color:'white' }}>{getInitials()}</div>
-              <div>
-                <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.95rem', fontWeight:700, color:'white' }}>{[user?.profile?.firstName, user?.profile?.lastName].filter(Boolean).join(' ') || user?.username}</p>
-                <div style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:4, padding:'3px 10px', borderRadius:20, background:'rgba(255,255,255,0.15)', fontSize:'0.74rem', fontWeight:600, fontFamily:"'Sora',sans-serif", color:'rgba(255,255,255,0.90)' }}>
-                  <span style={{ width:5, height:5, borderRadius:'50%', background:'#93c5fd', display:'inline-block' }} />
-                  {roleLabel[user?.role] || user?.role}
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:10, flexShrink:0 }}>
+              <Link
+                to="/user-notices"
+                style={{
+                  width:44,
+                  height:44,
+                  borderRadius:12,
+                  background:'rgba(255,255,255,0.14)',
+                  border:'1.5px solid rgba(255,255,255,0.30)',
+                  display:'flex',
+                  alignItems:'center',
+                  justifyContent:'center',
+                  color:'white',
+                  textDecoration:'none',
+                  boxShadow:'0 2px 10px rgba(9,72,134,0.2)',
+                  transition:'transform 0.15s, background 0.15s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'rgba(255,255,255,0.22)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; }}
+                title="View notifications"
+                aria-label="View notifications"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </Link>
+
+              <div style={{ background:'rgba(255,255,255,0.12)', border:'1.5px solid rgba(255,255,255,0.22)', borderRadius:16, padding:'16px 20px', display:'flex', alignItems:'center', gap:14, backdropFilter:'blur(10px)' }}>
+                <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(255,255,255,0.18)', border:'2px solid rgba(255,255,255,0.35)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Sora',sans-serif", fontSize:'1.1rem', fontWeight:800, color:'white' }}>{getInitials()}</div>
+                <div>
+                  <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.95rem', fontWeight:700, color:'white' }}>{[user?.profile?.firstName, user?.profile?.lastName].filter(Boolean).join(' ') || user?.username}</p>
+                  <div style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:4, padding:'3px 10px', borderRadius:20, background:'rgba(255,255,255,0.15)', fontSize:'0.74rem', fontWeight:600, fontFamily:"'Sora',sans-serif", color:'rgba(255,255,255,0.90)' }}>
+                    <span style={{ width:5, height:5, borderRadius:'50%', background:'#93c5fd', display:'inline-block' }} />
+                    {roleLabel[user?.role] || user?.role}
+                  </div>
                 </div>
               </div>
             </div>
