@@ -30,6 +30,8 @@ const Login = () => {
         const userRole = response.data.data.user.role;
         if (userRole === 'admin') {
           window.location.href = '/admin-dashboard';
+        } else if (userRole === 'coordinator') {
+          window.location.href = '/codeigniter-dashboard';
         } else if (userRole === 'noticeManager') {
           window.location.href = '/notice-management';
         } else if (userRole === 'resourceManager') {
@@ -58,9 +60,9 @@ const Login = () => {
         const userRole = response.data.user.role;
         switch (userRole) {
           case 'admin': navigate('/admin-dashboard', { replace: true }); break;
+          case 'coordinator': navigate('/codeigniter-dashboard', { replace: true }); break;
           case 'noticeManager': navigate('/notice-management', { replace: true }); break;
           case 'resourceManager': navigate('/manage-resources', { replace: true }); break;
-          case 'coordinator': navigate('/dashboard', { replace: true }); break;
           default: navigate('/dashboard', { replace: true }); break;
         }
       }
