@@ -5,7 +5,7 @@ const noticeSchema = new mongoose.Schema({
   content: { type: String, required: true },
   targetAudience: {
     type: String,
-    enum: ['students', 'tutors', 'all'],
+    enum: ['students', 'tutors', 'coordinators', 'all'],
     default: 'all'
   },
   module: { type: String, default: '' },
