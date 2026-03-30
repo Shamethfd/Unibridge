@@ -1,0 +1,51 @@
+﻿
+> frontend@0.1.0 build
+> react-scripts build
+
+Creating an optimized production build...
+Compiled with warnings.
+
+[eslint] 
+src\Components\MyCoursePanel.js
+  Line 1:38:   'useCallback' is defined but never used          no-unused-vars
+  Line 47:10:  'prefLoaded' is assigned a value but never used  no-unused-vars
+
+src\Pages\CodeIgniterDashboard.js
+  Line 8:29:  'updateModule' is defined but never used  no-unused-vars
+
+src\Pages\ModulePage.js
+  Line 23:40:  React Hook useEffect has a missing dependency: 'fetchModules'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\Pages\RequestFormPage.js
+  Line 4:59:   'getModules' is defined but never used                                                                                    no-unused-vars
+  Line 42:23:  'setSuggestions' is assigned a value but never used                                                                       no-unused-vars
+  Line 52:6:   React Hook useEffect has a missing dependency: 'fetchExistingRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\Pages\SemesterPage.js
+  Line 15:42:  React Hook useEffect has a missing dependency: 'fetchSemesters'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\Pages\YearPage.js
+  Line 7:7:    'YEAR_LABELS' is assigned a value but never used                                                               no-unused-vars
+  Line 15:38:  React Hook useEffect has a missing dependency: 'fetchYears'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  109.37 kB  build\static\js\main.bdbd4c2b.js
+  6.74 kB    build\static\css\main.e7652f49.css
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+

@@ -1,6 +1,8 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import HomePage from './Pages/HomePage';
 import Register from './Pages/Register';
@@ -16,6 +18,13 @@ import ManageResources from './Pages/ManageResources';
 import StructuredResources from './Pages/StructuredResources';
 import ManageModules from './Pages/ManageModules';
 import NoticePage from './Pages/NoticePage';
+import YearPage from './Pages/YearPage';
+import SemesterPage from './Pages/SemesterPage';
+import ModulePage from './Pages/ModulePage';
+import RequestFormPage from './Pages/RequestFormPage';
+import CodeIgniterDashboard from './Pages/CodeIgniterDashboard';
+import TutorManagement from './Pages/TutorManagement';
+import MyCoursePanel from './Components/MyCoursePanel';
 import CreateNotice from './Components/NoticeManagement/CreateNotice';
 import NoticeDetail from './Components/NoticeManagement/NoticeDetail';
 import UserNoticeView from './Components/NoticeManagement/UserNoticeView';
@@ -30,10 +39,7 @@ const Header = ({ user, onLogout }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -69,7 +75,9 @@ const Header = ({ user, onLogout }) => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' : 'bg-gradient-to-r from-primary-600 to-secondary-600'
+        scrolled
+          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
+          : 'bg-gradient-to-r from-primary-600 to-secondary-600'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -215,7 +223,7 @@ const Header = ({ user, onLogout }) => {
   );
 };
 
-const Layout = () => {
+const ProtectedLayout = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -267,48 +275,59 @@ function App() {
     }
   }
 
-  const isAdmin = isAuthenticated && userRole === 'admin';
   const canManageNotices = isAuthenticated && (userRole === 'admin' || userRole === 'noticeManager');
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/admin-login" element={<AdminLogin />} />
+    <>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
 
-      <Route path="/" element={<Layout />}>
-        <Route path="dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
-        <Route path="resources" element={isAuthenticated ? <StructuredResources /> : <Navigate to="/login" />} />
-        <Route path="upload-resource" element={isAuthenticated ? <UploadResource /> : <Navigate to="/login" />} />
-        <Route path="submit-resource" element={isAuthenticated ? <SubmitResource /> : <Navigate to="/login" />} />
-        <Route path="manage-resources" element={isAuthenticated ? <ManageResources /> : <Navigate to="/login" />} />
-        <Route path="manage-modules" element={isAuthenticated ? <ManageModules /> : <Navigate to="/login" />} />
-        <Route path="notices" element={canManageNotices ? <NoticePage /> : <Navigate to="/login" />} />
-        <Route path="user-notices" element={isAuthenticated ? <UserNoticeView /> : <Navigate to="/login" />} />
-        <Route path="notices/:id" element={isAuthenticated ? <NoticeDetail /> : <Navigate to="/login" />} />
-        <Route path="create-notice" element={canManageNotices ? <CreateNotice /> : <Navigate to="/login" />} />
-        <Route path="notice-request" element={canManageNotices ? <NoticeRequest /> : <Navigate to="/login" />} />
-        <Route path="notice-requests" element={canManageNotices ? <NoticeRequestList /> : <Navigate to="/login" />} />
-      </Route>
+        <Route path="/years/:facultyId/:facultyName" element={<YearPage />} />
+        <Route path="/semesters/:yearId/:yearName" element={<SemesterPage />} />
+        <Route path="/modules/:semesterId/:semesterName" element={<ModulePage />} />
+        <Route path="/request/:moduleId/:moduleName" element={<RequestFormPage />} />
+        <Route path="/codeigniter-dashboard" element={<CodeIgniterDashboard />} />
+        <Route path="/tutor-management" element={<TutorManagement />} />
 
-      <Route
-        path="/admin-dashboard"
-        element={isAuthenticated && userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/admin-login" />}
-      />
+        <Route path="/" element={<ProtectedLayout />}>
+          <Route path="dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
+          <Route path="profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
+          <Route path="resources" element={isAuthenticated ? <StructuredResources /> : <Navigate to="/login" />} />
+          <Route path="upload-resource" element={isAuthenticated ? <UploadResource /> : <Navigate to="/login" />} />
+          <Route path="submit-resource" element={isAuthenticated ? <SubmitResource /> : <Navigate to="/login" />} />
+          <Route path="manage-resources" element={isAuthenticated ? <ManageResources /> : <Navigate to="/login" />} />
+          <Route path="manage-modules" element={isAuthenticated ? <ManageModules /> : <Navigate to="/login" />} />
+          <Route path="notices" element={canManageNotices ? <NoticePage /> : <Navigate to="/login" />} />
+          <Route path="user-notices" element={isAuthenticated ? <UserNoticeView /> : <Navigate to="/login" />} />
+          <Route path="notices/:id" element={isAuthenticated ? <NoticeDetail /> : <Navigate to="/login" />} />
+          <Route path="create-notice" element={canManageNotices ? <CreateNotice /> : <Navigate to="/login" />} />
+          <Route path="notice-request" element={canManageNotices ? <NoticeRequest /> : <Navigate to="/login" />} />
+          <Route path="notice-requests" element={canManageNotices ? <NoticeRequestList /> : <Navigate to="/login" />} />
+        </Route>
 
-      <Route
-        path="/notice-management"
-        element={canManageNotices ? <NoticeManagementDashboard /> : <Navigate to="/login" />}
-      />
+        <Route
+          path="/admin-dashboard"
+          element={isAuthenticated && userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/admin-login" />}
+        />
 
-      <Route
-        path="/coordinator-dashboard"
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
-      />
-    </Routes>
+        <Route
+          path="/notice-management"
+          element={canManageNotices ? <NoticeManagementDashboard /> : <Navigate to="/login" />}
+        />
+
+        <Route
+          path="/coordinator-dashboard"
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
+        />
+      </Routes>
+
+      <ToastContainer position="top-right" autoClose={4000} theme="dark" />
+      <MyCoursePanel />
+    </>
   );
 }
 

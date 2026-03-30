@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -11,6 +10,6 @@ const getEnv = (key, fallback) => {
 
 export default async function connectDB() {
   const mongoUri = getEnv("MONGODBURL", "mongodb://127.0.0.1:27017/unibridge");
-  await mongoose.connect(mongoUri);
-  console.log("MongoDB connected");
+  const conn = await mongoose.connect(mongoUri);
+  console.log(`MongoDB connected: ${conn.connection.host}`);
 }
