@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FiSend, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import FormInput from '../Components/FormInput';
+import { api, getApiErrorMessage } from '../services/api';
+import { setStoredTutorStudentId } from '../utils/tutorStorage';
 
 const initialForm = {
   studentName: '',
@@ -29,6 +31,7 @@ export default function TutorApplicationPage() {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,14 +86,22 @@ export default function TutorApplicationPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
 
     if (!validate()) return;
 
-    // Simulate submission
-    setSubmitted(true);
+    try {
+      setSubmitting(true);
+      await api.post('/api/tutor-applications', form);
+      setStoredTutorStudentId(form.studentId.trim());
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(getApiErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -223,9 +234,9 @@ export default function TutorApplicationPage() {
               >
                 Clear Form
               </button>
-              <button type="submit" className="btn-primary inline-flex items-center gap-2">
+              <button type="submit" className="btn-primary inline-flex items-center gap-2" disabled={submitting}>
                 <FiSend />
-                Submit Application
+                {submitting ? 'Submitting...' : 'Submit Application'}
               </button>
             </div>
           </form>
