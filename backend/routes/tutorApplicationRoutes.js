@@ -1,16 +1,22 @@
-const express = require("express");
-const router = express.Router();
+import express from 'express';
 
-const {
+import {
   createApplication,
   getAllApplications,
   approveApplication,
-  rejectApplication
-} = require("../controllers/tutorApplicationController");
+  rejectApplication,
+} from '../controllers/tutorApplicationController.js';
 
-router.post("/", createApplication);
-router.get("/", getAllApplications);
-router.patch("/:id/approve", approveApplication);
-router.patch("/:id/reject", rejectApplication);
+const router = express.Router();
 
-module.exports = router;
+// Tutor submits application
+router.post('/', createApplication);
+
+// Coordinator reviews applications
+router.get('/', getAllApplications);
+
+// Coordinator actions
+router.patch('/:id/approve', approveApplication);
+router.patch('/:id/reject', rejectApplication);
+
+export default router;

@@ -1,9 +1,20 @@
-const express = require("express");
+import express from 'express';
+
+import {
+  createSession,
+  getAllSessions,
+  getSessionsByTutorStudentId,
+} from '../controllers/studySessionController.js';
+
 const router = express.Router();
 
-const { createSession, getAllSessions } = require("../controllers/studySessionController");
+// Tutor creates a session
+router.post('/', createSession);
 
-router.post("/", createSession);
-router.get("/", getAllSessions);
+// Public: list all sessions
+router.get('/', getAllSessions);
 
-module.exports = router;
+// Tutor convenience: list sessions for a given tutor studentId
+router.get('/tutor/:studentId', getSessionsByTutorStudentId);
+
+export default router;
