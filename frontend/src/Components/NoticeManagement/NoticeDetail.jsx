@@ -77,6 +77,18 @@ const NoticeDetail = () => {
           <p>{notice.content}</p>
         </div>
 
+        {notice.ctaLink && (
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              className="btn-publish"
+              onClick={() => navigate(notice.ctaLink)}
+              type="button"
+            >
+              {notice.ctaText || 'Fill the form'}
+            </button>
+          </div>
+        )}
+
         <div className="notice-detail-footer">
           <span className={notice.isArchived ? 'status-archived' : 'status-active'}>
             {notice.isArchived ? '🗂 Archived' : '● Active'}

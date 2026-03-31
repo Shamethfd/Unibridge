@@ -113,6 +113,20 @@ const UserNoticeView = () => {
                 <p className="notice-module">📚 {notice.module}</p>
               )}
 
+              {notice.ctaLink && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <button
+                    className="btn-add"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(notice.ctaLink);
+                    }}
+                  >
+                    {notice.ctaText || 'Fill the form'}
+                  </button>
+                </div>
+              )}
+
               <div className="user-notice-footer">
                 <span>📅 {new Date(notice.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric', month: 'short', day: 'numeric'

@@ -82,6 +82,11 @@ export const getAllMessages = () => API.get('/messages');
 export const createMessage = (data) => API.post('/messages', data);
 export const approveMessage = (id) => API.put(`/messages/${id}/approve`);
 
+// Tutor applications
+export const getTutorApplications = () => API.get('/tutor-applications');
+export const approveTutorApplication = (id, payload = {}) => API.patch(`/tutor-applications/${id}/approve`, payload);
+export const rejectTutorApplication = (id, payload = {}) => API.patch(`/tutor-applications/${id}/reject`, payload);
+
 export const getApiErrorMessage = (err) => {
   if (err?.response?.data?.message) return err.response.data.message;
   if (err?.response?.data?.success === false && err?.response?.data?.error) return err.response.data.error;

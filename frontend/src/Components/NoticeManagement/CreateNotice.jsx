@@ -4,7 +4,7 @@ import './NoticeManagement.css';
 
 const CreateNotice = ({ onCreated }) => {
   const [form, setForm] = useState({
-    title: '', content: '', targetAudience: 'all', module: '', scheduledAt: '',
+    title: '', content: '', targetAudience: 'all', module: '', scheduledAt: '', ctaText: '', ctaLink: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -47,8 +47,18 @@ const CreateNotice = ({ onCreated }) => {
       targetAudience: 'students',
       module: 'NDM',
       scheduledAt: '',
+      ctaText: '',
+      ctaLink: '',
     });
     setErrors({});
+  };
+
+  const addTutorApplicationCTA = () => {
+    setForm((prev) => ({
+      ...prev,
+      ctaText: 'Fill the form',
+      ctaLink: '/student/apply',
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -63,7 +73,7 @@ const CreateNotice = ({ onCreated }) => {
       await axios.post('http://localhost:5000/api/notices', form);
       setMessage('✅ Notice published successfully!');
       setMessageType('success');
-      setForm({ title: '', content: '', targetAudience: 'all', module: '', scheduledAt: '' });
+      setForm({ title: '', content: '', targetAudience: 'all', module: '', scheduledAt: '', ctaText: '', ctaLink: '' });
       setErrors({});
       if (onCreated) onCreated();
     } catch (err) {
@@ -78,9 +88,14 @@ const CreateNotice = ({ onCreated }) => {
     <div className="create-notice-container">
       <div className="section-header">
         <h3>📢 Create New Notice</h3>
-        <button className="btn-dummy" onClick={fillDummyData} type="button">
-          ⚡ Fill Demo Data
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn-dummy" onClick={fillDummyData} type="button">
+            ⚡ Fill Demo Data
+          </button>
+          <button className="btn-dummy" onClick={addTutorApplicationCTA} type="button">
+            🔗 Add Fill Form Link
+          </button>
+        </div>
       </div>
 
       {message && (
@@ -148,6 +163,30 @@ const CreateNotice = ({ onCreated }) => {
               className={errors.scheduledAt ? 'input-error' : ''}
             />
             {errors.scheduledAt && <span className="error-text">{errors.scheduledAt}</span>}
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label>Action Text <span className="optional">(optional)</span></label>
+            <input
+              type="text"
+              name="ctaText"
+              value={form.ctaText}
+              onChange={handleChange}
+              placeholder="e.g. Fill the form"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Action Link <span className="optional">(optional)</span></label>
+            <input
+              type="text"
+              name="ctaLink"
+              value={form.ctaLink}
+              onChange={handleChange}
+              placeholder="e.g. /student/apply"
+            />
           </div>
         </div>
 

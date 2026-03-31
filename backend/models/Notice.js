@@ -15,6 +15,8 @@ const noticeSchema = new mongoose.Schema(
       default: 'all',
     },
     module: { type: String, default: '' },
+    ctaText: { type: String, default: '' },
+    ctaLink: { type: String, default: '' },
     scheduledAt: { type: Date, default: null },
     isPublished: { type: Boolean, default: false },
     isArchived: { type: Boolean, default: false },

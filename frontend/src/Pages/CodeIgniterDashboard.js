@@ -7,7 +7,7 @@ import {
   getSemesters, createSemester, deleteSemester,
   getModules, createModule, updateModule, deleteModule,
   getAllRequests, updateRequestStatus, deleteRequest,
-  getDashboardStats, getAllMessages, approveMessage
+  getDashboardStats, getTutorApplications, approveTutorApplication, rejectTutorApplication
 } from '../services/api';
 import './HomePage.css';
 
@@ -22,7 +22,7 @@ const CodeIgniterDashboard = () => {
   const [modules, setModules] = useState([]);
   const [requests, setRequests] = useState([]);
   const [stats, setStats] = useState(null);
-  const [tutorMessages, setTutorMessages] = useState([]);
+  const [tutorFormRequests, setTutorFormRequests] = useState([]);
 
   // Send Note State
   const [sendNoteRequest, setSendNoteRequest] = useState(null);
@@ -61,11 +61,16 @@ const CodeIgniterDashboard = () => {
 
   const fetchAll = async () => {
     try {
-      const [facRes, reqRes, statRes, msgRes] = await Promise.all([getFaculties(), getAllRequests(), getDashboardStats(), getAllMessages()]);
+      const [facRes, reqRes, statRes, appsRes] = await Promise.all([
+        getFaculties(),
+        getAllRequests(),
+        getDashboardStats(),
+        getTutorApplications(),
+      ]);
       setFaculties(facRes.data);
       setRequests(reqRes.data);
       setStats(statRes.data);
-      setTutorMessages(msgRes.data.filter(m => m.source === 'Tutor'));
+      setTutorFormRequests(appsRes.data?.data || []);
     } catch { toast.error('Failed to load data'); }
   };
 
@@ -202,13 +207,18 @@ Preferred Time: ${sendNoteRequest.preferredTime && sendNoteRequest.preferredTime
       .catch(() => toast.error('Failed to copy note.'));
   };
 
-  const handleApproveMessage = async (msgId) => {
+  const handleTutorFormAction = async (applicationId, action) => {
     try {
-      await approveMessage(msgId);
-      toast.success('Message Approved! Notification sent to Tutor.');
+      if (action === 'approve') {
+        await approveTutorApplication(applicationId);
+        toast.success('Tutor application approved.');
+      } else {
+        await rejectTutorApplication(applicationId);
+        toast.success('Tutor application rejected.');
+      }
       fetchAll();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to approve message');
+      toast.error(err.response?.data?.message || 'Failed to update tutor application');
     }
   };
 
@@ -222,7 +232,7 @@ Preferred Time: ${sendNoteRequest.preferredTime && sendNoteRequest.preferredTime
     { id: 'semesters', label: '📚 Semesters' },
     { id: 'modules', label: '📖 Modules' },
     { id: 'requests', label: '📋 Requests' },
-    { id: 'tutormessages', label: '👨‍🏫 Tutor Messages' },
+    { id: 'tutormessages', label: '👨‍🏫 Tutor from request' },
   ];
 
 
@@ -562,48 +572,62 @@ Preferred Time: ${sendNoteRequest.preferredTime && sendNoteRequest.preferredTime
           </>
         )}
 
-        {/* ── TUTOR MESSAGES ── */}
+        {/* ── TUTOR FORM REQUESTS ── */}
         {tab === 'tutormessages' && (
           <>
-            <h3 style={{ marginBottom: '1rem' }}>Tutor Messages ({tutorMessages.length})</h3>
-            {tutorMessages.length === 0 ? (
-              <div className="empty-state"><div className="empty-icon">📫</div><p>No messages received from tutors yet.</p></div>
+            <h3 style={{ marginBottom: '1rem' }}>Tutor from request ({tutorFormRequests.length})</h3>
+            {tutorFormRequests.length === 0 ? (
+              <div className="empty-state"><div className="empty-icon">📫</div><p>No tutor application forms submitted yet.</p></div>
             ) : (
               <div className="cards-grid">
-                {tutorMessages.map(m => (
-                  <div key={m._id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', position: 'relative' }}>
+                {tutorFormRequests.map(app => (
+                  <div key={app._id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', position: 'relative' }}>
                     
-                    {m.status === 'approved' && (
+                    {app.status === 'approved' && (
                       <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: 'var(--green)', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
                         ✅ Approved
                       </div>
                     )}
+
+                    {app.status === 'rejected' && (
+                      <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: 'var(--red)', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                        ❌ Rejected
+                      </div>
+                    )}
                     
                     <div style={{ paddingBottom: '0.8rem', borderBottom: '1px solid var(--bg-card2)' }}>
-                      <h4 style={{ color: 'var(--primary)', marginBottom: '0.4rem' }}>{m.moduleName}</h4>
+                      <h4 style={{ color: 'var(--primary)', marginBottom: '0.4rem' }}>{app.studentName}</h4>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '0.85rem', color: 'var(--text-secondary)', gap: '0.4rem' }}>
-                        <span><strong>Cat:</strong> {m.category}</span>
-                        <span><strong>Uni:</strong> {m.university}</span>
-                        <span><strong>Time:</strong> {m.preferredTime?.length ? m.preferredTime.join(', ') : 'N/A'}</span>
-                        <span><strong>Students:</strong> {m.studentsCount}</span>
+                        <span><strong>ID:</strong> {app.studentId}</span>
+                        <span><strong>Email:</strong> {app.email}</span>
+                        <span><strong>Subject:</strong> {app.subject}</span>
+                        <span><strong>Status:</strong> {app.status}</span>
                       </div>
                     </div>
 
                     <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
+                        <strong>Experience:</strong> {app.experience}
+                      </p>
                       <p style={{ fontSize: '0.95rem', lineHeight: '1.6', fontStyle: 'italic', color: 'var(--text-primary)' }}>
-                        "{m.message}"
+                        "{app.description || 'No additional description'}"
                       </p>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--bg-card2)' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                        {new Date(m.createdAt).toLocaleString()}
+                        {new Date(app.createdAt).toLocaleString()}
                       </span>
                       
-                      {m.status === 'pending' ? (
-                        <button className="btn-success" style={{ fontWeight: 'bold' }} onClick={() => handleApproveMessage(m._id)}>
-                          Approve Selection
-                        </button>
+                      {app.status === 'pending' ? (
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button className="btn-success" style={{ fontWeight: 'bold' }} onClick={() => handleTutorFormAction(app._id, 'approve')}>
+                            Approve
+                          </button>
+                          <button className="btn-danger" onClick={() => handleTutorFormAction(app._id, 'reject')}>
+                            Reject
+                          </button>
+                        </div>
                       ) : (
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 'bold' }}>Done</span>
                       )}

@@ -2,12 +2,23 @@ import Notice from '../models/Notice.js';
 
 export const createNotice = async (req, res) => {
   try {
-    const { title, content, targetAudience, module, scheduledAt } = req.body;
+    const { title, content, targetAudience, module, scheduledAt, ctaText, ctaLink } = req.body;
     if (!title || !content) {
       return res.status(400).json({ error: 'Title and content are required' });
     }
+
+    const normalizedCtaLink = (ctaLink || '').trim();
+    const normalizedCtaText = (ctaText || '').trim();
+
+    if (normalizedCtaLink && !normalizedCtaLink.startsWith('/') && !/^https?:\/\//i.test(normalizedCtaLink)) {
+      return res.status(400).json({ error: 'CTA link must be a relative route (/) or full URL (http/https)' });
+    }
+
     const notice = new Notice({
       title, content, targetAudience, module,
+      message: content,
+      ctaText: normalizedCtaText,
+      ctaLink: normalizedCtaLink,
       scheduledAt: scheduledAt || null,
       isPublished: true,
     });

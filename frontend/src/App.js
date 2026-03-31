@@ -303,6 +303,15 @@ function App() {
         <Route path="/codeigniter-dashboard" element={<CodeIgniterDashboard />} />
         <Route path="/tutor-management" element={<TutorManagement />} />
 
+        {/* Student routes */}
+        <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/apply" element={<TutorApplicationPage />} />
+        <Route path="/student/noticeboard" element={<NoticeBoardPage />} />
+        <Route path="/student/feedback" element={<FeedbackPage />} />
+
+        {/* Coordinator route */}
+        <Route path="/coordinator" element={<CoordinatorDashboard />} />
+
         <Route path="/" element={<ProtectedLayout />}>
           <Route path="dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
           <Route path="hpage" element={isAuthenticated ? <Hpage /> : <Navigate to="/login" />} />
