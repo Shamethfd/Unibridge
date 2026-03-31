@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { FiSend, FiCheckCircle } from 'react-icons/fi';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FiSend, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import FormInput from '../Components/FormInput';
 import StarRating from '../Components/StarRating';
-import { mockSessions } from '../data/mockData';
+import { api, getApiErrorMessage } from '../services/api';
 
 const initialForm = {
   studentName: '',
@@ -16,6 +16,33 @@ export default function FeedbackPage() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitError, setSubmitError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchSessions = async () => {
+      try {
+        setLoading(true);
+        setSubmitError('');
+        const res = await api.get('/api/sessions');
+        if (cancelled) return;
+        setSessions(res.data?.data || []);
+      } catch (err) {
+        if (cancelled) return;
+        setSubmitError(getApiErrorMessage(err));
+      } finally {
+        if (cancelled) return;
+        setLoading(false);
+      }
+    };
+
+    fetchSessions();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,7 +52,7 @@ export default function FeedbackPage() {
 
   const handleSessionChange = (e) => {
     const sessionId = e.target.value;
-    const session = mockSessions.find((s) => s._id === sessionId);
+    const session = sessions.find((s) => s._id === sessionId);
     setForm({
       ...form,
       sessionId,
@@ -66,17 +93,38 @@ export default function FeedbackPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    setSubmitted(true);
+    setSubmitError('');
+    try {
+      await api.post('/api/feedback', {
+        studentName: form.studentName.trim(),
+        sessionId: form.sessionId,
+        rating: form.rating,
+        message: form.message,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(getApiErrorMessage(err));
+    }
   };
 
   const handleReset = () => {
     setForm(initialForm);
     setErrors({});
     setSubmitted(false);
+    setSubmitError('');
   };
+
+  const sessionOptions = useMemo(
+    () =>
+      sessions.map((s) => ({
+        value: s._id,
+        label: `${s.title} — ${s.tutorName} (${s.date})`,
+      })),
+    [sessions]
+  );
 
   if (submitted) {
     return (
@@ -100,11 +148,6 @@ export default function FeedbackPage() {
     );
   }
 
-  const sessionOptions = mockSessions.map((s) => ({
-    value: s._id,
-    label: `${s.title} — ${s.tutorName} (${s.date})`,
-  }));
-
   return (
     <div className="page-container animate-fade-in">
       <div className="max-w-2xl mx-auto">
@@ -118,6 +161,13 @@ export default function FeedbackPage() {
 
         <div className="card">
           <form onSubmit={handleSubmit} noValidate>
+            {submitError && (
+              <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-600 rounded-lg text-sm font-gilroyMedium mb-4 animate-fade-in">
+                <FiAlertCircle />
+                {submitError}
+              </div>
+            )}
+
             <FormInput
               label="Your Name"
               name="studentName"
@@ -138,6 +188,7 @@ export default function FeedbackPage() {
               error={errors.sessionId}
               options={sessionOptions}
               required
+              disabled={loading}
             />
 
             {form.tutorName && (
