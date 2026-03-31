@@ -24,6 +24,7 @@ import ModulePage from './Pages/ModulePage';
 import RequestFormPage from './Pages/RequestFormPage';
 import CodeIgniterDashboard from './Pages/CodeIgniterDashboard';
 import TutorManagement from './Pages/TutorManagement';
+import Hpage from './Pages/Hpage';
 import MyCoursePanel from './Components/MyCoursePanel';
 import CreateNotice from './Components/NoticeManagement/CreateNotice';
 import NoticeDetail from './Components/NoticeManagement/NoticeDetail';
@@ -295,6 +296,7 @@ function App() {
 
         <Route path="/" element={<ProtectedLayout />}>
           <Route path="dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
+          <Route path="hpage" element={isAuthenticated ? <Hpage /> : <Navigate to="/login" />} />
           <Route path="profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
           <Route path="resources" element={isAuthenticated ? <StructuredResources /> : <Navigate to="/login" />} />
           <Route path="upload-resource" element={isAuthenticated ? <UploadResource /> : <Navigate to="/login" />} />

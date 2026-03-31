@@ -55,6 +55,7 @@ const Dashboard = () => {
 
   const getQuickActions = () => {
     const base = [
+      { title: 'Courses',          desc: 'Browse faculties & modules', link: '/hpage',           color: '#0ea5a5', bg: '#f0fdfa', border: '#99f6e4' },
       { title: 'Browse Resources', desc: 'Explore study materials',  link: '/resources',       color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
       { title: 'Submit Resource',  desc: 'Share your materials',     link: '/submit-resource',  color: '#059669', bg: '#f0fdf4', border: '#a7f3d0' },
     ];
@@ -211,7 +212,7 @@ const Dashboard = () => {
                     onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 6px 20px rgba(9,72,134,0.08)'; e.currentTarget.style.borderTopColor=a.color; }}
                     onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderTopColor='transparent'; }}>
                     <div style={{ width:44, height:44, borderRadius:13, display:'flex', alignItems:'center', justifyContent:'center', background:a.bg, border:'1.5px solid '+a.border, fontSize:'1.2rem' }}>
-                      {a.title.includes('Browse')?'📚':a.title.includes('Submit')?'📤':a.title.includes('Module')?'⚙️':'📁'}
+                      {a.title.includes('Courses')?'🎓':a.title.includes('Browse')?'📚':a.title.includes('Submit')?'📤':a.title.includes('Module')?'⚙️':'📁'}
                     </div>
                     <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.84rem', fontWeight:700, color:'#0f1e35', textAlign:'center' }}>{a.title}</p>
                     <p style={{ fontSize:'0.76rem', color:'#94a3b8', textAlign:'center', lineHeight:1.4 }}>{a.desc}</p>

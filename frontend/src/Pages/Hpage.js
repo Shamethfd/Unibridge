@@ -30,31 +30,8 @@ const HomePage = () => {
 
   const getIcon = (name) => FACULTY_ICONS[name] || '🏛️';
 
-  const scrollToCourses = () => {
-    const section = document.getElementById('courses');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className="home-page">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="nav-brand" style={{ cursor: 'pointer' }} onClick={() => window.scrollTo(0, 0)}>
-          <span className="brand-icon">🎓</span>
-          <span className="brand-name">LearnBridge</span>
-        </div>
-        <div className="nav-links">
-          <button className="nav-btn" onClick={scrollToCourses}>
-            Courses
-          </button>
-          <button className="nav-btn admin-btn" onClick={() => navigate('/codeigniter-dashboard')}>
-            CodeIgniter Dashboard
-          </button>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-content">
