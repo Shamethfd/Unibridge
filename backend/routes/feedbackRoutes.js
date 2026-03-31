@@ -1,12 +1,16 @@
-const express = require("express");
+import express from 'express';
+
+import {
+  createFeedback,
+  getTutorFeedbackAndRating,
+} from '../controllers/feedbackController.js';
+
 const router = express.Router();
 
-const {
-  createFeedback,
-  getTutorFeedbackAndRating
-} = require("../controllers/feedbackController");
+// Create new feedback
+router.post('/', createFeedback);
 
-router.post("/", createFeedback);
-router.get("/tutor/:tutorId", getTutorFeedbackAndRating);
+// Tutor aggregates feedback + rating
+router.get('/tutor/:tutorId', getTutorFeedbackAndRating);
 
-module.exports = router;
+export default router;

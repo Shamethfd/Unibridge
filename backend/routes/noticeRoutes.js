@@ -1,8 +1,10 @@
-const express = require("express");
+import express from 'express';
+
+import { getNotices } from '../controllers/noticeController.js';
+
 const router = express.Router();
 
-const { getNotices } = require("../controllers/noticeController");
+// Public: list notices
+router.get('/', getNotices);
 
-router.get("/", getNotices);
-
-module.exports = router;
+export default router;
