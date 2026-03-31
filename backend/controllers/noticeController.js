@@ -1,6 +1,9 @@
-const Notice = require("../models/Notice");
+import Notice from '../models/Notice.js';
 
-exports.getNotices = async (req, res) => {
+/**
+ * Public: list notices for Notice Board.
+ */
+export const getNotices = async (req, res) => {
   try {
     const notices = await Notice.find().sort({ createdAt: -1 }).limit(50);
     res.json({ success: true, data: notices });
