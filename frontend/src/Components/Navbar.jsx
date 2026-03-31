@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { HiMenuAlt3, HiX } from 'react-icons/hi';
 import {
   FiHome, FiUser, FiBookOpen, FiClipboard,
-  FiMessageSquare, FiStar, FiUsers, FiCalendar
+  FiMessageSquare, FiStar, FiUsers, FiCalendar, FiBell
 } from 'react-icons/fi';
 
 const navLinks = [
@@ -20,6 +20,7 @@ const navLinks = [
     label: 'Tutor',
     children: [
       { to: '/tutor', label: 'Dashboard', icon: <FiUser /> },
+      { to: '/tutor/messages', label: 'Messages', icon: <FiBell /> },
       { to: '/tutor/create-session', label: 'Create Session', icon: <FiCalendar /> },
       { to: '/tutor/ratings', label: 'My Ratings', icon: <FiStar /> },
     ],

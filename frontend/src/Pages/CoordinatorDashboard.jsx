@@ -1,36 +1,66 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FiUsers, FiCheck, FiX, FiClock, FiCheckCircle, FiXCircle, FiFilter } from 'react-icons/fi';
 import StatusBadge from '../Components/StatusBadge';
-import { mockApplications, getCoordinatorStats } from '../data/mockData';
+import { api, getApiErrorMessage } from '../services/api';
 
 export default function CoordinatorDashboard() {
-  const initialStats = getCoordinatorStats();
-  const [applications, setApplications] = useState(mockApplications);
+  const [applications, setApplications] = useState([]);
   const [filter, setFilter] = useState('all');
-  const [stats, setStats] = useState(initialStats);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [decisionBy, setDecisionBy] = useState('');
 
-  const filteredApps = filter === 'all'
-    ? applications
-    : applications.filter(a => a.status === filter);
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const res = await api.get('/api/tutor-applications');
+        setApplications(res.data?.data || []);
+      } catch (err) {
+        setError(getApiErrorMessage(err));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+  const filteredApps = useMemo(() => {
+    return filter === 'all' ? applications : applications.filter((a) => a.status === filter);
+  }, [applications, filter]);
+
+  const stats = useMemo(() => {
+    const total = applications.length;
+    return {
+      total,
+      pending: applications.filter((a) => a.status === 'pending').length,
+      approved: applications.filter((a) => a.status === 'approved').length,
+      rejected: applications.filter((a) => a.status === 'rejected').length,
+    };
+  }, [applications]);
 
   const handleAction = (id, action) => {
-    setApplications(prev =>
-      prev.map(app =>
-        app._id === id
-          ? { ...app, status: action, decisionBy: 'Coordinator', decisionAt: new Date().toISOString() }
-          : app
-      )
-    );
-    // Update stats
-    const updated = applications.map(app =>
-      app._id === id ? { ...app, status: action } : app
-    );
-    setStats({
-      total: updated.length,
-      pending: updated.filter(a => a.status === 'pending').length,
-      approved: updated.filter(a => a.status === 'approved').length,
-      rejected: updated.filter(a => a.status === 'rejected').length,
-    });
+    (async () => {
+      try {
+        setError('');
+        const decisionByTrimmed = decisionBy.trim();
+        const payload = decisionByTrimmed ? { decisionBy: decisionByTrimmed } : {};
+
+        const endpoint = action === 'approved' ? 'approve' : 'reject';
+        const res = await api.patch(`/api/tutor-applications/${id}/${endpoint}`, payload);
+
+        const updatedApplication =
+          action === 'approved' ? res.data?.data?.application : res.data?.data;
+
+        setApplications((prev) =>
+          prev.map((app) => (app._id === id ? updatedApplication : app))
+        );
+      } catch (err) {
+        setError(getApiErrorMessage(err));
+      }
+    })();
   };
 
   const formatDate = (dateStr) => {
@@ -59,6 +89,19 @@ export default function CoordinatorDashboard() {
       <div className="mb-8">
         <h1 className="page-title">Coordinator Dashboard</h1>
         <p className="page-subtitle">Review and manage tutor applications.</p>
+        <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div className="flex-1">
+            <label className="text-sm font-gilroyMedium text-neutral-600">
+              Decision by (optional)
+            </label>
+            <input
+              value={decisionBy}
+              onChange={(e) => setDecisionBy(e.target.value)}
+              placeholder="e.g., Dr. Silva"
+              className="input-field"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Stats */}
@@ -102,7 +145,11 @@ export default function CoordinatorDashboard() {
       </div>
 
       {/* Applications List */}
-      {filteredApps.length === 0 ? (
+      {loading ? (
+        <div className="card text-center py-12">Loading applications...</div>
+      ) : error ? (
+        <div className="card text-center py-12 text-danger-600 font-gilroyMedium">{error}</div>
+      ) : filteredApps.length === 0 ? (
         <div className="card text-center py-12">
           <FiUsers className="text-neutral-300 mx-auto mb-3" size={40} />
           <p className="text-neutral-400 font-gilroyRegular">No applications found.</p>

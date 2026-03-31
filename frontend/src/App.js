@@ -9,6 +9,7 @@ import FeedbackPage from './Pages/FeedbackPage';
 import TutorDashboard from './Pages/TutorDashboard';
 import CreateSessionPage from './Pages/CreateSessionPage';
 import TutorRatingPage from './Pages/TutorRatingPage';
+import TutorMessagesPage from './Pages/TutorMessagesPage';
 import CoordinatorDashboard from './Pages/CoordinatorDashboard';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path='/tutor' element={<TutorDashboard />} />
         <Route path='/tutor/create-session' element={<CreateSessionPage />} />
         <Route path='/tutor/ratings' element={<TutorRatingPage />} />
+        <Route path='/tutor/messages' element={<TutorMessagesPage />} />
 
         {/* Coordinator Routes */}
         <Route path='/coordinator' element={<CoordinatorDashboard />} />
