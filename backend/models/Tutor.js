@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
 const tutorSchema = new mongoose.Schema(
   {
@@ -6,9 +6,9 @@ const tutorSchema = new mongoose.Schema(
     studentId: { type: String, required: true, unique: true },
     email: { type: String, required: true },
     subjects: [{ type: String }],
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Tutor", tutorSchema);
+export default mongoose.model('Tutor', tutorSchema);
