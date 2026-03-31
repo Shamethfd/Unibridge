@@ -46,7 +46,15 @@ const CodeIgniterDashboard = () => {
   const [editFacultyName, setEditFacultyName] = useState('');
   const [editFacultyIcon, setEditFacultyIcon] = useState('');
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Please login to access the dashboard');
+      navigate('/login');
+      return;
+    }
+    fetchAll();
+  }, [navigate]);
   useEffect(() => { if (selFaculty) loadYears(selFaculty); }, [selFaculty]);
   useEffect(() => { if (selYear) loadSemesters(selYear); }, [selYear]);
   useEffect(() => { if (selSemester) loadModules(selSemester); }, [selSemester]);

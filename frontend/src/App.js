@@ -32,6 +32,15 @@ import UserNoticeView from './Components/NoticeManagement/UserNoticeView';
 import NoticeRequest from './Components/NoticeManagement/NoticeRequest';
 import NoticeRequestList from './Components/NoticeManagement/NoticeRequestList';
 import NoticeManagementDashboard from './Components/NoticeManagement/NoticeManagementDashboard';
+import StudentDashboard from './Pages/StudentDashboard';
+import TutorApplicationPage from './Pages/TutorApplicationPage';
+import NoticeBoardPage from './Pages/NoticeBoardPage';
+import FeedbackPage from './Pages/FeedbackPage';
+import TutorDashboard from './Pages/TutorDashboard';
+import CreateSessionPage from './Pages/CreateSessionPage';
+import TutorRatingPage from './Pages/TutorRatingPage';
+import TutorMessagesPage from './Pages/TutorMessagesPage';
+import CoordinatorDashboard from './Pages/CoordinatorDashboard';
 
 const Header = ({ user, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -310,6 +319,11 @@ function App() {
           <Route path="notice-request" element={canManageNotices ? <NoticeRequest /> : <Navigate to="/login" />} />
           <Route path="notice-requests" element={canManageNotices ? <NoticeRequestList /> : <Navigate to="/login" />} />
         </Route>
+        {/* Tutor Routes */}
+        <Route path='/tutor' element={<TutorDashboard />} />
+        <Route path='/tutor/create-session' element={<CreateSessionPage />} />
+        <Route path='/tutor/ratings' element={<TutorRatingPage />} />
+        <Route path='/tutor/messages' element={<TutorMessagesPage />} />
 
         <Route
           path="/admin-dashboard"

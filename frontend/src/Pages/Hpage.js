@@ -32,41 +32,6 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      {/* Hero Section */}
-      <div className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">
-            Module & Study Request
-            <span className="gradient-text"> Management System</span>
-          </h1>
-          <p className="hero-subtitle">
-            Easily request study sessions, track demand, and connect with fellow students.
-            Our smart system prioritizes sessions based on urgency and demand.
-          </p>
-          <div className="hero-actions">
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="stats-grid">
-          <div className="stat-card red">
-            <div className="stat-icon">🔥</div>
-            <div className="stat-label">High Demand</div>
-            <div className="stat-desc">Sessions with many requests</div>
-          </div>
-          <div className="stat-card yellow">
-            <div className="stat-icon">⚡</div>
-            <div className="stat-label">Medium Demand</div>
-            <div className="stat-desc">Growing interest sessions</div>
-          </div>
-          <div className="stat-card blue">
-            <div className="stat-icon">❄️</div>
-            <div className="stat-label">Low Demand</div>
-            <div className="stat-desc">Early stage requests</div>
-          </div>
-        </div>
-      </div>
-
       {/* Embedded Courses Section */}
       <div id="courses" className="page-content" style={{ marginTop: '2rem', paddingTop: '2rem' }}>
         <div className="page-header" style={{ textAlign: 'center' }}>
@@ -98,43 +63,6 @@ const HomePage = () => {
             )}
           </div>
         )}
-      </div>
-
-      {/* Features Section */}
-      <div className="features-section">
-        <h2 className="section-title">Why Use Our System?</h2>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">🔍</div>
-            <h3 className="feature-title">Duplicate Detection</h3>
-            <p className="feature-desc">Automatically detects and groups similar requests</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">👥</div>
-            <h3 className="feature-title">Group Requests</h3>
-            <p className="feature-desc">Join existing requests and boost priority</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🎯</div>
-            <h3 className="feature-title">Urgency Levels</h3>
-            <p className="feature-desc">Normal, Urgent, or Exam Priority support</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">📊</div>
-            <h3 className="feature-title">Heat Score</h3>
-            <p className="feature-desc">Smart demand scoring based on students & urgency</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">💡</div>
-            <h3 className="feature-title">Smart Suggestions</h3>
-            <p className="feature-desc">Related module suggestions as you browse</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🔔</div>
-            <h3 className="feature-title">Notifications</h3>
-            <p className="feature-desc">Get alerted when your request is accepted</p>
-          </div>
-        </div>
       </div>
 
       <footer className="footer">
