@@ -15,11 +15,24 @@ const generateToken = (id) => {
 export const register = async (req, res) => {
   try {
     console.log('Registration request received:', req.body);
-    
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database is not connected. Please try again shortly.'
+      });
+    }
+
     const { username, email, password, firstName, lastName, phone, bio } = req.body;
+    const normalizedUsername = username?.trim();
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedFirstName = firstName?.trim();
+    const normalizedLastName = lastName?.trim();
+    const normalizedPhone = phone?.trim();
+    const normalizedBio = bio?.trim();
 
     // Validate required fields
-    if (!username || !email || !password || !firstName || !lastName) {
+    if (!normalizedUsername || !normalizedEmail || !password || !normalizedFirstName || !normalizedLastName) {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields: username, email, password, firstName, lastName'
@@ -28,7 +41,7 @@ export const register = async (req, res) => {
 
     // Check if user already exists
     const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
+      $or: [{ email: normalizedEmail }, { username: normalizedUsername }]
     });
 
     if (existingUser) {
@@ -40,14 +53,14 @@ export const register = async (req, res) => {
 
     // Create new user
     const user = await User.create({
-      username,
-      email,
+      username: normalizedUsername,
+      email: normalizedEmail,
       password,
       profile: {
-        firstName,
-        lastName,
-        phone,
-        bio
+        firstName: normalizedFirstName,
+        lastName: normalizedLastName,
+        phone: normalizedPhone,
+        bio: normalizedBio
       }
     });
 
@@ -83,6 +96,14 @@ export const register = async (req, res) => {
         success: false,
         message: 'Validation failed',
         error: messages.join(', ')
+      });
+    }
+
+    if (error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern || {})[0] || 'field';
+      return res.status(400).json({
+        success: false,
+        message: `A user with this ${duplicateField} already exists`
       });
     }
 
