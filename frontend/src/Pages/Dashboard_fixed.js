@@ -2,13 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getTutorApplications } from '../services/api';
+import { getStoredTutorStudentId } from '../utils/tutorStorage';
 
 const Dashboard = () => {
   const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState([]);
   const [stats, setStats]     = useState({ totalResources: 0, totalModules: 0, recentActivity: 0 });
+  const [eligibleStudentId, setEligibleStudentId] = useState('');
+  const [isApprovedTutor, setIsApprovedTutor] = useState(false);
   const navigate = useNavigate();
+
+  const normalize = (value) => String(value || '').trim().toLowerCase();
+  const normalizeId = (value) => normalize(value).replace(/[^a-z0-9]/g, '');
+  const normalizeName = (value) => normalize(value).replace(/\s+/g, ' ');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -16,10 +24,63 @@ const Dashboard = () => {
     if (!token) { navigate('/login'); return; }
     if (storedUser) {
       try { setUser(JSON.parse(storedUser)); }
-      catch { navigate('/login'); return; }
+      catch {
+        try { setUser(JSON.parse(decodeURIComponent(storedUser))); }
+        catch { navigate('/login'); return; }
+      }
     }
     fetchDashboardData();
   }, [navigate]);
+
+  useEffect(() => {
+    const resolveTutorEligibility = async () => {
+      if (!user || normalize(user.role) !== 'student') {
+        setIsApprovedTutor(false);
+        setEligibleStudentId('');
+        return;
+      }
+
+      try {
+        const userEmail = normalize(user.email);
+        const userFullName = normalizeName(`${user?.profile?.firstName || ''} ${user?.profile?.lastName || ''}`);
+        const userStudentIdNormalized = normalizeId(user?.studentId || user?.profile?.studentId || '');
+
+        const res = await getTutorApplications();
+        const apps = res.data?.data || [];
+
+        const mine = apps.filter((app) => {
+          const appEmail = normalize(app?.email);
+          const appStudentIdNormalized = normalizeId(app?.studentId);
+          const appStudentName = normalizeName(app?.studentName);
+          return (userEmail && appEmail === userEmail)
+            || (userStudentIdNormalized && appStudentIdNormalized === userStudentIdNormalized)
+            || (userFullName && appStudentName === userFullName);
+        });
+
+        const approved = mine.find((app) => normalize(app?.status) === 'approved');
+        if (approved) {
+          setIsApprovedTutor(true);
+          setEligibleStudentId(
+            String(
+              approved?.studentId
+                || user?.studentId
+                || user?.profile?.studentId
+                || getStoredTutorStudentId()
+                || ''
+            ).trim()
+          );
+        } else {
+          setIsApprovedTutor(false);
+          setEligibleStudentId('');
+        }
+      } catch {
+        setIsApprovedTutor(false);
+        setEligibleStudentId('');
+      }
+    };
+
+    resolveTutorEligibility();
+  }, [user]);
 
   const fetchDashboardData = async () => {
     try {
@@ -59,6 +120,27 @@ const Dashboard = () => {
       { title: 'Browse Resources', desc: 'Explore study materials',  link: '/resources',       color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
       { title: 'Submit Resource',  desc: 'Share your materials',     link: '/submit-resource',  color: '#059669', bg: '#f0fdf4', border: '#a7f3d0' },
     ];
+
+    if (normalize(user?.role) === 'student' && isApprovedTutor && eligibleStudentId) {
+      base.unshift({
+        title: 'Create Session',
+        desc: 'Start your approved tutoring session',
+        link: `/tutor/create-session`,
+        color: '#094886',
+        bg: '#eff6ff',
+        border: '#93c5fd',
+        state: { studentId: eligibleStudentId },
+      });
+      base.unshift({
+        title: 'My Ratings',
+        desc: 'View student feedback and ratings',
+        link: `/tutor/ratings`,
+        color: '#b45309',
+        bg: '#fffbeb',
+        border: '#fcd34d',
+      });
+    }
+
     if (['admin','resourceManager','coordinator'].includes(user?.role)) {
       base.unshift(
         { title: 'Manage Modules',   desc: 'Create & edit modules', link: '/manage-modules',   color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
@@ -208,11 +290,11 @@ const Dashboard = () => {
             <div style={{ padding:'0 1.4rem 1.4rem' }}>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                 {getQuickActions().map((a, i) => (
-                  <Link key={i} to={a.link} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, padding:'1.1rem 0.8rem', borderRadius:14, border:'1.5px solid #f1f5f9', borderTop:'3px solid transparent', background:'#fafbfc', textDecoration:'none', transition:'all 0.2s', cursor:'pointer' }}
+                  <Link key={i} to={a.link} state={a.state} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, padding:'1.1rem 0.8rem', borderRadius:14, border:'1.5px solid #f1f5f9', borderTop:'3px solid transparent', background:'#fafbfc', textDecoration:'none', transition:'all 0.2s', cursor:'pointer' }}
                     onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 6px 20px rgba(9,72,134,0.08)'; e.currentTarget.style.borderTopColor=a.color; }}
                     onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderTopColor='transparent'; }}>
                     <div style={{ width:44, height:44, borderRadius:13, display:'flex', alignItems:'center', justifyContent:'center', background:a.bg, border:'1.5px solid '+a.border, fontSize:'1.2rem' }}>
-                      {a.title.includes('Courses')?'🎓':a.title.includes('Browse')?'📚':a.title.includes('Submit')?'📤':a.title.includes('Module')?'⚙️':'📁'}
+                      {a.title.includes('Create Session')?'🗓️':a.title.includes('Ratings')?'⭐':a.title.includes('Courses')?'🎓':a.title.includes('Browse')?'📚':a.title.includes('Submit')?'📤':a.title.includes('Module')?'⚙️':'📁'}
                     </div>
                     <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.84rem', fontWeight:700, color:'#0f1e35', textAlign:'center' }}>{a.title}</p>
                     <p style={{ fontSize:'0.76rem', color:'#94a3b8', textAlign:'center', lineHeight:1.4 }}>{a.desc}</p>

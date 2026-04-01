@@ -3,16 +3,118 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getTutorApplications } from '../services/api';
+import { getStoredTutorStudentId } from '../utils/tutorStorage';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState([]);
+  const [myApplications, setMyApplications] = useState([]);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [eligibleStudentId, setEligibleStudentId] = useState('');
 
   const getRoleLabel = (role) => {
     const map = { admin: 'Administrator', resourceManager: 'Resource Manager', coordinator: 'Coordinator', student: 'Student' };
     return map[role] || role;
   };
+
+  const normalize = (value) => String(value || '').trim().toLowerCase();
+  const normalizeId = (value) => normalize(value).replace(/[^a-z0-9]/g, '');
+  const normalizeName = (value) => normalize(value).replace(/\s+/g, ' ');
+
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        try {
+          setUser(JSON.parse(decodeURIComponent(storedUser)));
+        } catch {
+          console.error('Failed to parse user:', err);
+          setUser(null);
+        }
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  // Fetch student's tutor applications
+  useEffect(() => {
+    if (normalize(user?.role) === 'student') {
+      const fetchApplications = async () => {
+        try {
+          setLoadingApps(true);
+          const res = await getTutorApplications();
+          if (res.data?.data) {
+            const userEmail = normalize(user?.email);
+            const storedTutorStudentId = getStoredTutorStudentId();
+            const userFullName = normalizeName(`${user?.profile?.firstName || ''} ${user?.profile?.lastName || ''}`);
+            const userFirstName = normalizeName(user?.profile?.firstName);
+            const userLastName = normalizeName(user?.profile?.lastName);
+            const userName = normalizeName(user?.username);
+            const storedTutorStudentIdNormalized = normalizeId(storedTutorStudentId);
+
+            const isMyApplication = (app) => {
+              const appEmail = normalize(app?.email);
+              const appStudentIdNormalized = normalizeId(app?.studentId);
+              const appStudentName = normalizeName(app?.studentName);
+
+              const emailMatch = userEmail && appEmail === userEmail;
+              const idMatch = storedTutorStudentIdNormalized && appStudentIdNormalized === storedTutorStudentIdNormalized;
+              const fullNameMatch = userFullName && appStudentName === userFullName;
+              const firstLastPartialMatch = (userFirstName && appStudentName.includes(userFirstName)) || (userLastName && appStudentName.includes(userLastName));
+              const usernamePartialMatch = userName && appStudentName.includes(userName);
+
+              return emailMatch || idMatch || fullNameMatch || firstLastPartialMatch || usernamePartialMatch;
+            };
+
+            const filtered = res.data.data.filter((app) => {
+              return isMyApplication(app);
+            });
+
+            setMyApplications(filtered);
+
+            const approved = filtered.find((app) => String(app?.status || '').toLowerCase() === 'approved');
+            if (approved?.studentId) {
+              setEligibleStudentId(String(approved.studentId).trim());
+            } else if (storedTutorStudentId) {
+              try {
+                const tutorRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tutors/by-student-id/${storedTutorStudentId}`);
+                if (tutorRes.data?.data?.isActive) {
+                  setEligibleStudentId(storedTutorStudentId);
+                  return;
+                }
+
+                const notifRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tutor-notifications/student/${storedTutorStudentId}`);
+                const hasApprovalNotice = (notifRes.data?.data || []).some((n) => n?.type === 'application_approved');
+                setEligibleStudentId(hasApprovalNotice ? storedTutorStudentId : '');
+              } catch {
+                setEligibleStudentId('');
+              }
+            } else if (userEmail) {
+              // Last-resort fallback: any approved application submitted with current account email.
+              const approvedByEmail = res.data.data.find((app) => {
+                return isMyApplication(app) && normalize(app?.status) === 'approved';
+              });
+              setEligibleStudentId(approvedByEmail?.studentId ? String(approvedByEmail.studentId).trim() : '');
+            } else {
+              setEligibleStudentId('');
+            }
+          }
+        } catch (err) {
+          console.error('Failed to load applications:', err);
+          setEligibleStudentId('');
+        } finally {
+          setLoadingApps(false);
+        }
+      };
+      fetchApplications();
+    }
+  }, [user?.role, user?.email, user?.profile?.firstName, user?.profile?.lastName, user?.username]);
 
   if (loading && !user) {
     return (
@@ -28,7 +130,11 @@ const Dashboard = () => {
   }
 
   const isManager = user?.role === 'admin' || user?.role === 'resourceManager';
-  const isStudent = user?.role === 'student';
+  const isStudent = normalize(user?.role) === 'student';
+  const approvedApplications = myApplications.filter(
+    (app) => String(app?.status || '').toLowerCase() === 'approved'
+  );
+  const showTutorSessionSection = isStudent && (approvedApplications.length > 0 || !!eligibleStudentId);
 
   return (
     <>
@@ -725,6 +831,126 @@ const Dashboard = () => {
                 )}
               </div>
             </div>
+
+            {/* My Tutor Applications - for students */}
+            {showTutorSessionSection && (
+              <div className="db-section">
+                <h3 className="db-section-title">My Tutor Applications</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {approvedApplications.map((app) => (
+                    <div
+                      key={app._id}
+                      style={{
+                        background: 'white',
+                        border: '1.5px solid #e2e8f0',
+                        borderRadius: '14px',
+                        padding: '1.2rem, 1.4rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.8rem',
+                        boxShadow: '0 1px 3px rgba(9,72,134,0.04)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.95rem', fontWeight: '700', color: '#0f1e35', marginBottom: '0.4rem' }}>
+                            {app.subject}
+                          </h4>
+                          <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                            <strong>Experience:</strong> {app.experience}
+                          </p>
+                          <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: '1.5' }}>
+                            {app.description || 'No description provided'}
+                          </p>
+                        </div>
+                        <span
+                          style={{
+                            padding: '0.4rem 0.9rem',
+                            borderRadius: '12px',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            fontFamily: "'Sora', sans-serif",
+                            whiteSpace: 'nowrap',
+                            background: '#d4edda',
+                            color: '#155724'
+                          }}
+                        >
+                          ✅ Approved
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => navigate('/tutor/create-session', { state: { studentId: app.studentId } })}
+                        style={{
+                          marginTop: '0.5rem',
+                          padding: '0.7rem 1.2rem',
+                          background: 'linear-gradient(135deg, #094886 0%, #2563eb 100%)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '10px',
+                          fontWeight: '600',
+                          fontFamily: "'Sora', sans-serif",
+                          cursor: 'pointer',
+                          fontSize: '0.85rem',
+                          maxWidth: '200px',
+                          transition: 'transform 0.15s, box-shadow 0.15s',
+                          boxShadow: '0 3px 10px rgba(37,99,235,0.28)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 6px 16px rgba(37,99,235,0.35)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 3px 10px rgba(37,99,235,0.28)';
+                        }}
+                      >
+                        📚 Create Study Session
+                      </button>
+                    </div>
+                  ))}
+
+                  {approvedApplications.length === 0 && eligibleStudentId && (
+                    <div
+                      style={{
+                        background: 'white',
+                        border: '1.5px solid #e2e8f0',
+                        borderRadius: '14px',
+                        padding: '1.2rem 1.4rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.8rem',
+                        boxShadow: '0 1px 3px rgba(9,72,134,0.04)',
+                      }}
+                    >
+                      <p style={{ fontSize: '0.9rem', color: '#475569' }}>
+                        Your tutor request is approved. You can now create a study session.
+                      </p>
+                      <button
+                        onClick={() => navigate('/tutor/create-session', { state: { studentId: eligibleStudentId } })}
+                        style={{
+                          marginTop: '0.2rem',
+                          padding: '0.7rem 1.2rem',
+                          background: 'linear-gradient(135deg, #094886 0%, #2563eb 100%)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '10px',
+                          fontWeight: '600',
+                          fontFamily: "'Sora', sans-serif",
+                          cursor: 'pointer',
+                          fontSize: '0.85rem',
+                          maxWidth: '220px',
+                          boxShadow: '0 3px 10px rgba(37,99,235,0.28)'
+                        }}
+                      >
+                        📚 Create Study Session
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Recent Activity */}
             <div className="db-section">

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FiSend, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import FormInput, { getTodayDate } from '../Components/FormInput';
 import { api, getApiErrorMessage } from '../services/api';
@@ -16,7 +17,19 @@ const initialForm = {
 const studentIdRegex = /^IT\d{8}$/i;
 
 export default function CreateSessionPage() {
-  const [form, setForm] = useState(initialForm);
+  const location = useLocation();
+  const [form, setForm] = useState(() => {
+    const initialStudentId = location.state?.studentId || '';
+    return {
+      studentId: initialStudentId,
+      subject: '',
+      title: '',
+      date: '',
+      time: '',
+      meetingLink: '',
+      description: '',
+    };
+  });
   const [errors, setErrors] = useState({});
 
   const [submitted, setSubmitted] = useState(false);

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiStar, FiMessageSquare, FiAlertCircle } from 'react-icons/fi';
+import { useLocation } from 'react-router-dom';
 import StarRating from '../Components/StarRating';
 import FormInput from '../Components/FormInput';
 import { api, getApiErrorMessage } from '../services/api';
@@ -7,9 +8,11 @@ import { getStoredTutorStudentId, setStoredTutorStudentId } from '../utils/tutor
 
 export default function TutorRatingPage() {
   const studentIdRegex = /^IT\d{8}$/i;
+  const location = useLocation();
+  const stateStudentId = (location.state?.studentId || '').trim();
 
-  const [studentIdInput, setStudentIdInput] = useState(() => getStoredTutorStudentId());
-  const [studentId, setStudentId] = useState(() => getStoredTutorStudentId());
+  const [studentIdInput, setStudentIdInput] = useState(() => stateStudentId || getStoredTutorStudentId());
+  const [studentId, setStudentId] = useState(() => stateStudentId || getStoredTutorStudentId());
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -59,6 +62,14 @@ export default function TutorRatingPage() {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (stateStudentId && studentIdRegex.test(stateStudentId)) {
+      setStoredTutorStudentId(stateStudentId);
+      setStudentIdInput(stateStudentId);
+      setStudentId(stateStudentId);
+    }
+  }, [stateStudentId]);
 
   useEffect(() => {
     if (studentIdRegex.test(studentId)) {

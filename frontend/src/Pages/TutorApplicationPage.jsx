@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSend, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import FormInput from '../Components/FormInput';
 import { api, getApiErrorMessage } from '../services/api';
@@ -30,6 +30,23 @@ export default function TutorApplicationPage() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+
+    // Auto-populate email and name from user account
+    useEffect(() => {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const userData = JSON.parse(userStr);
+          setForm(prev => ({
+            ...prev,
+            email: userData.email || '',
+            studentName: `${userData.profile?.firstName || ''} ${userData.profile?.lastName || ''}`.trim(),
+          }));
+        } catch (err) {
+          console.error('Failed to load user data:', err);
+        }
+      }
+    }, []);
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
