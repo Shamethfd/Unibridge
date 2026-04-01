@@ -85,13 +85,38 @@ const Dashboard = () => {
     try {
       if (!silent) setLoading(true);
 
-      const noticesRes = await api.get('/api/notices', {
-        params: {
-          archived: false,
-        },
-      });
+      const [noticesRes, resourcesRes, modulesRes, requestsRes] = await Promise.all([
+        api.get('/api/notices', {
+          params: {
+            archived: false,
+          },
+        }),
+        api.get('/api/resources', {
+          params: {
+            page: 1,
+            limit: 1,
+          },
+        }),
+        api.get('/api/modules', {
+          params: {
+            page: 1,
+            limit: 1,
+          },
+        }),
+        api.get('/api/requests'),
+      ]);
 
       const apiNotices = Array.isArray(noticesRes.data) ? noticesRes.data : [];
+      const resourcesTotal = resourcesRes?.data?.data?.pagination?.total || 0;
+      const modulesTotal = modulesRes?.data?.data?.pagination?.total || 0;
+
+      const requests = Array.isArray(requestsRes.data) ? requestsRes.data : [];
+      const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      const recentActivity = requests.filter((request) => {
+        const created = new Date(request?.createdAt || '').getTime();
+        return Number.isFinite(created) && created >= sevenDaysAgo;
+      }).length;
+
       const role = normalize(currentUser?.role);
       const targetMap = {
         student: 'students',
@@ -115,9 +140,13 @@ const Dashboard = () => {
       }));
 
       setNotices(topNotices);
-      setStats({ totalResources: 156, totalModules: 24, recentActivity: 12 });
+      setStats({
+        totalResources: resourcesTotal,
+        totalModules: modulesTotal,
+        recentActivity,
+      });
     } catch (err) {
-      if (!silent) toast.error('Failed to load dashboard notices');
+      if (!silent) toast.error('Failed to load dashboard data');
     } finally {
       if (!silent) setLoading(false);
     }
@@ -358,6 +387,18 @@ const Dashboard = () => {
 
         {/* Recent Activity */}
         <div style={{ background:'white', borderRadius:18, boxShadow:'0 2px 8px rgba(9,72,134,0.06)', overflow:'hidden' }}>
+          <div style={{ margin:'1rem 1.5rem 0.5rem', borderRadius:12, border:'1px solid #bfdbfe', background:'#eff6ff', padding:'0.85rem 1rem', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'0.8rem', flexWrap:'wrap' }}>
+            <p style={{ fontSize:'0.82rem', color:'#1e3a8a', fontWeight:600 }}>
+              Your feedback very important to Tutors.
+            </p>
+            <Link
+              to="/student/feedback"
+              style={{ fontSize:'0.78rem', fontWeight:700, color:'white', background:'#2563eb', textDecoration:'none', borderRadius:8, padding:'7px 12px', whiteSpace:'nowrap' }}
+            >
+              Feedback
+            </Link>
+          </div>
+
           <div style={{ padding:'1.1rem 1.5rem 0', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.4rem' }}>
             <span style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.95rem', fontWeight:700, color:'#0f1e35' }}>📈 Recent Activity</span>
             <button style={{ fontSize:'0.80rem', fontWeight:600, color:'#2563eb', background:'none', border:'none', cursor:'pointer', fontFamily:"'Sora',sans-serif" }}>View All</button>
