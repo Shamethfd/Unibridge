@@ -6,6 +6,7 @@ export const createNotice = async (req, res) => {
     if (!title || !content) {
       return res.status(400).json({ error: 'Title and content are required' });
     }
+    
     const notice = new Notice({
       title, content, targetAudience, module,
       scheduledAt: scheduledAt || null,

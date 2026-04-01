@@ -6,7 +6,7 @@ import CreateNotice from './Components/NoticeManagement/CreateNotice';
 import NoticeDetail from './Components/NoticeManagement/NoticeDetail';
 import UserNoticeView from './Components/NoticeManagement/UserNoticeView';
 import NoticeRequest from './Components/NoticeManagement/NoticeRequest';
-import NoticeRequestList from './Components/NoticeManagement/NoticeRequestList';
+import NoticeRequestList from "./Components/NoticeManagement/NoticeRequestList";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
       <Route path='/notices/:id' element={<NoticeDetail />} />
       <Route path='/create-notice' element={<CreateNotice />} />
       <Route path='/notice-request' element={<NoticeRequest />} />
-      <Route path='/notice-requests' element={<NoticeRequestList />} />
+      <Route path="/notice-requestlist" element={<NoticeRequestList />} />
     </Routes>
   );
 }
