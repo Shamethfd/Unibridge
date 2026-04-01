@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FiSend, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import FormInput, { getTodayDate } from '../Components/FormInput';
 import { api, getApiErrorMessage } from '../services/api';
@@ -237,6 +237,13 @@ export default function CreateSessionPage() {
           <button onClick={handleReset} className="btn-primary">
             Create Another Session
           </button>
+          <Link
+            to="/tutor/study-sessions"
+            state={{ studentId: form.studentId.trim() }}
+            className="btn-secondary ml-3 inline-flex items-center"
+          >
+            View Study Sessions
+          </Link>
         </div>
       </div>
     );

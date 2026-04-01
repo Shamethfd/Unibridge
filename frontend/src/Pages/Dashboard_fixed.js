@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { getTutorApplications } from '../services/api';
+import { getTutorApplications, api } from '../services/api';
 import { getStoredTutorStudentId } from '../utils/tutorStorage';
 
 const Dashboard = () => {
@@ -29,7 +29,6 @@ const Dashboard = () => {
         catch { navigate('/login'); return; }
       }
     }
-    fetchDashboardData();
   }, [navigate]);
 
   useEffect(() => {
@@ -82,21 +81,58 @@ const Dashboard = () => {
     resolveTutorEligibility();
   }, [user]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (silent = false, currentUser = user) => {
     try {
-      setLoading(true);
-      setNotices([
-        { id: 1, title: 'Welcome to LearnBridge!', content: 'Your academic resource management platform is ready. Explore modules, submit resources, and collaborate with peers.', type: 'info', date: new Date().toISOString(), priority: 'high' },
-        { id: 2, title: 'New Module Available', content: 'Advanced Web Development has been added to curriculum. Check out the latest resources and materials.', type: 'success', date: new Date(Date.now() - 86400000).toISOString(), priority: 'medium' },
-        { id: 3, title: 'System Maintenance', content: 'Scheduled maintenance this weekend from 2 AM to 4 AM. The platform may be temporarily unavailable.', type: 'warning', date: new Date(Date.now() - 172800000).toISOString(), priority: 'low' },
-      ]);
+      if (!silent) setLoading(true);
+
+      const noticesRes = await api.get('/api/notices', {
+        params: {
+          archived: false,
+        },
+      });
+
+      const apiNotices = Array.isArray(noticesRes.data) ? noticesRes.data : [];
+      const role = normalize(currentUser?.role);
+      const targetMap = {
+        student: 'students',
+        coordinator: 'coordinators',
+        tutor: 'tutors',
+      };
+      const roleTarget = targetMap[role] || 'all';
+
+      const visibleNotices = apiNotices.filter((n) => {
+        const audience = normalize(n?.targetAudience || 'all');
+        return audience === 'all' || audience === roleTarget;
+      });
+
+      const topNotices = visibleNotices.slice(0, 3).map((n) => ({
+        id: n._id,
+        title: n.title || 'Untitled notice',
+        content: n.content || n.message || '',
+        type: n.isPublished ? 'info' : 'warning',
+        date: n.createdAt || new Date().toISOString(),
+        priority: 'medium',
+      }));
+
+      setNotices(topNotices);
       setStats({ totalResources: 156, totalModules: 24, recentActivity: 12 });
     } catch (err) {
-      toast.error('Failed to load dashboard data');
+      if (!silent) toast.error('Failed to load dashboard notices');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!user) return;
+
+    fetchDashboardData(false, user);
+    const refreshId = setInterval(() => {
+      fetchDashboardData(true, user);
+    }, 15000);
+
+    return () => clearInterval(refreshId);
+  }, [user]);
 
   const formatDate = (ds) => {
     const diff = Math.ceil(Math.abs(new Date() - new Date(ds)) / 864e5);
@@ -120,6 +156,21 @@ const Dashboard = () => {
       { title: 'Browse Resources', desc: 'Explore study materials',  link: '/resources',       color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
       { title: 'Submit Resource',  desc: 'Share your materials',     link: '/submit-resource',  color: '#059669', bg: '#f0fdf4', border: '#a7f3d0' },
     ];
+
+    if (normalize(user?.role) === 'student') {
+      const studentStateId = String(
+        eligibleStudentId || user?.studentId || user?.profile?.studentId || ''
+      ).trim();
+      base.unshift({
+        title: 'Study Sessions',
+        desc: 'View previous, ongoing, upcoming',
+        link: `/tutor/study-sessions`,
+        color: '#0f766e',
+        bg: '#f0fdfa',
+        border: '#99f6e4',
+        state: studentStateId ? { studentId: studentStateId } : undefined,
+      });
+    }
 
     if (normalize(user?.role) === 'student' && isApprovedTutor && eligibleStudentId) {
       base.unshift({
@@ -294,7 +345,7 @@ const Dashboard = () => {
                     onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 6px 20px rgba(9,72,134,0.08)'; e.currentTarget.style.borderTopColor=a.color; }}
                     onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderTopColor='transparent'; }}>
                     <div style={{ width:44, height:44, borderRadius:13, display:'flex', alignItems:'center', justifyContent:'center', background:a.bg, border:'1.5px solid '+a.border, fontSize:'1.2rem' }}>
-                      {a.title.includes('Create Session')?'🗓️':a.title.includes('Ratings')?'⭐':a.title.includes('Courses')?'🎓':a.title.includes('Browse')?'📚':a.title.includes('Submit')?'📤':a.title.includes('Module')?'⚙️':'📁'}
+                      {a.title.includes('Create Session')?'🗓️':a.title.includes('Study Sessions')?'📋':a.title.includes('Ratings')?'⭐':a.title.includes('Courses')?'🎓':a.title.includes('Browse')?'📚':a.title.includes('Submit')?'📤':a.title.includes('Module')?'⚙️':'📁'}
                     </div>
                     <p style={{ fontFamily:"'Sora',sans-serif", fontSize:'0.84rem', fontWeight:700, color:'#0f1e35', textAlign:'center' }}>{a.title}</p>
                     <p style={{ fontSize:'0.76rem', color:'#94a3b8', textAlign:'center', lineHeight:1.4 }}>{a.desc}</p>
