@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getYears } from '../services/api';
-import './HomePage.css';
-
-const YEAR_LABELS = ['Year 1', 'Year 2', 'Year 3', 'Year 4'];
 
 const YearPage = () => {
   const navigate = useNavigate();
@@ -27,43 +24,40 @@ const YearPage = () => {
   const decodedFaculty = decodeURIComponent(facultyName);
 
   return (
-    <div className="page-shell">
-      <nav className="navbar">
-        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">LearnBridge</span></div>
-        <div className="nav-links">
-          <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
-          <button className="nav-btn admin-btn" onClick={() => navigate('/codeigniter-dashboard')}>CodeIgniter Dashboard</button>
-        </div>
-      </nav>
-
-      <div className="page-content">
-        <div className="page-header">
-          <div className="breadcrumb">
-            <a href="/">Home</a><span>/</span>
-            <a href="/faculties">Faculties</a><span>/</span>
-            <span>{decodedFaculty}</span>
+    <div className="page-container animate-fade-in">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-neutral-500 mb-3">
+            <Link to="/dashboard" className="hover:text-primary-600 transition-colors">Dashboard</Link>
+            <span>/</span>
+            <Link to="/hpage" className="hover:text-primary-600 transition-colors">Faculties</Link>
+            <span>/</span>
+            <span className="text-neutral-700">{decodedFaculty}</span>
           </div>
-          <h1 className="page-title">{decodedFaculty} — Select Year</h1>
-          <p className="page-subtitle">Choose your academic year</p>
+          <h1 className="page-title">{decodedFaculty} - Select Year</h1>
+          <p className="page-subtitle">Choose your academic year to continue.</p>
         </div>
 
         {loading ? (
-          <div className="loading-wrap"><div className="spinner" /><span>Loading...</span></div>
+          <div className="card text-center py-10 text-neutral-500">Loading years...</div>
         ) : years.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📅</div>
-            <p>No years configured yet. Please add years via the CodeIgniter Dashboard.</p>
+          <div className="card text-center py-12">
+            <div className="text-4xl mb-3">📅</div>
+            <p className="text-neutral-500">No years configured yet. Please add years from admin side.</p>
           </div>
         ) : (
-          <div className="cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {years.map((year, i) => (
               <div
                 key={year._id}
-                className="year-card"
+                className="card cursor-pointer hover:-translate-y-0.5"
                 onClick={() => navigate(`/semesters/${year._id}/${encodeURIComponent(year.name)}`)}
               >
-                <div className="year-number">{i + 1}</div>
-                <div className="year-label">{year.name}</div>
+                <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 font-gilroyBold flex items-center justify-center mb-3">
+                  {i + 1}
+                </div>
+                <p className="font-gilroyBold text-neutral-800 mb-1">{year.name}</p>
+                <p className="text-sm text-neutral-400">Open semesters</p>
               </div>
             ))}
           </div>

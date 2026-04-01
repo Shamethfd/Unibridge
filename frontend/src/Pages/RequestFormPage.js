@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { createRequest, joinRequest, getRequestsByModule, getModules } from '../services/api';
-import './HomePage.css';
 
 const TIME_SLOTS = [
   'Mon 8-10am', 'Mon 2-4pm', 'Tue 8-10am', 'Tue 2-4pm',
@@ -132,78 +131,55 @@ const RequestFormPage = () => {
   const existingByCategory = existingReqs.filter(r => r.category === category);
 
   return (
-    <div className="page-shell">
-      <nav className="navbar">
-        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">LearnBridge</span></div>
-        <div className="nav-links">
-          <button className="nav-btn" onClick={() => navigate('/faculties')}>Courses</button>
-        </div>
-      </nav>
-
-      <div className="page-content">
-        <div className="page-header">
-          <div className="breadcrumb">
-            <a href="/">Home</a><span>/</span>
-            <a href="/faculties">Faculties</a><span>/</span>
-            <span>Request</span>
+    <div className="page-container animate-fade-in">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-neutral-500 mb-3">
+            <Link to="/dashboard" className="hover:text-primary-600 transition-colors">Dashboard</Link>
+            <span>/</span>
+            <Link to="/hpage" className="hover:text-primary-600 transition-colors">Faculties</Link>
+            <span>/</span>
+            <span className="text-neutral-700">Request</span>
           </div>
-          <h1 className="page-title">📋 Study Request</h1>
+          <h1 className="page-title">Study Request</h1>
+          <p className="page-subtitle">Create and submit your request for {decoded}.</p>
         </div>
 
-        <div className="request-form-card">
+        <div className="card">
           {/* Module Banner */}
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(19, 198, 214, 0.2), rgba(255,101,132,0.2))',
-            border: '1px solid rgba(108,99,255,0.3)',
-            borderRadius: '12px',
-            padding: '1rem 1.5rem',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.5rem'
-          }}>
+          <div className="rounded-xl border border-primary-200 bg-primary-50 px-5 py-4 mb-6 flex items-center justify-between flex-wrap gap-2">
             <div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Selected Module</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>📚 {decoded}</div>
+              <div className="text-xs text-neutral-500 mb-1">Selected Module</div>
+              <div className="text-lg font-gilroyBold text-neutral-800">{decoded}</div>
             </div>
-            <span className={`demand-badge ${demand.cls}`} style={{ fontSize: '0.9rem' }}>{demand.label}</span>
+            <span className="text-xs px-2 py-1 rounded-full border border-primary-200 text-primary-700 bg-white">{demand.label}</span>
           </div>
 
           {/* Duplicate Alert */}
           {duplicateData && (
-            <div className="duplicate-alert">
+            <div className="rounded-xl border border-warning-200 bg-warning-50 p-4 mb-5">
               <h4>⚠️ Request Already Exists!</h4>
               <p>{duplicateData.message}</p>
               <p style={{ marginBottom: '1rem' }}>
                 Urgency: <strong>{duplicateData.request.urgency}</strong> &nbsp;|&nbsp;
                 Time: <strong>{new Date(duplicateData.request.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>
               </p>
-              <button className="btn-join" onClick={handleJoin}>👥 Join This Request</button>
+              <button className="btn-primary" onClick={handleJoin}>Join This Request</button>
             </div>
           )}
 
           {/* Existing requests for selected category */}
           {category && existingByCategory.length > 0 && !duplicateData && (
-            <div style={{
-              background: 'rgba(46,213,115,0.08)',
-              border: '1px solid rgba(46,213,115,0.3)',
-              borderRadius: '12px',
-              padding: '1rem 1.2rem',
-              marginBottom: '1.5rem',
-              fontSize: '0.9rem',
-              color: 'var(--green)'
-            }}>
+            <div className="rounded-xl border border-accent-200 bg-accent-50 text-accent-700 p-4 mb-5 text-sm">
               ℹ️ {existingByCategory.length} existing request(s) for this category — submitting will auto-check for duplicates.
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             {/* Category */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label>Category *</label>
-              <select value={category} onChange={e => { setCategory(e.target.value); setErrors(p => ({...p, category: ''})); }} required>
+            <div className="mb-5">
+              <label className="label">Category *</label>
+              <select className="input-field" value={category} onChange={e => { setCategory(e.target.value); setErrors(p => ({...p, category: ''})); }} required>
                 <option value="">— Select category —</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -211,9 +187,10 @@ const RequestFormPage = () => {
             </div>
 
             {/* Description */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label>Description <span style={{ color: '#da1e28' }}>*</span></label>
+            <div className="mb-5">
+              <label className="label">Description <span style={{ color: '#da1e28' }}>*</span></label>
               <textarea
+                className="input-field"
                 value={description}
                 onChange={e => {
                   setDescription(e.target.value);
@@ -236,14 +213,14 @@ const RequestFormPage = () => {
             </div>
 
             {/* Urgency */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label>Urgency Level</label>
-              <div className="urgency-options">
+            <div className="mb-5">
+              <label className="label">Urgency Level</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {['Normal', 'Urgent', 'Exam Priority'].map(u => (
                   <button
                     type="button"
                     key={u}
-                    className={`urgency-btn ${u === 'Urgent' ? 'urgent' : u === 'Exam Priority' ? 'exam' : ''} ${urgency === u ? 'selected' : ''}`}
+                    className={`px-3 py-2 rounded-lg border text-sm transition-colors ${urgency === u ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-neutral-600 border-neutral-200'}`}
                     onClick={() => setUrgency(u)}
                   >
                     {u === 'Normal' ? '🟢' : u === 'Urgent' ? '🟡' : '🔴'} {u}
@@ -253,14 +230,14 @@ const RequestFormPage = () => {
             </div>
 
             {/* Time Slots */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label>Preferred Time Slots (select all applicable)</label>
-              <div className="time-slots">
+            <div className="mb-5">
+              <label className="label">Preferred Time Slots (select all applicable)</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {TIME_SLOTS.map(slot => (
                   <button
                     type="button"
                     key={slot}
-                    className={`time-slot ${selectedSlots.includes(slot) ? 'selected' : ''}`}
+                    className={`px-2.5 py-2 rounded-lg border text-xs sm:text-sm transition-colors ${selectedSlots.includes(slot) ? 'bg-secondary-500 text-white border-secondary-500' : 'bg-white text-neutral-600 border-neutral-200'}`}
                     onClick={() => { toggleSlot(slot); setErrors(p => ({...p, slots: ''})); }}
                   >
                     {slot}
@@ -271,8 +248,8 @@ const RequestFormPage = () => {
             </div>
 
             {/* Heat Score Preview */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label>Request Heat Score (Preview)</label>
+            <div className="mb-5">
+              <label className="label">Request Heat Score (Preview)</label>
               <div className="heat-bar-wrap">
                 <div className="heat-bar-bg">
                   <div className="heat-bar-fill" style={{ width: `${Math.min((heatScore / 100) * 100, 100)}%` }} />
@@ -282,8 +259,8 @@ const RequestFormPage = () => {
             </div>
 
             {/* Invite Friends */}
-            <div className="form-group" style={{ marginBottom: '1.8rem' }}>
-              <label>👥 Invite Friends</label>
+            <div className="mb-7">
+              <label className="label">Invite Friends</label>
               <div className="invite-bar">
                 <p>Share this link with classmates to boost demand for this session</p>
                 <button type="button" className="btn-copy" onClick={handleCopyLink}>
@@ -293,20 +270,20 @@ const RequestFormPage = () => {
             </div>
 
             {/* Submit */}
-            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.05rem' }} disabled={submitting}>
+            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '0.95rem', fontSize: '1rem' }} disabled={submitting}>
               {submitting ? '⏳ Submitting...' : '🚀 Submit Request'}
             </button>
           </form>
 
           {/* Smart Suggestions */}
           {suggestions.length > 0 && (
-            <div className="suggestions-section">
+            <div className="mt-6">
               <h4>💡 Related Modules You Might Also Need:</h4>
-              <div className="suggestion-chips">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {suggestions.map(s => (
                   <span
                     key={s._id}
-                    className="suggestion-chip"
+                    className="px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-700 text-sm cursor-pointer hover:bg-neutral-200"
                     onClick={() => navigate(`/request/${s._id}/${encodeURIComponent(s.name)}`)}
                   >
                     {s.name}
@@ -319,8 +296,8 @@ const RequestFormPage = () => {
 
         {/* Existing Requests Panel */}
         {existingReqs.length > 0 && (
-          <div style={{ marginTop: '2rem' }}>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>📊 Current Requests for This Module</h3>
+          <div className="card mt-6">
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Current Requests for This Module</h3>
             <div style={{ overflowX: 'auto' }}>
               <table className="data-table">
                 <thead>

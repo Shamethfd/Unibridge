@@ -63,19 +63,29 @@ const Header = ({ user, onLogout }) => {
   const getNavLinks = () => {
     if (!user) return [];
 
-    const baseLinks = [{ path: '/dashboard', label: 'Dashboard', icon: '🏠' }];
+    const baseLinks = [{ path: '/dashboard', label: 'Dashboard' }];
+
+    if (user.role === 'student') {
+      baseLinks.push(
+        { path: '/tutor/study-sessions', label: 'Study Sessions' }
+      );
+    }
+
+    if (user.role === 'coordinator') {
+      baseLinks.push({ path: '/coordinator', label: 'Coordinator' });
+    }
 
     if (user.role === 'admin' || user.role === 'resourceManager' || user.role === 'coordinator') {
       baseLinks.push(
-        { path: '/manage-modules', label: 'Manage Modules', icon: '📚' },
-        { path: '/manage-resources', label: 'Manage Resources', icon: '📁' }
+        { path: '/manage-modules', label: 'Manage Modules' },
+        { path: '/manage-resources', label: 'Manage Resources' }
       );
     }
 
     baseLinks.push(
-      { path: '/resources', label: 'Resources', icon: '📖' },
-      { path: '/submit-resource', label: 'Submit Resource', icon: '➕' },
-      { path: '/user-notices', label: 'Notices', icon: '🔔' }
+      { path: '/resources', label: 'Resources' },
+      { path: '/submit-resource', label: 'Submit Resource' },
+      { path: '/user-notices', label: 'Notices' }
     );
 
     return baseLinks;
@@ -118,7 +128,6 @@ const Header = ({ user, onLogout }) => {
                           : 'text-white/80 hover:bg-white/10 hover:text-white'
                     }`}
                   >
-                    <span>{link.icon}</span>
                     <span>{link.label}</span>
                   </Link>
                 </li>
@@ -223,7 +232,6 @@ const Header = ({ user, onLogout }) => {
                       : 'text-white/80 hover:bg-white/10'
                 }`}
               >
-                <span>{link.icon}</span>
                 <span>{link.label}</span>
               </Link>
             ))}
@@ -259,9 +267,9 @@ const ProtectedLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sage-50 to-sage-100">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50/40 to-secondary-50/40">
       <Header user={user} onLogout={handleLogout} />
-      <main className="pt-16">
+      <main className="pt-16 app-surface">
         <Outlet />
       </main>
     </div>
@@ -304,18 +312,10 @@ function App() {
         <Route path="/codeigniter-dashboard" element={<CodeIgniterDashboard />} />
         <Route path="/tutor-management" element={<TutorManagement />} />
 
-        {/* Student routes */}
-        <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/student/apply" element={<TutorApplicationPage />} />
-        <Route path="/student/noticeboard" element={<NoticeBoardPage />} />
-        <Route path="/student/feedback" element={<FeedbackPage />} />
-
-        {/* Coordinator route */}
-        <Route path="/coordinator" element={<CoordinatorDashboard />} />
-
         <Route path="/" element={<ProtectedLayout />}>
           <Route path="dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
           <Route path="hpage" element={isAuthenticated ? <Hpage /> : <Navigate to="/login" />} />
+          <Route path="faculties" element={isAuthenticated ? <Hpage /> : <Navigate to="/login" />} />
           <Route path="profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
           <Route path="resources" element={isAuthenticated ? <StructuredResources /> : <Navigate to="/login" />} />
           <Route path="upload-resource" element={isAuthenticated ? <UploadResource /> : <Navigate to="/login" />} />
@@ -328,13 +328,23 @@ function App() {
           <Route path="create-notice" element={canManageNotices ? <CreateNotice /> : <Navigate to="/login" />} />
           <Route path="notice-request" element={canManageNotices ? <NoticeRequest /> : <Navigate to="/login" />} />
           <Route path="notice-requests" element={canManageNotices ? <NoticeRequestList /> : <Navigate to="/login" />} />
+
+          {/* Student routes */}
+          <Route path="student" element={isAuthenticated ? <StudentDashboard /> : <Navigate to="/login" />} />
+          <Route path="student/apply" element={isAuthenticated ? <TutorApplicationPage /> : <Navigate to="/login" />} />
+          <Route path="student/noticeboard" element={isAuthenticated ? <NoticeBoardPage /> : <Navigate to="/login" />} />
+          <Route path="student/feedback" element={isAuthenticated ? <FeedbackPage /> : <Navigate to="/login" />} />
+
+          {/* Coordinator route */}
+          <Route path="coordinator" element={isAuthenticated ? <CoordinatorDashboard /> : <Navigate to="/login" />} />
+
+          {/* Tutor routes */}
+          <Route path="tutor" element={isAuthenticated ? <TutorDashboard /> : <Navigate to="/login" />} />
+          <Route path="tutor/create-session" element={isAuthenticated ? <CreateSessionPage /> : <Navigate to="/login" />} />
+          <Route path="tutor/study-sessions" element={isAuthenticated ? <StudySessionsPage /> : <Navigate to="/login" />} />
+          <Route path="tutor/ratings" element={isAuthenticated ? <TutorRatingPage /> : <Navigate to="/login" />} />
+          <Route path="tutor/messages" element={isAuthenticated ? <TutorMessagesPage /> : <Navigate to="/login" />} />
         </Route>
-        {/* Tutor Routes */}
-        <Route path='/tutor' element={<TutorDashboard />} />
-        <Route path='/tutor/create-session' element={<CreateSessionPage />} />
-        <Route path='/tutor/study-sessions' element={<StudySessionsPage />} />
-        <Route path='/tutor/ratings' element={<TutorRatingPage />} />
-        <Route path='/tutor/messages' element={<TutorMessagesPage />} />
 
         <Route
           path="/admin-dashboard"

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getSemesters } from '../services/api';
-import './HomePage.css';
 
 const SEM_ICONS = ['📘', '📗'];
 
@@ -27,45 +26,38 @@ const SemesterPage = () => {
   const decoded = decodeURIComponent(yearName);
 
   return (
-    <div className="page-shell">
-      <nav className="navbar">
-        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">UniConnect</span></div>
-        <div className="nav-links">
-          <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
-          <button className="nav-btn admin-btn" onClick={() => navigate('/codeigniter-dashboard')}>CodeIgniter Dashboard</button>
-        </div>
-      </nav>
-
-      <div className="page-content">
-        <div className="page-header">
-          <div className="breadcrumb">
-            <a href="/">Home</a><span>/</span>
-            <a href="/faculties">Faculties</a><span>/</span>
-            <span>{decoded}</span><span>/</span><span>Semester</span>
+    <div className="page-container animate-fade-in">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-neutral-500 mb-3">
+            <Link to="/dashboard" className="hover:text-primary-600 transition-colors">Dashboard</Link>
+            <span>/</span>
+            <Link to="/hpage" className="hover:text-primary-600 transition-colors">Faculties</Link>
+            <span>/</span>
+            <span className="text-neutral-700">{decoded}</span>
           </div>
-          <h1 className="page-title">{decoded} — Select Semester</h1>
-          <p className="page-subtitle">Choose your semester</p>
+          <h1 className="page-title">{decoded} - Select Semester</h1>
+          <p className="page-subtitle">Choose your semester to view modules.</p>
         </div>
 
         {loading ? (
-          <div className="loading-wrap"><div className="spinner" /><span>Loading...</span></div>
+          <div className="card text-center py-10 text-neutral-500">Loading semesters...</div>
         ) : semesters.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📚</div>
-            <p>No semesters configured. Please add semesters via the CodeIgniter Dashboard.</p>
+          <div className="card text-center py-12">
+            <div className="text-4xl mb-3">📚</div>
+            <p className="text-neutral-500">No semesters configured for this year.</p>
           </div>
         ) : (
-          <div className="cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {semesters.map((sem, i) => (
               <div
                 key={sem._id}
-                className="nav-card"
+                className="card cursor-pointer hover:-translate-y-0.5"
                 onClick={() => navigate(`/modules/${sem._id}/${encodeURIComponent(sem.name)}`)}
-                style={{ padding: '2.5rem 1.5rem' }}
               >
-                <span className="card-icon" style={{ fontSize: '3rem' }}>{SEM_ICONS[i % 2]}</span>
-                <div className="card-title" style={{ fontSize: '1.3rem' }}>{sem.name}</div>
-                <div className="card-desc">Explore modules →</div>
+                <div className="text-4xl mb-3">{SEM_ICONS[i % 2]}</div>
+                <p className="text-lg font-gilroyBold text-neutral-800 mb-1">{sem.name}</p>
+                <p className="text-sm text-neutral-400">Explore modules</p>
               </div>
             ))}
           </div>

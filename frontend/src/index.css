@@ -55,7 +55,10 @@ body {
     'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fafc;
+  background:
+    radial-gradient(circle at 5% 5%, rgba(37, 99, 235, 0.08), transparent 34%),
+    radial-gradient(circle at 95% 10%, rgba(9, 72, 134, 0.10), transparent 36%),
+    #f8fafc;
   color: #1e293b;
 }
 
@@ -87,15 +90,15 @@ code {
 /* ===== Component Layer ===== */
 @layer components {
   .btn-primary {
-    @apply bg-primary-500 text-white px-6 py-2.5 rounded-lg font-gilroyMedium
-           hover:bg-primary-600 active:bg-primary-700 transition-all duration-200
-           shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500/50;
+      @apply bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-6 py-2.5 rounded-xl font-gilroyMedium
+        hover:from-primary-600 hover:to-secondary-600 active:scale-[0.99] transition-all duration-200
+        shadow-card hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-primary-500/50;
   }
 
   .btn-secondary {
-    @apply bg-secondary-500 text-white px-6 py-2.5 rounded-lg font-gilroyMedium
-           hover:bg-secondary-600 active:bg-secondary-700 transition-all duration-200
-           shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-secondary-500/50;
+      @apply bg-white text-primary-700 px-6 py-2.5 rounded-xl font-gilroyMedium border border-primary-200
+        hover:bg-primary-50 active:scale-[0.99] transition-all duration-200
+        shadow-card hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-primary-500/30;
   }
 
   .btn-outline {
@@ -117,8 +120,8 @@ code {
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-card p-6 transition-all duration-300
-           hover:shadow-card-hover border border-neutral-100;
+      @apply bg-white/95 backdrop-blur-sm rounded-2xl shadow-card p-6 transition-all duration-300
+        hover:shadow-card-hover border border-neutral-100/80;
   }
 
   .card-glass {
@@ -142,15 +145,15 @@ code {
   }
 
   .page-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10;
   }
 
   .page-title {
-    @apply text-3xl font-gilroyBold text-primary-500 mb-2;
+    @apply text-3xl md:text-4xl font-gilroyBold text-primary-600 mb-2 tracking-tight;
   }
 
   .page-subtitle {
-    @apply text-neutral-500 font-gilroyRegular mb-8;
+    @apply text-neutral-500 font-gilroyRegular mb-8 text-[15px] leading-relaxed;
   }
 
   .section-title {
