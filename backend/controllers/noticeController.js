@@ -1,4 +1,5 @@
 import Notice from '../models/Notice.js';
+import User from '../models/User.js';
 
 export const createNotice = async (req, res) => {
   try {
@@ -96,12 +97,19 @@ export const markViewed = async (req, res) => {
   }
 };
 
+
 export const getAnalytics = async (req, res) => {
   try {
     const total = await Notice.countDocuments();
     const published = await Notice.countDocuments({ isPublished: true });
     const archived = await Notice.countDocuments({ isArchived: true });
     const active = await Notice.countDocuments({ isArchived: false });
+
+    
+    const totalStudents = await User.countDocuments({ role: 'student' });
+    const totalTutors = await User.countDocuments({ role: 'tutor' });
+    const totalCoordinators = await User.countDocuments({ role: 'coordinator' });
+
     const notices = await Notice.find({}, 'title viewedBy createdAt targetAudience');
     const viewStats = notices.map(n => ({
       title: n.title,
@@ -109,7 +117,14 @@ export const getAnalytics = async (req, res) => {
       target: n.targetAudience,
       date: n.createdAt,
     }));
-    res.status(200).json({ total, published, archived, active, viewStats });
+
+    res.status(200).json({ 
+      total, published, archived, active,
+      totalStudents,
+      totalTutors,
+      totalCoordinators,
+      viewStats 
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
