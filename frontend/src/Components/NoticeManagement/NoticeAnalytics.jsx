@@ -75,6 +75,28 @@ const NoticeAnalytics = () => {
           <h4>Archived</h4>
           <p>{stats.archived}</p>
         </div>
+        <div className="stat-card orange">
+          <div className="stat-icon">⭐</div>
+          <h4>Avg. Notice Rating</h4>
+          <p>{stats.avgRating ? stats.avgRating.toFixed(1) : 'N/A'}</p>
+        </div>
+        {/* ✅ System-wide cards */}
+        <div className="stat-card purple">
+          <div className="stat-icon">👨‍🏫</div>
+          <h4>Total Tutors</h4>
+          <p>{stats.totalTutors ?? 0}</p>
+        </div>
+        <div className="stat-card blue">
+          <div className="stat-icon">🎓</div>
+          <h4>Total Students</h4>
+          <p>{stats.totalStudents ?? 0}</p>
+        </div>
+        {/* ✅ NEW — Coordinators card */}
+        <div className="stat-card green">
+          <div className="stat-icon">📋</div>
+          <h4>Total Coordinators</h4>
+          <p>{stats.totalCoordinators ?? 0}</p>
+        </div>
       </div>
 
       {/* View Stats Table */}
@@ -106,10 +128,9 @@ const NoticeAnalytics = () => {
                   <td>
                     <span className={`table-badge ${n.target}`}>
                       {n.target === 'all' ? '🌐 All' :
-                       n.target === 'students' ? '🎓 Students' : 
+                       n.target === 'students' ? '🎓 Students' :
                        n.target === 'tutors' ? '👨‍🏫 Tutors' :
                        '📋 Coordinators'}
-
                     </span>
                   </td>
                   <td>
