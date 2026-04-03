@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import CreateNotice from './CreateNotice';
 import NoticeList from './NoticeList';
 import NoticeAnalytics from './NoticeAnalytics';
+import NoticeRequestList from './NoticeRequestList';
 import './NoticeManagement.css';
 import '../../Pages/NoticePage.css';
 
@@ -41,6 +42,9 @@ const NoticeManagementDashboard = () => {
           <Link to="/admin-dashboard" className="page-back-btn" style={{ textDecoration: 'none' }}>
             Back to Admin Dashboard
           </Link>
+          <Link to="/modules" className="page-back-btn" style={{ textDecoration: 'none' }}>
+            📚 Go to Module Page
+          </Link>
         </div>
       </div>
 
@@ -54,12 +58,17 @@ const NoticeManagementDashboard = () => {
         <button className={`nav-btn ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
           NoticeAnalytics
         </button>
+        <button className={`nav-btn ${activeTab === 'requests' ? 'active' : ''}`} onClick={() => setActiveTab('requests')}>
+    📋   Notice Requests
+        </button>
       </div>
 
       <div className="page-content">
         {activeTab === 'create' && <CreateNotice onCreated={() => setRefresh((r) => r + 1)} />}
         {activeTab === 'list' && <NoticeList refresh={refresh} />}
         {activeTab === 'analytics' && <NoticeAnalytics />}
+        {activeTab === 'requests' && <NoticeRequestList />}
+
       </div>
     </div>
   );
