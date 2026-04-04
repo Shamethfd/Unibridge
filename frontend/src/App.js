@@ -131,7 +131,7 @@ const Header = ({ user, onLogout }) => {
             <Link to={brandHomePath} className="flex items-center group">
               <div className="h-12 w-[140px] flex items-center justify-start">
                 <img
-                  src="/Logof.png"
+                  src={scrolled ? '/_Logo.png' : '/Logof.png'}
                   alt="Logo"
                   className="h-16 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
                   style={{ transform: 'scale(1.35)', transformOrigin: 'left center' }}
@@ -152,7 +152,7 @@ const Header = ({ user, onLogout }) => {
                           ? 'bg-primary-100 text-primary-700'
                           : 'bg-white/20 text-white'
                         : scrolled
-                          ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                           : 'text-white/80 hover:bg-white/10 hover:text-white'
                     }`}
                   >
@@ -168,7 +168,7 @@ const Header = ({ user, onLogout }) => {
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  scrolled ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-white/20 hover:bg-white/30 text-white'
+                  scrolled ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' : 'bg-white/20 hover:bg-white/30 text-white'
                 }`}
               >
                 <div
@@ -229,7 +229,7 @@ const Header = ({ user, onLogout }) => {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`md:hidden p-2 rounded-lg transition-colors ${
-                scrolled ? 'text-gray-600 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
               }`}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
