@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import CreateNotice from './CreateNotice';
 import NoticeList from './NoticeList';
 import NoticeAnalytics from './NoticeAnalytics';
@@ -32,19 +32,11 @@ const NoticeManagementDashboard = () => {
   }, [navigate]);
 
   return (
-    <div className="notice-page" style={{ minHeight: '100vh', background: '#f0f4f8' }}>
+    <div className="notice-page notice-management-page" style={{ minHeight: '100vh', background: '#f0f4f8' }}>
       <div className="page-header">
         <div className="header-left">
           <h1>Admin Notice Management</h1>
           <p>Create notices, manage all posts, and review notice analytics</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Link to="/admin-dashboard" className="page-back-btn" style={{ textDecoration: 'none' }}>
-            Back to Admin Dashboard
-          </Link>
-          <Link to="/modules" className="page-back-btn" style={{ textDecoration: 'none' }}>
-            📚 Go to Module Page
-          </Link>
         </div>
       </div>
 

@@ -239,14 +239,6 @@ Preferred Time: ${sendNoteRequest.preferredTime && sendNoteRequest.preferredTime
 
   return (
     <div className="page-shell">
-      <nav className="navbar">
-        <div className="nav-brand"><span className="brand-icon">🎓</span><span className="brand-name">LearnBridge</span></div>
-        <div className="nav-links">
-          <button className="nav-btn" onClick={() => navigate('/')}>Courses</button>
-          <button className="nav-btn" onClick={() => navigate('/')}>Exit Dashboard</button>
-        </div>
-      </nav>
-
       <div className="page-content">
         <div className="page-header">
           <h1 className="page-title">⚙️ CodeIgniter Dashboard</h1>

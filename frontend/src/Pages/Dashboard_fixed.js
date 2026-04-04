@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState([]);
   const [stats, setStats]     = useState({ totalResources: 0, totalModules: 0, recentActivity: 0 });
+  const [recentActivities, setRecentActivities] = useState([]);
   const [eligibleStudentId, setEligibleStudentId] = useState('');
   const [isApprovedTutor, setIsApprovedTutor] = useState(false);
   const navigate = useNavigate();
@@ -94,13 +95,13 @@ const Dashboard = () => {
         api.get('/api/resources', {
           params: {
             page: 1,
-            limit: 1,
+            limit: 5,
           },
         }),
         api.get('/api/modules', {
           params: {
             page: 1,
-            limit: 1,
+            limit: 5,
           },
         }),
         api.get('/api/requests'),
@@ -130,6 +131,51 @@ const Dashboard = () => {
         return audience === 'all' || audience === roleTarget;
       });
 
+      const resourceItems = (resourcesRes?.data?.data?.resources || []).map((resource) => ({
+        id: `resource-${resource?._id}`,
+        ts: new Date(resource?.createdAt || 0).getTime(),
+        bg: '#eff6ff',
+        emoji: '📤',
+        text: 'New resource uploaded',
+        detail: resource?.title || resource?.fileName || 'Untitled resource',
+      }));
+
+      const moduleItems = (modulesRes?.data?.data?.modules || []).map((module) => ({
+        id: `module-${module?._id}`,
+        ts: new Date(module?.createdAt || 0).getTime(),
+        bg: '#f0fdf4',
+        emoji: '📚',
+        text: 'New module created',
+        detail: module?.name || 'Untitled module',
+      }));
+
+      const requestItems = requests.slice(0, 10).map((request) => ({
+        id: `request-${request?._id}`,
+        ts: new Date(request?.createdAt || 0).getTime(),
+        bg: '#faf5ff',
+        emoji: '🙋',
+        text: 'New student request',
+        detail: request?.moduleName || request?.moduleId?.name || request?.category || 'Request submitted',
+      }));
+
+      const noticeItems = visibleNotices.slice(0, 10).map((notice) => ({
+        id: `notice-${notice?._id}`,
+        ts: new Date(notice?.createdAt || 0).getTime(),
+        bg: '#fff7ed',
+        emoji: '📢',
+        text: 'Notice published',
+        detail: notice?.title || 'Untitled notice',
+      }));
+
+      const mergedActivities = [...resourceItems, ...moduleItems, ...requestItems, ...noticeItems]
+        .filter((item) => Number.isFinite(item.ts) && item.ts > 0)
+        .sort((a, b) => b.ts - a.ts)
+        .slice(0, 5)
+        .map((item) => ({
+          ...item,
+          time: formatRelativeTime(item.ts),
+        }));
+
       const topNotices = visibleNotices.slice(0, 3).map((n) => ({
         id: n._id,
         title: n.title || 'Untitled notice',
@@ -140,6 +186,7 @@ const Dashboard = () => {
       }));
 
       setNotices(topNotices);
+      setRecentActivities(mergedActivities);
       setStats({
         totalResources: resourcesTotal,
         totalModules: modulesTotal,
@@ -169,6 +216,24 @@ const Dashboard = () => {
     if (diff === 1) return 'Yesterday';
     if (diff < 7)  return diff + ' days ago';
     return new Date(ds).toLocaleDateString();
+  };
+
+  const formatRelativeTime = (ds) => {
+    const ts = new Date(ds).getTime();
+    if (!Number.isFinite(ts)) return '';
+
+    const diffMs = Date.now() - ts;
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return `${diffMin} min ago`;
+
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr} hour${diffHr > 1 ? 's' : ''} ago`;
+
+    const diffDay = Math.floor(diffHr / 24);
+    if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
+
+    return new Date(ts).toLocaleDateString();
   };
 
   const getInitials = () => {
@@ -404,12 +469,10 @@ const Dashboard = () => {
             <button style={{ fontSize:'0.80rem', fontWeight:600, color:'#2563eb', background:'none', border:'none', cursor:'pointer', fontFamily:"'Sora',sans-serif" }}>View All</button>
           </div>
           <div style={{ paddingBottom:'0.4rem' }}>
-            {[
-              { bg:'#eff6ff', emoji:'📤', text:'New resource uploaded', detail:'JavaScript Fundamentals',  time:'2 hours ago' },
-              { bg:'#f0fdf4', emoji:'📚', text:'New module created',    detail:'Machine Learning Basics',   time:'5 hours ago' },
-              { bg:'#faf5ff', emoji:'👤', text:'New user joined',       detail:'John Doe',                  time:'1 day ago'   },
-            ].map((a, i) => (
-              <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderBottom: i<2?'1px solid #f8fafc':'none', transition:'background 0.15s' }}
+            {recentActivities.length === 0 ? (
+              <div style={{ padding:'14px 16px', color:'#94a3b8', fontSize:'0.84rem' }}>No recent activity available yet.</div>
+            ) : recentActivities.map((a, i) => (
+              <div key={a.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderBottom: i < recentActivities.length - 1 ? '1px solid #f8fafc' : 'none', transition:'background 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.background='#fafbfe'}
                 onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                 <div style={{ width:38, height:38, borderRadius:11, background:a.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'1.1rem' }}>{a.emoji}</div>

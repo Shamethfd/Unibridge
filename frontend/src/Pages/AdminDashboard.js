@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -64,8 +63,6 @@ const AdminDashboard = () => {
       toast.success('User deleted successfully'); fetchUsers();
     } catch { toast.error('Failed to delete user'); }
   };
-
-  const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/admin-login'; };
 
   const roleConfig = {
     admin:           { label: 'Admin',            color: '#7c3aed', bg: '#faf5ff', border: '#ddd6fe' },
@@ -178,19 +175,6 @@ const AdminDashboard = () => {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .ad-root { min-height: 100vh; background: #f0f4f8; font-family: 'DM Sans', sans-serif; }
 
-        /* NAVBAR */
-        .ad-nav { position: sticky; top: 0; z-index: 50; background: white; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 12px rgba(9,72,134,0.07); }
-        .ad-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-        .ad-brand { display: flex; align-items: center; gap: 10px; }
-        .ad-brand-logo { width: 36px; height: 36px; background: linear-gradient(135deg, #094886, #2563eb); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .ad-brand-name { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; color: #0f1e35; }
-        .ad-brand-badge { padding: 3px 10px; border-radius: 20px; background: #eff6ff; border: 1.5px solid #bfdbfe; font-family: 'Sora', sans-serif; font-size: 0.70rem; font-weight: 700; color: #2563eb; letter-spacing: 0.3px; }
-        .ad-nav-right { display: flex; align-items: center; gap: 6px; }
-        .ad-nav-link { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 10px; font-size: 0.84rem; font-weight: 500; color: #475569; text-decoration: none; transition: background 0.15s, color 0.15s; }
-        .ad-nav-link:hover { background: #f1f5f9; color: #094886; }
-        .ad-logout-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white; font-size: 0.84rem; font-weight: 500; color: #64748b; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-        .ad-logout-btn:hover { border-color: #fca5a5; color: #dc2626; background: #fff5f5; }
-
         /* BODY */
         .ad-body { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
 
@@ -282,43 +266,12 @@ const AdminDashboard = () => {
           .ad-body { padding: 1rem; }
           .ad-grid2 { grid-template-columns: 1fr; }
           .ad-tabs { flex-direction: column; }
-          .ad-brand-badge { display: none; }
         }
       `}</style>
 
       <ToastContainer position="top-right" toastStyle={{ fontFamily: "'DM Sans', sans-serif" }} />
 
       <div className="ad-root">
-
-        {/* NAVBAR */}
-        <nav className="ad-nav">
-          <div className="ad-nav-inner">
-            <div className="ad-brand">
-              <div className="ad-brand-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="ad-brand-name">LearnBridge</span>
-              <span className="ad-brand-badge">Admin Panel</span>
-            </div>
-            <div className="ad-nav-right">
-              <Link to="/manage-resources" className="ad-nav-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Manage Resources
-              </Link>
-              <Link to="/notice-management" className="ad-nav-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                Notice Manage
-              </Link>
-              <button className="ad-logout-btn" onClick={handleLogout}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Logout
-              </button>
-            </div>
-          </div>
-        </nav>
-
         <div className="ad-body">
 
           {/* Page header */}

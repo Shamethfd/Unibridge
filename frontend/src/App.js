@@ -62,34 +62,58 @@ const Header = ({ user, onLogout }) => {
 
   const getNavLinks = () => {
     if (!user) return [];
+    if (user.role === 'admin') {
+      return [
+        { path: '/admin-dashboard', label: 'Admin Dashboard' },
+        { path: '/manage-modules', label: 'Manage Modules' },
+        { path: '/manage-resources', label: 'Manage Resources' },
+        { path: '/notice-management', label: 'Notice Management' },
+      ];
+    }
+
+    if (user.role === 'noticeManager') {
+      return [
+        { path: '/notice-management', label: 'Notice Management' },
+        { path: '/user-notices', label: 'User Notices' },
+      ];
+    }
+
+    if (user.role === 'coordinator') {
+      return [
+        { path: '/user-notices', label: 'Notices' },
+      ];
+    }
+
+    if (user.role === 'resourceManager') {
+      return [
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/manage-modules', label: 'Manage Modules' },
+        { path: '/manage-resources', label: 'Manage Resources' },
+        { path: '/resources', label: 'Resources' },
+      ];
+    }
 
     const baseLinks = [{ path: '/dashboard', label: 'Dashboard' }];
 
     if (user.role === 'student') {
-      baseLinks.push(
-        { path: '/tutor/study-sessions', label: 'Study Sessions' }
-      );
-    }
-
-    if (user.role === 'coordinator') {
-      baseLinks.push({ path: '/coordinator', label: 'Coordinator' });
-    }
-
-    if (user.role === 'admin' || user.role === 'resourceManager' || user.role === 'coordinator') {
-      baseLinks.push(
-        { path: '/manage-modules', label: 'Manage Modules' },
-        { path: '/manage-resources', label: 'Manage Resources' }
-      );
+      baseLinks.push({ path: '/tutor/study-sessions', label: 'Study Sessions' });
     }
 
     baseLinks.push(
       { path: '/resources', label: 'Resources' },
-      { path: '/submit-resource', label: 'Submit Resource' },
+      { path: '/hpage', label: 'Courses' },
       { path: '/user-notices', label: 'Notices' }
     );
 
     return baseLinks;
   };
+
+  const homePathByRole = {
+    admin: '/admin-dashboard',
+    noticeManager: '/notice-management',
+    coordinator: '/coordinator',
+  };
+  const brandHomePath = homePathByRole[user?.role] || '/dashboard';
 
   const isActiveLink = (path) => location.pathname === path;
 
@@ -102,13 +126,17 @@ const Header = ({ user, onLogout }) => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
-            <Link to="/dashboard" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                <span className="text-2xl">🎓</span>
+            <Link to={brandHomePath} className="flex items-center group">
+              <div className="h-12 w-[140px] flex items-center justify-start">
+                <img
+                  src="/Logof.png"
+                  alt="Logo"
+                  className="h-16 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+                  style={{ transform: 'scale(1.35)', transformOrigin: 'left center' }}
+                />
               </div>
-              <span className={`text-xl font-bold transition-colors ${scrolled ? 'text-gray-900' : 'text-white'}`}>LearnBridge</span>
             </Link>
           </div>
 
@@ -269,7 +297,7 @@ const ProtectedLayout = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50/40 to-secondary-50/40">
       <Header user={user} onLogout={handleLogout} />
-      <main className="pt-16 app-surface">
+      <main className="pt-20 app-surface">
         <Outlet />
       </main>
     </div>
@@ -309,7 +337,6 @@ function App() {
         <Route path="/semesters/:yearId/:yearName" element={<SemesterPage />} />
         <Route path="/modules/:semesterId/:semesterName" element={<ModulePage />} />
         <Route path="/request/:moduleId/:moduleName" element={<RequestFormPage />} />
-        <Route path="/codeigniter-dashboard" element={<CodeIgniterDashboard />} />
         <Route path="/tutor-management" element={<TutorManagement />} />
 
         <Route path="/" element={<ProtectedLayout />}>
@@ -322,6 +349,9 @@ function App() {
           <Route path="submit-resource" element={isAuthenticated ? <SubmitResource /> : <Navigate to="/login" />} />
           <Route path="manage-resources" element={isAuthenticated ? <ManageResources /> : <Navigate to="/login" />} />
           <Route path="manage-modules" element={isAuthenticated ? <ManageModules /> : <Navigate to="/login" />} />
+          <Route path="codeigniter-dashboard" element={isAuthenticated ? <CodeIgniterDashboard /> : <Navigate to="/login" />} />
+          <Route path="admin-dashboard" element={isAuthenticated && userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/admin-login" />} />
+          <Route path="notice-management" element={canManageNotices ? <NoticeManagementDashboard /> : <Navigate to="/login" />} />
           <Route path="notices" element={canManageNotices ? <NoticePage /> : <Navigate to="/login" />} />
           <Route path="user-notices" element={isAuthenticated ? <UserNoticeView /> : <Navigate to="/login" />} />
           <Route path="notices/:id" element={isAuthenticated ? <NoticeDetail /> : <Navigate to="/login" />} />
@@ -345,16 +375,6 @@ function App() {
           <Route path="tutor/ratings" element={isAuthenticated ? <TutorRatingPage /> : <Navigate to="/login" />} />
           <Route path="tutor/messages" element={isAuthenticated ? <TutorMessagesPage /> : <Navigate to="/login" />} />
         </Route>
-
-        <Route
-          path="/admin-dashboard"
-          element={isAuthenticated && userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/admin-login" />}
-        />
-
-        <Route
-          path="/notice-management"
-          element={canManageNotices ? <NoticeManagementDashboard /> : <Navigate to="/login" />}
-        />
 
         <Route
           path="/coordinator-dashboard"

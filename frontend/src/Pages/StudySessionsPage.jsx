@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiCalendar, FiClock, FiExternalLink, FiAlertCircle, FiArrowLeft } from 'react-icons/fi';
-import FormInput from '../Components/FormInput';
 import { api, getApiErrorMessage } from '../services/api';
-import { getStoredTutorStudentId, setStoredTutorStudentId } from '../utils/tutorStorage';
+import { getStoredTutorStudentId } from '../utils/tutorStorage';
 
 const studentIdRegex = /^IT\d{8}$/i;
 
@@ -35,7 +34,6 @@ export default function StudySessionsPage() {
   const location = useLocation();
   const stateStudentId = (location.state?.studentId || '').trim();
 
-  const [studentIdInput, setStudentIdInput] = useState(() => stateStudentId || getStoredTutorStudentId());
   const [studentId, setStudentId] = useState(() => stateStudentId || getStoredTutorStudentId());
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,8 +41,6 @@ export default function StudySessionsPage() {
 
   useEffect(() => {
     if (stateStudentId && studentIdRegex.test(stateStudentId)) {
-      setStoredTutorStudentId(stateStudentId);
-      setStudentIdInput(stateStudentId);
       setStudentId(stateStudentId);
     }
   }, [stateStudentId]);
@@ -72,17 +68,6 @@ export default function StudySessionsPage() {
 
     loadSessions();
   }, [studentId]);
-
-  const applyStudentId = () => {
-    const clean = studentIdInput.trim();
-    if (!studentIdRegex.test(clean)) {
-      setError('Enter a valid student ID (e.g. IT21504832).');
-      return;
-    }
-    setStoredTutorStudentId(clean);
-    setStudentId(clean);
-    setError('');
-  };
 
   const grouped = useMemo(() => {
     const buckets = { previous: [], ongoing: [], upcoming: [] };
@@ -172,25 +157,6 @@ export default function StudySessionsPage() {
           <FiArrowLeft />
           Back to Dashboard
         </Link>
-      </div>
-
-      <div className="card mb-6">
-        <div className="flex flex-col md:flex-row md:items-end gap-4">
-          <div className="flex-1">
-            <FormInput
-              label="Your student ID"
-              name="studentId"
-              value={studentIdInput}
-              onChange={(e) => setStudentIdInput(e.target.value)}
-              placeholder="e.g., IT21504832"
-              inputFilter="studentId"
-              maxLength={10}
-            />
-          </div>
-          <button type="button" className="btn-primary px-6 h-[42px]" onClick={applyStudentId}>
-            Load Sessions
-          </button>
-        </div>
       </div>
 
       {error && (

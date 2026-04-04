@@ -81,3 +81,51 @@
   .page-content { padding: 20px; }
   .header-left h1 { font-size: 20px; }
 }
+
+/* Notice Management specific overrides */
+.notice-management-page .page-header {
+  background: #ffffff;
+  color: #0f1e35;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin: 16px 40px 0;
+  box-shadow: 0 4px 16px rgba(9, 72, 134, 0.08);
+}
+
+.notice-management-page .header-left p {
+  color: #64748b;
+  opacity: 1;
+}
+
+.notice-management-page .page-nav {
+  background: transparent;
+  border-bottom: none;
+  padding-top: 14px;
+  gap: 10px;
+}
+
+.notice-management-page .nav-btn {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  border-radius: 10px;
+  margin-bottom: 0;
+}
+
+.notice-management-page .nav-btn:hover {
+  color: var(--primary);
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.notice-management-page .nav-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border-color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .notice-management-page .page-header { margin: 10px 20px 0; }
+}

@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
+import Tutor from '../models/Tutor.js';
+import TutorApplication from '../models/TutorApplication.js';
+import TutorNotification from '../models/TutorNotification.js';
 
 // Hardcoded admin credentials
 const ADMIN_CREDENTIALS = {
@@ -227,7 +230,22 @@ export const deleteUser = async (req, res) => {
       });
     }
 
-    await User.findByIdAndDelete(req.params.id);
+    const normalizedEmail = String(user.email || '').trim().toLowerCase();
+
+    // Remove tutor profile + history tied to this account so re-registration starts as a fresh student.
+    const tutors = await Tutor.find({ email: normalizedEmail }).select('studentId');
+    const tutorStudentIds = tutors
+      .map((t) => String(t.studentId || '').trim())
+      .filter(Boolean);
+
+    await Promise.all([
+      Tutor.deleteMany({ email: normalizedEmail }),
+      TutorApplication.deleteMany({ email: normalizedEmail }),
+      tutorStudentIds.length
+        ? TutorNotification.deleteMany({ studentId: { $in: tutorStudentIds } })
+        : Promise.resolve(),
+      User.findByIdAndDelete(req.params.id)
+    ]);
 
     res.status(200).json({
       success: true,
