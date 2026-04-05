@@ -112,10 +112,10 @@ const HomePage = () => {
         }
         .hp-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .hp-brand-logo {
-          width: 40px; height: 40px;
-          background: linear-gradient(135deg, #094886, #2563eb);
-          border-radius: 12px; display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 3px 10px rgba(37,99,235,0.30);
+          width: 150px;
+          height: 42px;
+          object-fit: contain;
+          display: block;
         }
         .hp-brand-name {
           font-family: 'Sora', sans-serif; font-size: 1.25rem;
@@ -401,11 +401,12 @@ const HomePage = () => {
           display: flex; flex-wrap: wrap; align-items: center;
           justify-content: space-between; gap: 1.5rem;
         }
-        .hp-footer-brand { display: flex; align-items: center; gap: 10px; }
+        .hp-footer-brand { display: flex; align-items: center; }
         .hp-footer-logo {
-          width: 32px; height: 32px;
-          background: linear-gradient(135deg, #094886, #2563eb);
-          border-radius: 9px; display: flex; align-items: center; justify-content: center;
+          width: 130px;
+          height: 42px;
+          object-fit: contain;
+          display: block;
         }
         .hp-footer-name {
           font-family: 'Sora', sans-serif; font-size: 1rem; font-weight: 700; color: white;
@@ -438,12 +439,7 @@ const HomePage = () => {
         <nav className={`hp-nav${scrolled ? ' scrolled' : ''}`}>
           <div className="hp-nav-inner">
             <Link to="/" className="hp-brand">
-              <div className="hp-brand-logo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="hp-brand-name">LearnBridge</span>
+              <img src="/_Logo.png" alt="Home logo" className="hp-brand-logo" />
             </Link>
             <div className="hp-nav-right">
               <Link to="/login" className="hp-nav-link">Sign In</Link>
@@ -600,12 +596,7 @@ const HomePage = () => {
         <footer className="hp-footer">
           <div className="hp-footer-inner">
             <div className="hp-footer-brand">
-              <div className="hp-footer-logo">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="hp-footer-name">LearnBridge</span>
+              <img src="/Logof.png" alt="Footer logo" className="hp-footer-logo" />
             </div>
             <div className="hp-footer-links">
               {[['About','/about'],['Contact','/contact'],['Privacy','/privacy'],['Terms','/terms'],['Sign In','/login'],['Register','/register']].map(([l,h]) => (
@@ -613,7 +604,7 @@ const HomePage = () => {
               ))}
             </div>
           </div>
-          <p className="hp-footer-copy">© {new Date().getFullYear()} LearnBridge. All rights reserved. Built for academic excellence.</p>
+          <p className="hp-footer-copy">© {new Date().getFullYear()} All rights reserved. Built for academic excellence.</p>
         </footer>
 
       </div>

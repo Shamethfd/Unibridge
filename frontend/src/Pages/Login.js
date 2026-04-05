@@ -127,23 +127,14 @@ const Login = () => {
         .brand-logo {
           display: flex;
           align-items: center;
-          gap: 12px;
           margin-bottom: 3.5rem;
           z-index: 1;
         }
-        .brand-icon {
-          width: 46px; height: 46px;
-          background: rgba(255,255,255,0.15);
-          border: 1.5px solid rgba(255,255,255,0.3);
-          border-radius: 12px;
-          display: flex; align-items: center; justify-content: center;
-          backdrop-filter: blur(8px);
-        }
-        .brand-name {
-          font-family: 'Sora', sans-serif;
-          font-size: 1.5rem;
-          font-weight: 700;
-          letter-spacing: -0.3px;
+        .brand-image {
+          width: 180px;
+          height: 54px;
+          object-fit: contain;
+          display: block;
         }
 
         .left-headline {
@@ -424,14 +415,7 @@ const Login = () => {
 
           {/* brand */}
           <div className="brand-logo">
-            <div className="brand-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5"/>
-                <path d="M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-            <span className="brand-name">LearnBridge</span>
+            <img src="/Logof.png" alt="Sign in logo" className="brand-image" />
           </div>
 
           <h1 className="left-headline">

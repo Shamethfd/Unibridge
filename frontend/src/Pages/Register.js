@@ -113,9 +113,8 @@ const Register = () => {
         .rg-dot { width: 4px; height: 4px; background: white; border-radius: 50%; }
         .rg-glow { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(37,99,235,0.28) 0%, transparent 70%); bottom: -50px; left: 50%; transform: translateX(-50%); pointer-events: none; }
 
-        .rg-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 2.8rem; z-index: 1; }
-        .rg-brand-icon { width: 46px; height: 46px; background: rgba(255,255,255,0.13); border: 1.5px solid rgba(255,255,255,0.28); border-radius: 13px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .rg-brand-name { font-family: 'Sora', sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
+        .rg-brand { display: flex; align-items: center; margin-bottom: 2.8rem; z-index: 1; }
+        .rg-brand-image { width: 180px; height: 54px; object-fit: contain; display: block; }
         .rg-headline { font-family: 'Sora', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1.18; text-align: center; margin-bottom: 1.1rem; z-index: 1; }
         .rg-headline span { color: #93c5fd; }
         .rg-sub { font-size: 0.91rem; color: rgba(255,255,255,0.66); text-align: center; line-height: 1.72; max-width: 310px; z-index: 1; margin-bottom: 2.4rem; }
@@ -191,12 +190,7 @@ const Register = () => {
           <div className="rg-dots">{Array.from({ length: 30 }).map((_, i) => <div className="rg-dot" key={i} />)}</div>
 
           <div className="rg-brand">
-            <div className="rg-brand-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-            <span className="rg-brand-name">LearnBridge</span>
+            <img src="/Logof.png" alt="Register logo" className="rg-brand-image" />
           </div>
 
           <h1 className="rg-headline">Start Your<br /><span>Learning</span><br />Journey Today</h1>
