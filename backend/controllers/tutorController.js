@@ -25,6 +25,28 @@ export const getTutorByStudentId = async (req, res) => {
 };
 
 /**
+ * Get the tutor record for the currently authenticated user.
+ */
+export const getCurrentTutor = async (req, res) => {
+  try {
+    const email = String(req.user?.email || '').trim().toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Authenticated user email is required' });
+    }
+
+    const tutor = await Tutor.findOne({ email });
+    if (!tutor) {
+      return res.status(404).json({ success: false, message: 'Tutor not found for the current account' });
+    }
+
+    res.json({ success: true, data: tutor });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
  * Get the latest application status for a given `studentId`.
  * This helps the UI explain whether the tutor is approved or still pending.
  */

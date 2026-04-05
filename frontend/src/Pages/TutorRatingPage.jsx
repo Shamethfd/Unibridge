@@ -1,21 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiStar, FiMessageSquare, FiAlertCircle } from 'react-icons/fi';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import StarRating from '../Components/StarRating';
-import FormInput from '../Components/FormInput';
 import { api, getApiErrorMessage } from '../services/api';
-import { getStoredTutorStudentId, setStoredTutorStudentId } from '../utils/tutorStorage';
 
 export default function TutorRatingPage() {
-  const studentIdRegex = /^IT\d{8}$/i;
-  const location = useLocation();
-  const stateStudentId = (location.state?.studentId || '').trim();
-
-  const [studentIdInput, setStudentIdInput] = useState(() => stateStudentId || getStoredTutorStudentId());
-  const [studentId, setStudentId] = useState(() => stateStudentId || getStoredTutorStudentId());
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [tutorName, setTutorName] = useState('');
+  const [studentId, setStudentId] = useState('');
 
   const [averageRating, setAverageRating] = useState(0);
   const [totalFeedback, setTotalFeedback] = useState(0);
@@ -31,22 +26,24 @@ export default function TutorRatingPage() {
         })
       : '';
 
-  const loadAll = useCallback(async (sid) => {
-    const clean = (sid || '').trim();
-    if (!studentIdRegex.test(clean)) return;
-
+  const loadAll = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const tutorRes = await api.get(`/api/tutors/by-student-id/${clean}`);
+      const tutorRes = await api.get('/api/tutors/me');
       const tutor = tutorRes.data?.data;
+      if (!tutor?._id || !tutor?.studentId) {
+        throw new Error('Tutor profile not found for the current account.');
+      }
 
       const [sessionsRes, feedbackRes] = await Promise.all([
-        api.get(`/api/sessions/tutor/${clean}`),
+        api.get(`/api/sessions/tutor/${tutor.studentId}`),
         api.get(`/api/feedback/tutor/${tutor._id}`),
       ]);
 
+      setTutorName(tutor.studentName || '');
+      setStudentId(tutor.studentId || '');
       const list = feedbackRes.data?.feedbacks || feedbackRes.data?.data?.feedbacks || [];
       setTutorFeedback(list);
       setAverageRating(feedbackRes.data?.averageRating ?? 0);
@@ -58,35 +55,17 @@ export default function TutorRatingPage() {
       setAverageRating(0);
       setTotalFeedback(0);
       setSessionsCreated(0);
+      if (String(err?.response?.status || '') === '404') {
+        navigate('/tutor');
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
-    if (stateStudentId && studentIdRegex.test(stateStudentId)) {
-      setStoredTutorStudentId(stateStudentId);
-      setStudentIdInput(stateStudentId);
-      setStudentId(stateStudentId);
-    }
-  }, [stateStudentId]);
-
-  useEffect(() => {
-    if (studentIdRegex.test(studentId)) {
-      loadAll(studentId);
-    }
-  }, [studentId, loadAll]);
-
-  const applyStudentId = () => {
-    const clean = studentIdInput.trim();
-    if (!studentIdRegex.test(clean)) {
-      setError('Enter a valid student ID (e.g. IT21504832).');
-      return;
-    }
-    setStoredTutorStudentId(clean);
-    setStudentId(clean);
-    setError('');
-  };
+    loadAll();
+  }, [loadAll]);
 
   const starRounded = Math.round(averageRating);
 
@@ -101,29 +80,15 @@ export default function TutorRatingPage() {
 
   return (
     <div className="page-container animate-fade-in">
-      <div className="card mb-6">
-        <div className="flex flex-col md:flex-row md:items-end gap-4">
-          <div className="flex-1">
-            <FormInput
-              label="Your student ID"
-              name="studentId"
-              value={studentIdInput}
-              onChange={(e) => setStudentIdInput(e.target.value)}
-              placeholder="e.g., IT21504832"
-              inputFilter="studentId"
-              maxLength={10}
-            />
-          </div>
-          <button type="button" className="btn-primary px-6 h-[42px]" onClick={applyStudentId}>
-            Load my ratings
-          </button>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="mb-8">
         <h1 className="page-title">My Ratings & Feedback</h1>
-        <p className="page-subtitle">View all feedback received from students.</p>
+        <p className="page-subtitle">View all feedback received from students for your tutor profile.</p>
+        {tutorName && (
+          <p className="text-sm text-neutral-400 font-gilroyRegular mt-2">
+            Loaded for <strong>{tutorName}</strong> {studentId ? `(${studentId})` : ''}
+          </p>
+        )}
       </div>
 
       {error && (
