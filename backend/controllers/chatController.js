@@ -110,8 +110,9 @@ export const startOrGetConversation = async (req, res) => {
       return res.status(400).json({ error: 'Cannot start a conversation with yourself' });
     }
 
-    // Check if conversation already exists
+    // Check if active conversation already exists
     let conversation = await Conversation.findOne({
+      isActive: true,
       participants: {
         $all: [
           { $elemMatch: { userId: studentUserId } },
@@ -119,6 +120,24 @@ export const startOrGetConversation = async (req, res) => {
         ],
       },
     });
+
+    // If an old conversation exists but was soft-deleted, reactivate it.
+    if (!conversation) {
+      conversation = await Conversation.findOne({
+        isActive: false,
+        participants: {
+          $all: [
+            { $elemMatch: { userId: studentUserId } },
+            { $elemMatch: { userId: resolvedTutorUserId } },
+          ],
+        },
+      });
+
+      if (conversation) {
+        conversation.isActive = true;
+        await conversation.save();
+      }
+    }
 
     // If not, create new conversation
     if (!conversation) {
@@ -146,6 +165,7 @@ export const getUserConversations = async (req, res) => {
 
     const conversations = await Conversation.find({
       'participants.userId': userId,
+      isActive: true,
     })
       .populate('participants.userId', 'profile.firstName profile.lastName email username')
       .sort({ updatedAt: -1 });

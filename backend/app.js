@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import http from 'http';
+import net from 'net';
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 
@@ -176,7 +177,36 @@ app.get('/', (req, res) => {
   res.json({ message: 'UniBridge API running' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
+
+function checkPortAvailable(port) {
+  return new Promise((resolve) => {
+    const tester = net.createServer();
+
+    tester.once('error', () => {
+      resolve(false);
+    });
+
+    tester.once('listening', () => {
+      tester.close(() => resolve(true));
+    });
+
+    tester.listen(port);
+  });
+}
+
+async function getAvailablePort(startPort, maxOffset = 20) {
+  for (let offset = 0; offset <= maxOffset; offset += 1) {
+    const candidate = startPort + offset;
+    // Try a small port window so repeated local runs can still start.
+    // Keep this bounded to avoid jumping to unexpected high ports.
+    // eslint-disable-next-line no-await-in-loop
+    const available = await checkPortAvailable(candidate);
+    if (available) return candidate;
+  }
+
+  return startPort;
+}
 
 async function start() {
   await connectDB();
@@ -185,7 +215,13 @@ async function start() {
   } catch (indexError) {
     console.error('Module index sync failed:', indexError.message);
   }
-  server.listen(PORT, () => console.log(`Server running on port ${PORT} with Socket.io enabled`));
+
+  const listenPort = await getAvailablePort(PORT);
+  if (listenPort !== PORT) {
+    console.warn(`Port ${PORT} is busy. Starting on port ${listenPort} instead.`);
+  }
+
+  server.listen(listenPort, () => console.log(`Server running on port ${listenPort} with Socket.io enabled`));
 }
 
 start().catch((err) => {
