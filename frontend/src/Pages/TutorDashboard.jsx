@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiCalendar, FiStar, FiMessageSquare, FiArrowRight, FiPlus, FiBell, FiAlertCircle } from 'react-icons/fi';
 import StarRating from '../Components/StarRating';
 import FormInput from '../Components/FormInput';
-import { api, getApiErrorMessage } from '../services/api';
+import { api, getApiErrorMessage, getTotalUnreadCount } from '../services/api';
 import { getStoredTutorStudentId, setStoredTutorStudentId } from '../utils/tutorStorage';
 
 const studentIdRegex = /^IT\d{8}$/i;
@@ -18,8 +18,18 @@ export default function TutorDashboard() {
   const [avgRating, setAvgRating] = useState(0);
   const [feedbackCount, setFeedbackCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const loadChatUnread = useCallback(async () => {
+    try {
+      const res = await getTotalUnreadCount();
+      setChatUnreadCount(res?.data?.totalUnread ?? 0);
+    } catch {
+      setChatUnreadCount(0);
+    }
+  }, []);
 
   const loadData = useCallback(async (sid) => {
     const clean = (sid || '').trim();
@@ -63,6 +73,12 @@ export default function TutorDashboard() {
       loadData(studentId);
     }
   }, [studentId, loadData]);
+
+  useEffect(() => {
+    loadChatUnread();
+    const timer = setInterval(loadChatUnread, 10000);
+    return () => clearInterval(timer);
+  }, [loadChatUnread]);
 
   const applyId = () => {
     const clean = studentIdInput.trim();
@@ -164,15 +180,24 @@ export default function TutorDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <Link
-          to="/tutor/messages"
+          to="/student/messages"
           className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-100 shadow-card hover:shadow-card-hover transition-all hover:-translate-y-0.5"
         >
-          <div className="w-12 h-12 bg-primary-500 text-white rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+          <div className="relative w-12 h-12 bg-primary-500 text-white rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
             <FiBell />
+            {chatUnreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1 rounded-full bg-danger-500 text-white text-[11px] leading-5 text-center font-gilroyBold">
+                {chatUnreadCount > 99 ? '99+' : chatUnreadCount}
+              </span>
+            )}
           </div>
           <div className="flex-1">
-            <p className="font-gilroyBold text-neutral-800">Messages</p>
-            <p className="text-xs text-neutral-400">Coordinator decisions and &quot;you are now a tutor&quot;</p>
+            <p className="font-gilroyBold text-neutral-800">Student chats</p>
+            <p className="text-xs text-neutral-400">
+              {chatUnreadCount > 0
+                ? `${chatUnreadCount} unread message${chatUnreadCount !== 1 ? 's' : ''}`
+                : 'No unread student messages'}
+            </p>
           </div>
           <FiArrowRight className="text-neutral-300 group-hover:text-primary-500 transition-colors" />
         </Link>

@@ -3,6 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
 
 import connectDB from './config/db.js';
 import Module from './models/Module.js';
@@ -27,13 +30,98 @@ import studySessionRoutes from './routes/studySessionRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import tutorRoutes from './routes/tutorRoutes.js';
 import tutorNotificationRoutes from './routes/tutorNotificationRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      const allowedOriginFromEnv = process.env.CORS_ORIGIN;
+      if (allowedOriginFromEnv && origin === allowedOriginFromEnv) {
+        return callback(null, true);
+      }
+      if (/^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  },
+});
+
 const allowedOriginFromEnv = process.env.CORS_ORIGIN;
+
+// Socket.io authentication middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error('Authentication error'));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.id;
+    next();
+  } catch (error) {
+    next(new Error('Authentication error'));
+  }
+});
+
+// Socket.io event handlers
+io.on('connection', (socket) => {
+  console.log(`User connected: ${socket.userId}`);
+
+  // Join conversation room
+  socket.on('join_conversation', (conversationId) => {
+    socket.join(`conversation_${conversationId}`);
+    console.log(`User ${socket.userId} joined conversation ${conversationId}`);
+  });
+
+  // Leave conversation room
+  socket.on('leave_conversation', (conversationId) => {
+    socket.leave(`conversation_${conversationId}`);
+    console.log(`User ${socket.userId} left conversation ${conversationId}`);
+  });
+
+  // Send message event
+  socket.on('send_message', (data) => {
+    const { conversationId, message } = data;
+    const normalizedMessage = typeof message === 'string'
+      ? { text: message }
+      : (message || {});
+
+    io.to(`conversation_${conversationId}`).emit('receive_message', {
+      conversationId,
+      ...normalizedMessage,
+      senderId: socket.userId,
+      timestamp: new Date(),
+    });
+  });
+
+  // Typing indicator
+  socket.on('typing', (conversationId) => {
+    socket.to(`conversation_${conversationId}`).emit('user_typing', {
+      userId: socket.userId,
+    });
+  });
+
+  // Stop typing indicator
+  socket.on('stop_typing', (conversationId) => {
+    socket.to(`conversation_${conversationId}`).emit('user_stop_typing', {
+      userId: socket.userId,
+    });
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`User disconnected: ${socket.userId}`);
+  });
+});
 
 app.use(
   cors({
@@ -78,6 +166,7 @@ app.use('/api/sessions', studySessionRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/tutors', tutorRoutes);
 app.use('/api/tutor-notifications', tutorNotificationRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'Server is running' });
@@ -96,10 +185,12 @@ async function start() {
   } catch (indexError) {
     console.error('Module index sync failed:', indexError.message);
   }
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  server.listen(PORT, () => console.log(`Server running on port ${PORT} with Socket.io enabled`));
 }
 
 start().catch((err) => {
   console.error('Failed to start server:', err);
   process.exit(1);
 });
+
+export { io };

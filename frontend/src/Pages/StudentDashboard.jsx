@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiClipboard, FiBookOpen, FiMessageSquare, FiCalendar, FiArrowRight, FiTrendingUp } from 'react-icons/fi';
+import { FiClipboard, FiBookOpen, FiMessageSquare, FiCalendar, FiArrowRight, FiTrendingUp, FiMail } from 'react-icons/fi';
 import { getStudentStats, mockSessions, mockNotices } from '../data/mockData';
 import { getTutorApplications } from '../services/api';
 import { getStoredTutorStudentId } from '../utils/tutorStorage';
@@ -53,6 +53,7 @@ export default function StudentDashboard() {
 
   const quickLinks = [
     { to: '/student/apply', label: 'Apply as Tutor', icon: <FiClipboard />, color: 'bg-primary-500' },
+    { to: '/student/messages', label: 'Chat with Tutors', icon: <FiMail />, color: 'bg-blue-500' },
     { to: '/student/noticeboard', label: 'Notice Board', icon: <FiBookOpen />, color: 'bg-secondary-500' },
     { to: '/student/feedback', label: 'Give Feedback', icon: <FiMessageSquare />, color: 'bg-accent-500' },
   ];
@@ -92,7 +93,7 @@ export default function StudentDashboard() {
       {/* Quick Actions */}
       <div className="mb-8">
         <h2 className="section-title">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickLinks.map((link, i) => (
             <Link
               key={i}

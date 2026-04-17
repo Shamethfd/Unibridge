@@ -41,6 +41,7 @@ import CreateSessionPage from './Pages/CreateSessionPage';
 import StudySessionsPage from './Pages/StudySessionsPage';
 import TutorRatingPage from './Pages/TutorRatingPage';
 import TutorMessagesPage from './Pages/TutorMessagesPage';
+import ChatPage from './Pages/ChatPage';
 import CoordinatorDashboard from './Pages/CoordinatorDashboard';
 
 const Header = ({ user, onLogout }) => {
@@ -164,6 +165,32 @@ const Header = ({ user, onLogout }) => {
           </nav>
 
           <div className="flex items-center space-x-4">
+            {/* Chat Button for Students */}
+            {user?.role === 'student' && (
+              <Link
+                to="/student/messages"
+                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 ${
+                  scrolled
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                    : 'bg-white/20 hover:bg-white/30 text-white'
+                }`}
+                title="Chat with Tutors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+              </Link>
+            )}
             <div className="relative">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -364,6 +391,7 @@ function App() {
           <Route path="student/apply" element={isAuthenticated ? <TutorApplicationPage /> : <Navigate to="/login" />} />
           <Route path="student/noticeboard" element={isAuthenticated ? <NoticeBoardPage /> : <Navigate to="/login" />} />
           <Route path="student/feedback" element={isAuthenticated ? <FeedbackPage /> : <Navigate to="/login" />} />
+          <Route path="student/messages" element={isAuthenticated ? <ChatPage /> : <Navigate to="/login" />} />
 
           {/* Coordinator route */}
           <Route path="coordinator" element={isAuthenticated ? <CoordinatorDashboard /> : <Navigate to="/login" />} />

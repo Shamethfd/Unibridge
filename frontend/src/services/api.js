@@ -87,6 +87,31 @@ export const getTutorApplications = () => API.get('/tutor-applications');
 export const approveTutorApplication = (id, payload = {}) => API.patch(`/tutor-applications/${id}/approve`, payload);
 export const rejectTutorApplication = (id, payload = {}) => API.patch(`/tutor-applications/${id}/reject`, payload);
 
+// Chat
+export const getAvailableTutors = () => API.get('/chat/tutors');
+export const startConversation = (tutorUserId) => API.post('/chat/conversations', { tutorUserId });
+export const getUserConversations = () => API.get('/chat/conversations');
+export const getConversationMessages = (conversationId, page = 1, limit = 50) =>
+  API.get(`/chat/conversations/${conversationId}/messages`, { params: { page, limit } });
+export const markMessagesAsRead = (conversationId) => API.put(`/chat/conversations/${conversationId}/read`);
+export const deleteConversation = (conversationId) => API.delete(`/chat/conversations/${conversationId}`);
+export const sendChatMessage = (conversationId, text, attachments = []) => {
+  const formData = new FormData();
+  formData.append('conversationId', conversationId);
+  formData.append('text', text || '');
+
+  attachments.forEach((file) => {
+    formData.append('attachments', file);
+  });
+
+  return API.post('/chat/messages', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+export const getUnreadCount = (conversationId) => API.get(`/chat/conversations/${conversationId}/unread`);
+export const getTotalUnreadCount = () => API.get('/chat/messages/unread/total');
+export const deleteChatMessage = (messageId) => API.delete(`/chat/messages/${messageId}`);
+
 export const getApiErrorMessage = (err) => {
   if (err?.response?.data?.message) return err.response.data.message;
   if (err?.response?.data?.success === false && err?.response?.data?.error) return err.response.data.error;
