@@ -151,7 +151,7 @@ export default function StudentDashboard() {
 
                 {app.status === 'approved' && (
                   <button
-                    onClick={() => navigate('/create-session', { state: { studentId: app.studentId } })}
+                    onClick={() => navigate('/tutor/create-session', { state: { studentId: app.studentId } })}
                     style={{
                       marginTop: '0.8rem',
                       padding: '0.6rem 1.2rem',

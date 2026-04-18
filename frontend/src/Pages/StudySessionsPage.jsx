@@ -2,9 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiCalendar, FiClock, FiExternalLink, FiAlertCircle, FiArrowLeft } from 'react-icons/fi';
 import { api, getApiErrorMessage } from '../services/api';
-import { getStoredTutorStudentId } from '../utils/tutorStorage';
-
-const studentIdRegex = /^IT\d{8}$/i;
 
 const parseSessionDate = (session) => {
   const dateValue = String(session?.date || '').trim();
@@ -32,31 +29,17 @@ const getSessionStatus = (session) => {
 
 export default function StudySessionsPage() {
   const location = useLocation();
-  const stateStudentId = (location.state?.studentId || '').trim();
-
-  const [studentId, setStudentId] = useState(() => stateStudentId || getStoredTutorStudentId());
+  const _stateStudentId = (location.state?.studentId || '').trim();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (stateStudentId && studentIdRegex.test(stateStudentId)) {
-      setStudentId(stateStudentId);
-    }
-  }, [stateStudentId]);
-
-  useEffect(() => {
     const loadSessions = async () => {
-      const clean = (studentId || '').trim();
-      if (!studentIdRegex.test(clean)) {
-        setSessions([]);
-        return;
-      }
-
       try {
         setLoading(true);
         setError('');
-        const res = await api.get(`/api/sessions/tutor/${clean}`);
+        const res = await api.get('/api/sessions');
         setSessions(res.data?.data || []);
       } catch (err) {
         setError(getApiErrorMessage(err));
@@ -67,7 +50,7 @@ export default function StudySessionsPage() {
     };
 
     loadSessions();
-  }, [studentId]);
+  }, [location.state]);
 
   const grouped = useMemo(() => {
     const buckets = { previous: [], ongoing: [], upcoming: [] };
