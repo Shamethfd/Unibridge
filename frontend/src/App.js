@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getTotalUnreadCount } from './services/api';
 
 import HomePage from './Pages/HomePage';
 import Register from './Pages/Register';
@@ -47,6 +48,7 @@ import CoordinatorDashboard from './Pages/CoordinatorDashboard';
 const Header = ({ user, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,6 +57,27 @@ const Header = ({ user, onLogout }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (user?.role !== 'student') {
+      setTotalUnread(0);
+      return undefined;
+    }
+
+    const loadUnreadCount = async () => {
+      try {
+        const response = await getTotalUnreadCount();
+        setTotalUnread(response.data.totalUnread || 0);
+      } catch (error) {
+        console.error('Failed to load unread count:', error);
+      }
+    };
+
+    loadUnreadCount();
+    const interval = setInterval(loadUnreadCount, 10000);
+
+    return () => clearInterval(interval);
+  }, [user?.role]);
 
   const handleLogout = () => {
     onLogout();
@@ -169,7 +192,7 @@ const Header = ({ user, onLogout }) => {
             {user?.role === 'student' && (
               <Link
                 to="/student/messages"
-                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 ${
+                className={`relative flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 ${
                   scrolled
                     ? 'bg-blue-500 hover:bg-blue-600 text-white'
                     : 'bg-white/20 hover:bg-white/30 text-white'
@@ -189,6 +212,11 @@ const Header = ({ user, onLogout }) => {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
+                {totalUnread > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold leading-none text-white shadow-sm shadow-rose-950/30">
+                    {totalUnread > 99 ? '99+' : totalUnread}
+                  </span>
+                )}
               </Link>
             )}
             <div className="relative">

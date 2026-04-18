@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { signInWithGoogle } from '../services/googleAuthSimple';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -42,33 +41,6 @@ const Login = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      const response = await signInWithGoogle();
-      
-      if (response.success) {
-        toast.success('Google login successful!');
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-
-        const userRole = response.data.user.role;
-        switch (userRole) {
-          case 'admin': navigate('/admin-dashboard', { replace: true }); break;
-          case 'coordinator': navigate('/codeigniter-dashboard', { replace: true }); break;
-          case 'noticeManager': navigate('/notice-management', { replace: true }); break;
-          case 'resourceManager': navigate('/manage-resources', { replace: true }); break;
-          default: navigate('/dashboard', { replace: true }); break;
-        }
-      }
-    } catch (error) {
-      toast.error('Google login failed. Please try again.');
-      console.error('Google sign-in error:', error);
     } finally {
       setLoading(false);
     }
@@ -548,33 +520,6 @@ const Login = () => {
                 </span>
               </button>
             </form>
-
-            {/* Divider */}
-            <div className="divider">
-              <div className="divider-line" />
-              <span className="divider-text">Or continue with</span>
-              <div className="divider-line" />
-            </div>
-
-            {/* Social */}
-            <div className="social-row">
-              <button 
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                className="social-btn"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.627 0-12 5.373-12 12s5.373 12 12 12c6.965 0 11.58-4.915 11.58-11.846 0-.799-.071-1.534-.205-2.269H12.24z" fill="#4285F4"/>
-                </svg>
-                Google
-              </button>
-              <a href="#" className="social-btn">
-                <svg viewBox="0 0 24 24" fill="#1f2937">
-                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"/>
-                </svg>
-                GitHub
-              </a>
-            </div>
 
           </div>
         </div>
